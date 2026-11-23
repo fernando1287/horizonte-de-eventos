@@ -141,6 +141,13 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
 .pane p{margin:0;color:var(--dim);font-size:15px;line-height:1.5;max-width:46ch}
 .btns{display:flex;flex-wrap:wrap;gap:10px}
 .btn{pointer-events:auto;font:700 15px var(--f-disp);letter-spacing:.1em;text-transform:uppercase;padding:14px 22px;border-radius:12px;border:1px solid var(--accent);background:var(--accent);color:#04060f;cursor:pointer}
+.facPick{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:5px;border-radius:14px;border:1px solid var(--line);background:var(--panel)}
+.facPick .lbl{padding:0 8px 0 10px}
+.facPick button{font:700 14px var(--f-disp);letter-spacing:.06em;text-transform:uppercase;padding:12px 16px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--dim);cursor:pointer}
+.facPick button.on[data-f=alianza]{background:#6fb8ff;color:#04060f;border-color:#6fb8ff}
+.facPick button.on[data-f=umbra]{background:#ff3ad0;color:#14020e;border-color:#ff3ad0}
+.facTxt{margin:0;font-size:13px!important;color:var(--ink)!important}
+#pbFac{font-size:8px;letter-spacing:.12em;text-transform:uppercase;font-weight:700}
 .langPick{display:inline-flex;align-items:center;gap:4px;padding:4px;border-radius:999px;border:1px solid var(--line);background:var(--panel);pointer-events:auto}
 .langPick .lbl{padding:0 8px 0 10px}
 .langPick button{font:700 13px var(--f-disp);letter-spacing:.08em;text-transform:uppercase;padding:10px 16px;border-radius:999px;border:1px solid transparent;background:transparent;color:var(--dim);cursor:pointer}
@@ -401,7 +408,7 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
   </div>
 </div>
 
-<div id="pilotBadge" hidden><img id="pbImg" alt=""><div><span class="lbl">Piloto</span><b id="pbName"></b></div></div>
+<div id="pilotBadge" hidden><img id="pbImg" alt=""><div><span class="lbl">Piloto</span><b id="pbName"></b><span id="pbFac"></span></div></div>
 
 <div id="card"><div id="cardNum">GALAXIA 01</div><div id="cardName">Vía Láctea</div><div id="cardSub"></div><div id="cardGoal"></div><div id="cardShip"></div></div>
 
@@ -520,6 +527,8 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
     <h2>Elige a tu guerrero</h2>
     <p>Cada piloto tiene una habilidad especial que funciona en cualquier nave y también en la arena.</p>
     <div class="langPick" role="group" aria-label="Idioma de las voces"><span class="lbl">Voces</span><button type="button" data-l="es">Español</button><button type="button" data-l="en">English</button></div>
+    <div class="facPick" id="facPick"><span class="lbl">Tu facción</span><button type="button" data-f="alianza">Alianza Estelar</button><button type="button" data-f="umbra">Imperio Umbra</button></div>
+    <p class="facTxt" id="facTxt"></p>
     <div class="pilots" id="pilots"></div>
     <div class="btns"><button class="btn" id="pilotGo">Ir al hangar</button><button class="btn ghost" id="pilotBack">Volver</button></div>
   </div>
@@ -683,7 +692,7 @@ const PILOTS=[
  {name:'Nem Vor',img:'pilots/nem-vor.jpg',from:'Glaciar Blanco',bonus:'+2 bombas extra',b:{bombs:2},look:{type:'alien',skin:'#7a8aa8',eye:'#e0e8ff',head:'wide',eyes:2,bg:'#141c2a',mark:'#e0e8ff',tentacles:true},acc:0xa0c0ff}];
 let PILOT=PILOTS[0];
 function pilotBadgeUI(){const b=$('pilotBadge');if(!b)return;const show=S.state!=='menu'&&S.state!=='arena'&&S.state!=='carrera'&&$('pilotSel').hidden&&$('menu').hidden;
-  if(show&&b.dataset.n!==PILOT.name){b.dataset.n=PILOT.name;$('pbImg').src=PILOT.img;$('pbName').textContent=PILOT.name;b.style.setProperty('--accent','#'+new THREE.Color(PILOT.acc).getHexString());}b.hidden=!show;}
+  if(show&&b.dataset.n!==PILOT.name+FACTION){b.dataset.n=PILOT.name+FACTION;const fe=$('pbFac');fe.textContent=FACTIONS[FACTION].short;fe.style.color=FACTIONS[FACTION].col;$('pbImg').src=PILOT.img;$('pbName').textContent=PILOT.name;b.style.setProperty('--accent','#'+new THREE.Color(PILOT.acc).getHexString());}b.hidden=!show;}
 function drawPilotPhoto(c){const x=c.getContext('2d');drawPortrait(c,PILOT.look);if(typeof Image==='undefined')return;const im=new Image();im.onload=()=>{x.clearRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);};im.src=PILOT.img;}
 const DRAGONS={G:{body:0x2f8a3a,belly:0x9adf6a,eye:0xffe040,breath:'poison'},F:{body:0xb02a10,belly:0xffb040,eye:0xffff80,breath:'fire'},W:{body:0xdfe8ff,belly:0xa8c8ff,eye:0x40a0ff,breath:'ice'}};
 /* ---------- MISILES (se montan en las naves desde la armería del hangar) ---------- */
@@ -762,7 +771,7 @@ function diskTex(){const s=512,c=cv(s,s),x=c.getContext('2d'),h=s/2,inner=h*.3;
   x.globalCompositeOperation='destination-out';x.beginPath();x.arc(h,h,inner,0,Math.PI*2);x.fill();
   return new THREE.CanvasTexture(c);}
 const DISK=diskTex();
-function labelTex(text,color){const c=cv(1024,128),x=c.getContext('2d');x.font='700 56px "Chakra Petch", "Segoe UI", sans-serif';x.textAlign='center';x.textBaseline='middle';
+function labelTex(text,color){const c=cv(1024,128),x=c.getContext('2d');x.font='700 56px "Chakra Petch", "Segoe UI", sans-serif';{let fz=56;while(fz>26&&x.measureText&&x.measureText(text).width>980){fz-=4;x.font='700 '+fz+'px "Chakra Petch", "Segoe UI", sans-serif';}}x.textAlign='center';x.textBaseline='middle';
   x.shadowColor=color;x.shadowBlur=20;x.fillStyle=color;x.fillText(text,512,64);x.shadowBlur=0;x.fillStyle='#ffffff';x.globalAlpha=.85;x.fillText(text,512,64);return new THREE.CanvasTexture(c);}
 
 /* ---------- SPARK PARTICLES ---------- */
@@ -1001,7 +1010,7 @@ const beamCoreMat=basic(0xffffff,{transparent:true,opacity:.95,blending:THREE.Ad
 beam.add(new THREE.Mesh(new THREE.CylinderGeometry(.16,.16,1,8).translate(0,.5,0).rotateX(-Math.PI/2),beamCoreMat));
 beam.add(new THREE.Mesh(new THREE.CylinderGeometry(.6,.6,1,10,1,true).translate(0,.5,0).rotateX(-Math.PI/2),beamGlowMat));
 beam.visible=false;scene.add(beam);
-function setMotherShip(){if(ship)scene.remove(ship);const b=buildMother(true);ship=b.g;ship.userData.blink=b.blink;b.beamT.visible=false;SHIPSC=.11;ship.scale.setScalar(SHIPSC);scene.add(ship);SHIP=MOTHER_SHIP;S.flyMother=true;
+function setMotherShip(){if(ship)scene.remove(ship);const b=buildMother(true);ship=b.g;ship.userData.blink=b.blink;b.beamT.visible=false;SHIPSC=.11;ship.scale.setScalar(SHIPSC);scene.add(ship);SHIP=Object.assign({},MOTHER_SHIP,{name:curMC().name});S.flyMother=true;
   shipCol=C(SHIP.glow);engineLight.color.set(SHIP.glow);shotCore=basic(new THREE.Color(0x9fe4ff).lerp(C(0xffffff),.5));shotGlow=basic(0x6fb8ff,{transparent:true,opacity:.42,blending:THREE.AdditiveBlending,depthWrite:false});
   $('cShip').textContent=SHIP.name;$('cWeap').textContent=SHIP.weapon;$('viewBtn').hidden=false;$('viewBig').hidden=isTouch;$('tView').hidden=false;viewLbl();setDockUI(false);setLandUI(null);}
 function restoreSmallShip(){if(!S.flyMother)return;S.flyMother=false;S.cockpit=false;SHIPSC=.72;setPlayerShip(S.shipIdx);$('viewBtn').hidden=true;$('viewBig').hidden=true;$('tView').hidden=true;setDockUI(false);ckShow(0);}
@@ -1012,7 +1021,7 @@ function takeHelm(){if(!MS||S.state!=='mother'||MS.launch)return;disposeScene(MS
   if(S.mother){disposeScene(S.mother.o);scene.remove(S.mother.o);S.mother=null;}
   setMotherShip();S.state='play';S.mis=Math.max(S.mis,20);S.fuelWarn=S.fuelOut=false;S.fuel=S.fuelMax;P.x=0;P.y=1;P.vx=P.vy=0;S.inv=2;S.thr=1.2;S.cockpit=false;S.viewSet=false;S.mvT=0;
   ship.visible=true;ship.up.set(0,1,0);ship.rotation.set(0,0,0);camBase.set(16,7,34);camLook.set(0,1,-10);S.camBlend=1.4;$('hud').hidden=false;$('touch').hidden=!isTouch;fadeFlash();musicMuffle(false);
-  $('starMap').hidden=true;msg('Tienes el mando de la Estrella Madre','var(--shield)',2.2);setTimeout(()=>{if(S.state==='play')routeDepart();},1200);sayAttendant('Atención, tripulación. El piloto tiene el mando de la Estrella Madre. Motores al máximo.');updHud();}
+  $('starMap').hidden=true;msg('Tienes el mando de la nave nodriza '+curMC().name,'var(--shield)',2.2);setTimeout(()=>{if(S.state==='play')routeDepart();},1200);sayAttendant('Atención, tripulación. El piloto tiene el mando de la Estrella Madre. Motores al máximo.');updHud();}
 function motherToDeck(){if(!S.flyMother||!canAct())return;$('card').classList.remove('on');firing=false;beam.visible=false;const f=S.fuel;restoreSmallShip();ship.visible=false;S.motherDeck=true;enterMother(f);}
 function setPlayerShip(i){i=clamp(i,0,SHIPS.length-1);if(ship)scene.remove(ship);S.shipIdx=i;SHIP=SHIPS[i];ship=buildShip(SHIP);SHIPSC=.72;ship.scale.setScalar(.72);scene.add(ship);attachShipPod();
   shipCol=C(SHIP.glow);engineLight.color.set(SHIP.glow);shotCore=basic(new THREE.Color(SHIP.glow).lerp(C(0xffffff),.65));shotGlow=basic(SHIP.glow,{transparent:true,opacity:.38,blending:THREE.AdditiveBlending,depthWrite:false});
@@ -1176,7 +1185,7 @@ function updHud(){const L=LEVELS[S.lvl];
 function rm(o){scene.remove(o.o);if(o.mat&&o.mat.dispose)o.mat.dispose();if(o.o.isSprite&&!o.o.userData.shared)o.o.material.dispose();if(o.geo)o.geo.dispose();}
 function clearList(list){for(const o of list)rm(o);return [];}
 function removeLand(){if(!S.land)return;scene.remove(S.land.o);S.land.m.material.map.dispose();S.land.m.material.dispose();S.land.label.material.map.dispose();S.land=null;S.landCool=14;S.autoBrake=false;setLandUI(null);$('orbitHud').hidden=true;}
-function clearWorld(){if(S.site){disposeScene(S.site.o);scene.remove(S.site.o);S.site=null;}S.siteCool=14;setPodUI(false);shots=clearList(shots);missiles=clearList(missiles);bombs=clearList(bombs);ebul=clearList(ebul);enemies=clearList(enemies);rocks=clearList(rocks);mines=clearList(mines);pickups=clearList(pickups);flashes=clearList(flashes);shocks=clearList(shocks);bolts=clearList(bolts);
+function clearWorld(){if(S.rival){scene.remove(S.rival.o);disposeScene(S.rival.o);S.rival=null;}S.rivalCool=45;if(S.site){disposeScene(S.site.o);scene.remove(S.site.o);S.site=null;}S.siteCool=14;setPodUI(false);shots=clearList(shots);missiles=clearList(missiles);bombs=clearList(bombs);ebul=clearList(ebul);enemies=clearList(enemies);rocks=clearList(rocks);mines=clearList(mines);pickups=clearList(pickups);flashes=clearList(flashes);shocks=clearList(shocks);bolts=clearList(bolts);
   if(S.boss){scene.remove(S.boss.o);S.boss=null;}if(S.bh){scene.remove(S.bh.o);S.bh=null;}removeLand();removeMother();vortices=[];S.dock=null;S.chill=S.poison=S.ink=0;S.orbit=null;S.landPath=null;beam.visible=false;sparks.clear();puffs.clear();}
 function setupLevel(i){const L=LEVELS[i];S.lvl=i;clearWorld();
   planets=clearList(planets);for(const b of bigstars){scene.remove(b.core);b.core.material.dispose();}bigstars=clearList(bigstars);
@@ -1361,13 +1370,30 @@ function explosion(x,y,z,scale,col){const n=(26*scale)|0,dr=LEVELS[S.lvl].speed*
   for(let i=0;i<n;i++){const v=new THREE.Vector3(R(-1,1),R(-1,1),R(-1,1)).normalize().multiplyScalar(R(8,30)*scale);sparks.emit(x,y,z,v.x,v.y,v.z,R(.4,1.1),Math.random()<.5?col:COL.hot,dr);}
   for(let i=0;i<(6*scale|0)+3;i++){const v=new THREE.Vector3(R(-1,1),R(-1,1),R(-1,1)).multiplyScalar(R(2,8)*scale);puffs.emit(x,y,z,v.x,v.y,v.z,R(.4,.8),i%2?COL.fire:col,dr);}
   const f=glowSprite(0xfff0d0,2*scale,1);f.position.set(x,y,z);scene.add(f);flashes.push({o:f,t:0,max:.35,s0:2*scale,s1:12*scale});}
-function targets(){const a=[];for(const e of enemies)if(e.alive)a.push(e);for(const r of rocks)if(r.alive&&r.inLane)a.push(r);for(const m of mines)if(m.alive)a.push(m);if(S.boss&&S.boss.alive&&S.boss.entered)a.push(S.boss);return a;}
+function targets(){const a=[];for(const e of enemies)if(e.alive)a.push(e);for(const r of rocks)if(r.alive&&r.inLane)a.push(r);for(const m of mines)if(m.alive)a.push(m);if(S.boss&&S.boss.alive&&S.boss.entered)a.push(S.boss);if(S.rival&&S.rival.alive&&S.rival.dist<420)a.push(S.rival);return a;}
 const ptsMul=()=>1+Math.max(0,S.thr-1)*.6;
 function damage(t,dmg){if(!t.alive)return;t.hp-=dmg;
   if(t.kind==='enemy'){t.flash=.08;if(t.hp<=0)killEnemy(t);}
   else if(t.kind==='rock'){if(t.hp<=0){t.alive=false;const p=t.o.position;explosion(p.x,p.y,p.z,Math.min(2.5,t.r*.7),t.meteor?COL.fire:COL.rock);S.score+=(t.meteor?60:25)*ptsMul();sfx('small');if(Math.random()<.04)spawnPickup(p.x,p.y,p.z,pick(['ammo','repair']));}}
   else if(t.kind==='mine'){t.alive=false;const p=t.o.position;explosion(p.x,p.y,p.z,1.8,COL.red);S.score+=80*ptsMul();sfx('small');}
-  else if(t.kind==='boss'){t.flash=.06;if(t.hp<=0)killBoss();}}
+  else if(t.kind==='boss'){t.flash=.06;if(t.hp<=0)killBoss();}
+  else if(t.kind==='rival'){t.flash=.06;if(Math.random()<.3){const p=t.o.position;sparks.emit(p.x*(1-40/Math.max(t.dist,41)),p.y,p.z*(1-40/Math.max(t.dist,41)),R(-6,6),R(-6,6),R(-6,6),.5,C(0xffd080));}if(t.hp<=0)killRival();}}
+function spawnRival(){const mc=rivalMC();const b=buildMother(false,mc,true);const sd=Math.random()<.5?-1:1;b.g.position.copy(farDir(sd,1050,.2,1.2));scene.add(b.g);b.beamT.visible=false;
+  const hp=900+S.lvl*140;S.rival={o:b.g,blink:b.blink,mc,hp,max:hp,r:42,alive:true,kind:'rival',launchT:4,fireT:3,launched:0,flash:0,told:false,dist:1050};
+  msg('¡Alerta! Nave nodriza enemiga: '+mc.name,'var(--danger)',2.8);say('Alerta. Nave nodriza enemiga detectada. Destrúyela antes de que lance a su flota.');}
+function killRival(){const R0=S.rival;if(!R0)return;R0.alive=false;const p=R0.o.position;for(let k=0;k<8;k++)setTimeout(()=>{if(!R0.o.parent)return;explosion(p.x+R(-30,30),p.y+R(-15,15),p.z+R(-30,30),4,new THREE.Color(R0.mc.glow));sfx('boom');S.shake=1;},k*180);
+  setTimeout(()=>{scene.remove(R0.o);disposeScene(R0.o);},1700);S.score+=6000*ptsMul();addCry(10);S.rival=null;S.rivalCool=110;$('bossbar').hidden=!(S.boss&&S.boss.alive);
+  msg('¡Nave nodriza enemiga destruida! +10 cristales','var(--good)',3);say('Nave nodriza enemiga destruida. Gran victoria para tu facción.');}
+function rivalUpdate(dt,spd,playing){if(S.state==='play'&&!S.rival&&!S.bh){S.rivalCool=(S.rivalCool==null?45:S.rivalCool)-dt;if(S.rivalCool<=0)spawnRival();}
+  const rv=S.rival;if(!rv)return;const p=rv.o.position;rv.blink.forEach((b,i)=>{b.material.opacity=((S.time*1.3+i*.3)%1)<.5?1:.15;});if(rv.o.userData.ring)rv.o.userData.ring.rotation.z+=dt*.3;animEscorts(rv.o,S.time);
+  if(playing){p.z+=spd*.7*dt;keepOut(rv.o,75);}rv.dist=p.length();
+  if(playing&&rv.dist>3000){scene.remove(rv.o);disposeScene(rv.o);S.rival=null;S.rivalCool=40;$('bossbar').hidden=!(S.boss&&S.boss.alive);return;}
+  if(S.state==='play'){if(rv.dist<760){rv.launchT-=dt;if(rv.launchT<=0&&rv.launched<14&&enemies.length<14){rv.launchT=R(5,8)-Math.min(2,S.lvl*.15);rv.launched++;
+        for(let k=0;k<2;k++){exTmp.copy(p).multiplyScalar(1-55/Math.max(rv.dist,60));spawnEnemy(Math.random()<.5?'fighter':'scout',exTmp.x+R(-8,8),exTmp.y+R(-6,6),exTmp.z+R(-8,8));}}}
+    if(rv.dist<360){rv.fireT-=dt;if(rv.fireT<=0){rv.fireT=Math.max(.8,1.8-S.lvl*.06);exTmp.copy(p).multiplyScalar(1-45/Math.max(rv.dist,50));for(const s of [-1,0,1])enemyShoot(exTmp.x+s*6,exTmp.y,exTmp.z,P.x+s*3,P.y,0,46+S.lvl*2);}}}
+  const show=rv.dist<520&&!(S.boss&&S.boss.alive)&&S.state==='play';if(show){$('bossbar').hidden=false;$('bossname').textContent='Nave enemiga · '+rv.mc.name;$('bossnum').textContent=Math.ceil(rv.hp);$('bossfill').style.transform='scaleX('+Math.max(0,rv.hp/rv.max)+')';}
+  else if(!(S.boss&&S.boss.alive))$('bossbar').hidden=true;
+  if(rv.flash>0){rv.flash-=dt;}}
 function killEnemy(e){e.alive=false;const p=e.o.position,T=ETYPES[e.type];explosion(p.x,p.y,p.z,e.type==='tank'?2.4:1.4,new THREE.Color(LEVELS[S.lvl].glow));sfx('boom');S.score+=T.score*ptsMul();S.kills++;S.shake=Math.max(S.shake,.25);
   const ch=e.type==='tank'?.45:.11;if(Math.random()<ch){const r=Math.random();spawnPickup(p.x,p.y,p.z,r<.38?'repair':r<.78||S.laserLvl>=3?'ammo':'power');}
   checkProgress();}
@@ -1423,7 +1449,176 @@ function loftHull(secs){const ring=(z,w,ht,hb)=>[[0,ht],[w*.62,ht*.56],[w,0],[w*
       P(ra,k,A[0]);P(rb,k+1,B[0]);P(ra,k+1,A[0]);uv.push(u0,va,u1,vb,u1,va);}}
   const L=secs[secs.length-1],rl=ring(...L);for(let k=0;k<K;k++){pos.push(0,0,L[0]);P(rl,k+1,L[0]);P(rl,k,L[0]);uv.push(.5,.5,0,0,1,0);}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.computeVertexNormals();return g;}
-function buildMother(asPlayer){const g=new THREE.Group();const T=motherTex();
+/* ---------- CLASES DE NAVES NODRIZAS (una distinta según la galaxia) ---------- */
+const MCLASSES=[
+ {id:'estrella',name:'Estrella Madre',cls:'Clase Estrella',hull:0xc8d0dc,glow:0x6fb8ff,style:1,d:'La nave insignia de la flota aliada.'},
+ {id:'omega',name:'Omega',cls:'Clase Omega',hull:0xb8c4d6,glow:0x4fc0ff,style:2,d:'Cuchillas plateadas en forma de media luna y torres de cristal azul.'},
+ {id:'oraculo',name:'Oráculo',cls:'Clase Oráculo',hull:0xece4d2,glow:0xa070ff,gold:0xd4a84a,style:1,d:'Una aguja blanca y dorada que viaja dentro de anillos de energía morada.'},
+ {id:'vesper',name:'Vesper',cls:'Clase Vesper',hull:0x3a4252,glow:0x3a9aff,style:0,d:'Un gigantesco arco oscuro con ventanales azules.'},
+ {id:'bastion',name:'Bastión Prime',cls:'Clase Bastión',hull:0x5c5c62,glow:0xff8a30,style:0,d:'Una fortaleza blindada con torres y hornos de luz naranja.'},
+ {id:'nightfall',name:'Nightfall',cls:'Clase Nightfall',hull:0x5a3a40,glow:0xff2a3a,style:2,d:'Una manta negra y roja con una bahía para toda una flota.'},
+ {id:'helios',name:'Helios',cls:'Arreglo Helios',hull:0xa0a6ac,glow:0x40ff80,style:3,d:'Una estación hexagonal con un reactor verde en el corazón.'}];
+const UCLASSES=[
+ {id:'carrier',name:'Portanaves Hostil',cls:'Clase Amenaza Omega',hull:0x5a3a52,glow:0xff3ad0,style:2,d:'Una bestia de púas con un orbe verde y tentáculos que lanzan cazas.'},
+ {id:'serpiente',name:'Dreadnought Serpiente',cls:'Clase Serpiente',hull:0x8a8090,glow:0xa040ff,style:2,d:'Un acorazado con forma de serpiente gigante y fauces de energía morada.'},
+ {id:'vacio',name:'Crucero del Vacío',cls:'Clase Sigilo',hull:0x3a4a8a,glow:0x40c8ff,style:3,d:'Una manta de alas transparentes que se esconde en la oscuridad.'},
+ {id:'jade',name:'Mando del Enjambre Jade',cls:'Clase Enjambre',hull:0xe4ded2,glow:0x40ff70,style:2,d:'Placas de mármol y cuchillas de cristal verde que dirigen al enjambre.'},
+ {id:'segador',name:'Segador Orbital',cls:'Clase Segador',hull:0x7a6a62,glow:0xff8a20,style:0,d:'Un anillo de púas con un sol atrapado en el centro.'}];
+const FACTIONS={alianza:{name:'Alianza Estelar',short:'Alianza',col:'#6fb8ff',d:'Defienden las galaxias con las naves nodrizas Estrella Madre, Omega, Oráculo, Vesper, Bastión, Nightfall y Helios.'},
+  umbra:{name:'Imperio Umbra',short:'Umbra',col:'#ff3ad0',d:'Conquistan las galaxias con el Portanaves Hostil, el Dreadnought Serpiente, el Crucero del Vacío, el Enjambre Jade y el Segador Orbital.'}};
+let FACTION='alianza';try{if(localStorage.getItem('hde_fac')==='umbra')FACTION='umbra';}catch(_){}
+function facList(f){return f==='umbra'?UCLASSES:MCLASSES;}
+function curMC(){const l=facList(FACTION);return l[S.lvl%l.length];}
+function rivalMC(){const f=FACTION==='umbra'?'alianza':'umbra',l=facList(f);return l[(S.lvl+2)%l.length];}
+function mcHex(c){return '#'+new THREE.Color(c).getHexString();}
+function buildMother(asPlayer,mc0,hostile){const mc=mc0||curMC();const b=mc.id==='estrella'&&!hostile?buildMotherEstrella(asPlayer):buildMotherStyled(asPlayer,mc,hostile);if(!asPlayer)addEscorts(b.g,mc);b.g.userData.mc=mc;return b;}
+/* naves de escolta que vuelan alrededor */
+function addEscorts(g,mc){const es=[];for(let i=0;i<6;i++){const d=SHIPS[(i*3+S.lvl)%SHIPS.length];const s=buildShip(d);s.scale.setScalar(1.7);g.add(s);
+  es.push({o:s,r:R(85,130),h:R(-25,30),sp:R(.12,.22)*(i%2?1:-1),ph:i/6*Math.PI*2});}g.userData.escorts=es;}
+function animEscorts(g,t){const es=g.userData.escorts;if(!es)return;for(const e of es){const a=e.ph+t*e.sp;e.o.position.set(Math.cos(a)*e.r,e.h+Math.sin(t*.7+e.ph)*4,Math.sin(a)*e.r);
+  const a2=a+.05*Math.sign(e.sp);e.o.lookAt(g.localToWorld(exTmp2.set(Math.cos(a2)*e.r,e.h,Math.sin(a2)*e.r)));}}
+function buildMotherStyled(asPlayer,mc,hostile){const g=new THREE.Group();const T=motherTex();const gl=mc.glow;
+  const hullM=new THREE.MeshStandardMaterial({color:mc.hull,map:T.map,emissive:new THREE.Color(gl).lerp(new THREE.Color(0xffffff),.45),emissiveMap:T.em,emissiveIntensity:.85,metalness:.6,roughness:.45,flatShading:true,side:THREE.DoubleSide,fog:false});
+  const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,metalness:.6,roughness:.45,flatShading:true,fog:false},o));
+  const plate=M(new THREE.Color(mc.hull).multiplyScalar(.85).getHex()),dark=M(0x1a1c22,{roughness:.6}),trim=M(new THREE.Color(mc.hull).multiplyScalar(.6).getHex());
+  const glowM=basic(gl,{fog:false}),glowSoft=basic(gl,{fog:false,transparent:true,opacity:.75,blending:THREE.AdditiveBlending,depthWrite:false}),gold=M(mc.gold||0xd4a84a,{metalness:.9,roughness:.25});
+  const add=(gm,m,x,y,z,p=g)=>{const ms=new THREE.Mesh(gm,m);ms.position.set(x,y,z);p.add(ms);return ms;};
+  const spire=(x,y,z,r,h,m,down)=>{const c=add(new THREE.ConeGeometry(r,h,6),m,x,y+(down?-h/2:h/2),z);if(down)c.rotation.x=Math.PI;return c;};
+  const tube=(pts,rad,m,flat=.5)=>{const cu=new THREE.CatmullRomCurve3(pts.map(p=>new THREE.Vector3(p[0],p[1],p[2])));const ms=new THREE.Mesh(new THREE.TubeGeometry(cu,48,rad,10,false),m);ms.scale.y=flat;g.add(ms);return {ms,cu};};
+  const engines=[],flames=[];const engine=(x,y,z,r)=>{add(new THREE.CylinderGeometry(r,r*1.15,7,18).rotateX(Math.PI/2),dark,x,y,z);add(new THREE.TorusGeometry(r*.85,.35,8,24),glowM,x,y,z+3.6);
+    add(new THREE.CircleGeometry(r*.78,20),basic(new THREE.Color(gl).lerp(new THREE.Color(0xffffff),.6).getHex(),{fog:false}),x,y,z+3.7);const f=glowSprite(gl,r*4.4,.95);f.position.set(x,y,z+7);g.add(f);flames.push(f);engines.push([x,y,z+4]);};
+  const blink=[];const light=(x,y,z,c)=>{const b=glowSprite(c,3,1);b.position.set(x,y,z);g.add(b);blink.push(b);};
+  let ring=null;
+  if(mc.id==='omega'){
+    add(loftHull([[-108,.5,.4,.4],[-86,6,2.4,2.2],[-56,13,4.6,4],[-20,18,7,6],[15,20,8,6.5],[45,18,7.5,6],[66,14,6,5],[74,12,5,4.5]]),hullM,0,0,0);
+    for(const sd of [-1,1]){for(const [y,a,b,c] of [[5,[sd*14,5,-46],[sd*72,5,-28],[sd*60,5,58]],[-4,[sd*14,-4,-12],[sd*62,-4,2],[sd*48,-4,74]]]){
+        const t1=tube([a,[(a[0]+b[0])/2,y,(a[2]+b[2])/2-8],b,[(b[0]+c[0])/2+sd*6,y,(b[2]+c[2])/2],c],2.8,hullM,.42);
+        const t2=tube([[a[0],y+1.4,a[2]],[b[0],y+1.4,b[2]],[c[0],y+1.4,c[2]]],.45,glowSoft,1);
+        const tip=add(new THREE.ConeGeometry(2.6,16,8),plate,c[0],y,c[2]);tip.lookAt(c[0]+(c[0]-b[0]),y,c[2]+(c[2]-b[2]));tip.rotateX(Math.PI/2);}
+      add(new THREE.BoxGeometry(.4,.5,70),glowM,sd*17.6,0,-6);}
+    spire(0,7,8,2.2,42,plate);for(let i=0;i<12;i++){const a=i/12*Math.PI*2,r=R(3,9);spire(Math.cos(a)*r,7,8+Math.sin(a)*r*1.6,R(.6,1.5),R(10,28),i%3?trim:plate);}
+    for(const [r,y] of [[11,10],[17,8.4]]){add(new THREE.TorusGeometry(r,.35,6,48).rotateX(Math.PI/2),glowM,0,y,8);}
+    const halo=glowSprite(gl,30,.4);halo.position.set(0,14,8);g.add(halo);
+    for(let i=0;i<10;i++)spire(R(-10,10),-5.5,R(-30,45),R(.8,2),R(8,26),trim,true);
+    for(const [x,y,r] of [[-7,0,3.8],[0,0,4.2],[7,0,3.8],[-4,4.5,2.4],[4,4.5,2.4]])engine(x,y,75,r);
+    light(-72,6,-28,0xff3030);light(72,6,-28,0x40ff80);light(0,50,8,0xff3030);}
+  else if(mc.id==='oraculo'){
+    add(new THREE.CylinderGeometry(10,10.5,80,28).rotateX(Math.PI/2),hullM,0,0,20);add(new THREE.ConeGeometry(10,118,28).rotateX(-Math.PI/2),hullM,0,0,-79);
+    for(const z of [-10,8,30,52])add(new THREE.TorusGeometry(10.4,.5,8,32),gold,0,0,z);
+    for(const sd of [-1,1])add(new THREE.BoxGeometry(.4,.6,140),glowM,sd*9.9,0,-30).rotation.y=sd*.035;
+    ring=new THREE.Group();g.add(ring);
+    for(const z of [0,38]){const rg=new THREE.Group();rg.position.z=z;ring.add(rg);rg.add(new THREE.Mesh(new THREE.TorusGeometry(38,3.4,12,72),hullM));
+      rg.add(new THREE.Mesh(new THREE.TorusGeometry(35.6,.8,8,72),glowM));rg.add(new THREE.Mesh(new THREE.TorusGeometry(41.6,.6,8,72),gold));
+      for(let i=0;i<4;i++){const s=new THREE.Mesh(new THREE.BoxGeometry(1.2,26,1.2),gold);const a=i*Math.PI/2+Math.PI/4;s.position.set(Math.cos(a)*24,Math.sin(a)*24,0);s.rotation.z=a-Math.PI/2;rg.add(s);}
+      for(let i=0;i<8;i++){const a=i/8*Math.PI*2;const l=glowSprite(gl,4,.9);l.position.set(Math.cos(a)*38,Math.sin(a)*38,0);rg.add(l);}}
+    for(let i=0;i<9;i++){const z=R(-6,50),h=R(6,24);add(new THREE.BoxGeometry(R(3,7),h*.4,R(4,9)),plate,R(-4,4),10+h*.2,z);spire(R(-3,3),10+h*.35,z,R(.6,1.4),h,i%2?gold:plate);}
+    for(let i=0;i<5;i++)spire(R(-5,5),-9,R(-4,50),R(.8,1.6),R(8,20),trim,true);
+    for(const [x,y,r] of [[0,0,6],[-6,5,2.4],[6,5,2.4],[-6,-5,2.4],[6,-5,2.4]])engine(x,y,62,r);
+    light(0,32,10,0xff3030);light(0,0,-137,0xffffff);}
+  else if(mc.id==='vesper'){
+    add(loftHull([[-50,.5,.4,.4],[-38,7,3,3],[-10,13,6,5],[30,14,6,5],[58,11,5,4.5]]),hullM,0,0,0);
+    add(new THREE.BoxGeometry(10,6,40),plate,0,0,-62);
+    const cres=[[-52,0,78],[-74,0,24],[-66,0,-40],[-30,0,-80],[0,0,-90],[30,0,-80],[66,0,-40],[74,0,24],[52,0,78]];
+    tube(cres,9.5,hullM,.55);const gl1=tube(cres.map(p=>[p[0]*1.06,4.6,p[2]*1.04]),.6,glowSoft,1);const gl2=tube(cres.map(p=>[p[0]*1.1,-.5,p[2]*1.08]),.45,glowSoft,1);
+    for(let i=0;i<40;i++){const p=gl2.cu.getPoint(i/39);add(new THREE.BoxGeometry(3,2.2,.5),glowM,p.x,0,p.z).lookAt(0,0,0);}
+    for(const p of [cres[0],cres[8]]){const tip=add(new THREE.ConeGeometry(6,34,10),hullM,p[0],0,p[2]+14);tip.rotation.x=Math.PI/2;tip.scale.z=.55;}
+    for(let i=0;i<6;i++)spire(R(-6,6),4,-88+R(-3,3),R(.6,1.4),R(8,26),trim);
+    for(let i=0;i<4;i++)spire(R(-4,4),6,R(-10,30),R(.6,1.2),R(8,16),trim);
+    for(const [x,y,r] of [[-5,0,3.6],[5,0,3.6],[0,4,2.6]])engine(x,y,60,r);
+    light(-52,5,78,0xff3030);light(52,5,78,0x40ff80);light(0,6,-92,0xffffff);}
+  else if(mc.id==='bastion'){
+    add(loftHull([[-92,6,3,3],[-74,22,7,6],[-24,27,9,7],[40,27,9,7],[66,23,8,6],[72,20,7,5]]),hullM,0,0,0);
+    add(new THREE.BoxGeometry(34,4,90),plate,0,10.5,0);add(new THREE.BoxGeometry(24,4,60),trim,0,14.5,8);
+    for(const [x,z,w,h] of [[-8,46,9,34],[7,40,7,24],[0,-38,12,14]]){add(new THREE.BoxGeometry(w,h,w),plate,x,16+h/2,z);add(new THREE.BoxGeometry(w*1.5,1.4,w*1.2),trim,x,16+h,z);
+      for(let k=0;k<4;k++)add(new THREE.BoxGeometry(w+.2,.5,.4),glowM,x,18+k*(h/4),z-w/2-.1);const an=add(new THREE.CylinderGeometry(.18,.18,8,6),trim,x,20+h,z);light(x,24+h,z,0xff3030);}
+    for(const sd of [-1,1]){for(let k=0;k<6;k++)add(new THREE.BoxGeometry(.5,2.2,6),glowM,sd*27.2,-1.5,-40+k*16);
+      for(let k=0;k<5;k++)add(new THREE.BoxGeometry(5,.6,.5),glowM,sd*(8+k*3),-6.4,-70);}
+    for(let i=0;i<26;i++)add(new THREE.BoxGeometry(R(2,6),R(1,3),R(2,8)),Math.random()<.5?dark:trim,R(-14,14),12.5+R(0,4),R(-40,40));
+    for(let i=0;i<8;i++){const x=R(-12,12),z=R(-40,40);add(new THREE.CylinderGeometry(.15,.15,R(4,10),5),trim,x,20,z);}
+    for(const [x,y,r] of [[-12,0,4],[-4,0,4],[4,0,4],[12,0,4]])engine(x,y,74,r);}
+  else if(mc.id==='nightfall'){
+    add(loftHull([[-98,1,.8,.8],[-66,18,4,3],[-26,46,6,4],[10,74,7,5],[40,64,6,4],[62,32,5,3],[70,16,4,3]]),hullM,0,0,0);
+    for(const sd of [-1,1]){for(const [x,z,l] of [[30,-6,40],[50,6,34],[18,-24,30]]){const s=add(new THREE.BoxGeometry(.6,.5,l),glowM,sd*x,4.2,z);s.rotation.y=sd*.55;}
+      for(let k=0;k<3;k++){const sp=add(new THREE.ConeGeometry(2.6,26+k*6,8),hullM,sd*(60+k*6),-6-k*2,8+k*8);sp.rotation.x=Math.PI*.82;sp.rotation.z=sd*.25;}
+      for(let k=0;k<8;k++)add(new THREE.BoxGeometry(5,.4,.6),glowM,sd*(22+k*5),-3.2,-12+k*2.4);}
+    for(const sd of [-1,1]){const le=add(new THREE.BoxGeometry(.7,.7,Math.hypot(74,105)),glowM,sd*37,1.4,-42);le.rotation.y=sd*Math.atan2(74,105);}
+    add(new THREE.BoxGeometry(6,5,120),hullM,0,4.5,-10);add(new THREE.BoxGeometry(.6,.6,118),glowM,0,7.2,-10);
+    add(new THREE.BoxGeometry(18,6,2),basic(0xffc070,{fog:false}),0,-3.4,-40);add(new THREE.BoxGeometry(22,8,12),dark,0,-3,-34);
+    for(let i=0;i<7;i++)spire(R(-6,6),6,R(-10,22),R(.8,2),R(10,30),hullM);
+    for(let i=0;i<5;i++)spire(R(-10,10),-5,R(-20,30),R(1,2),R(10,24),hullM,true);
+    for(const [x,y,r] of [[-10,0,3.6],[0,0,4.2],[10,0,3.6]])engine(x,y,68,r);
+    light(-74,0,14,0xff3030);light(74,0,14,0xff3030);}
+  else if(mc.id==='carrier'){/* Portanaves Hostil: púas, orbe verde y tentáculos */
+    add(loftHull([[-110,.5,.4,.4],[-84,7,3,3],[-50,13,5,5],[-10,16,7,6],[30,15,7,6],[56,12,6,5],[70,8,4,4]]),hullM,0,0,0);
+    for(let i=0;i<22;i++){const z=-90+i*7;spire(R(-3,3),3+Math.max(0,6-Math.abs(z+10)/14),z,R(1,2.4),R(6,22),hullM);const sp=spire(R(-4,4),-3,z,R(.8,2),R(6,18),hullM,true);sp.rotation.z=R(-.4,.4);}
+    for(const sd of [-1,1]){for(let i=0;i<9;i++)add(new THREE.BoxGeometry(.5,2.4,3),glowM,sd*(14.6-Math.abs(i-4)*.6),0,-50+i*10);
+      const hn=tube([[sd*6,6,30],[sd*22,26,22],[sd*30,38,-4],[sd*18,30,-30]],2.2,hullM,1);const hg=tube([[sd*6,7.5,30],[sd*22,27.5,22],[sd*30,39.5,-4]],.4,glowSoft,1);}
+    const orb=add(new THREE.SphereGeometry(16,24,16),new THREE.MeshStandardMaterial({color:0x8aff3a,emissive:0x5adf20,emissiveIntensity:1,transparent:true,opacity:.85,fog:false}),0,-14,42);
+    for(let k=0;k<6;k++){const rr=add(new THREE.TorusGeometry(17,.9,6,28,Math.PI*1.3),hullM,0,-14,42);rr.rotation.set(R(0,3),R(0,3),R(0,3));}
+    const og=glowSprite(0x8aff3a,60,.55);og.position.set(0,-14,42);g.add(og);
+    for(let k=0;k<5;k++){const a=(k-2)*.35;tube([[Math.sin(a)*8,-26,40],[Math.sin(a)*14,-46,20],[Math.sin(a)*20,-58,-12],[Math.sin(a)*14,-66,-44]],1.6-k%2*.4,hullM,1);}
+    for(const [x,y,r] of [[-6,0,3.4],[6,0,3.4]])engine(x,y,72,r);light(0,12,-80,0xff3ad0);}
+  else if(mc.id==='serpiente'){/* Dreadnought Serpiente: cuerpo de segmentos que termina en espiral */
+    const path=new THREE.CatmullRomCurve3([[0,0,-96],[0,0,-60],[0,2,-20],[0,4,20],[-10,8,52],[-34,14,66],[-50,22,48],[-44,30,22],[-24,36,14],[-12,40,30]].map(p=>new THREE.Vector3(...p)));
+    for(let i=0;i<34;i++){const u=i/33,p=path.getPoint(u),tn=path.getTangent(u),s=1-u*.62;const seg=new THREE.Mesh(new THREE.CylinderGeometry(9*s,10*s,6,10),hullM);seg.position.copy(p);
+      seg.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),tn);g.add(seg);const gr=new THREE.Mesh(new THREE.TorusGeometry(8.8*s,.55,6,20),glowM);gr.position.copy(p).addScaledVector(tn,3.4);gr.lookAt(p.clone().add(tn));g.add(gr);
+      const fin=new THREE.Mesh(new THREE.ConeGeometry(2.4*s,9*s,4),plate);fin.position.copy(p);fin.position.y+=9*s;fin.rotation.x=.5;g.add(fin);}
+    add(new THREE.ConeGeometry(10,30,10).rotateX(-Math.PI/2),hullM,0,4,-108);const jaw=add(new THREE.ConeGeometry(7,26,8).rotateX(-Math.PI/2),hullM,0,-6,-104);jaw.rotation.x=-.25;
+    const mouth=glowSprite(gl,26,.9);mouth.position.set(0,-1,-110);g.add(mouth);for(const sd of [-1,1]){const e=glowSprite(gl,6,1);e.position.set(sd*6,6,-100);g.add(e);}
+    for(let i=0;i<8;i++){const z=-70+i*12;add(new THREE.CylinderGeometry(.5,.5,14,6).rotateX(Math.PI/2),dark,R(-6,6),10,z);}
+    for(const [x,y,r] of [[-12,40,2.4],[-14,38,2]])engine(x,y,34,r);light(0,14,-96,0xff3030);}
+  else if(mc.id==='vacio'){/* Crucero del Vacío: manta de alas translúcidas */
+    add(loftHull([[-96,.6,.5,.5],[-70,8,3,3],[-30,13,5,4],[20,12,5,4],[60,7,3,3]]),hullM,0,0,0);
+    const wingM=new THREE.MeshStandardMaterial({color:gl,emissive:gl,emissiveIntensity:.55,transparent:true,opacity:.42,side:THREE.DoubleSide,depthWrite:false,fog:false});
+    add(loftHull([[-60,6,.8,.8],[-30,40,1.5,1.2],[0,82,2,1.5],[30,70,1.5,1.2],[58,22,1,1]]),wingM,0,-1,0);
+    for(const sd of [-1,1]){for(let k=0;k<5;k++){const v=add(new THREE.BoxGeometry(.35,.35,R(30,60)),glowSoft,sd*R(14,60),0,R(-20,30));v.rotation.y=sd*R(.3,1.1);}
+      const hn=tube([[sd*4,2,-80],[sd*14,8,-96],[sd*10,4,-112]],1.4,hullM,1);const tip=tube([[sd*76,0,6],[sd*90,4,30],[sd*84,10,52]],1.6,hullM,1);}
+    for(let i=0;i<5;i++){const f=tube([[0,4,-50+i*20],[R(-8,8),12+i,-40+i*20],[R(-6,6),18+i*2,-20+i*20]],1.1,hullM,1);}
+    for(const [x,y,r] of [[-4,0,3],[4,0,3]])engine(x,y,62,r);light(-82,0,6,0xff3030);light(82,0,6,0x40ff80);}
+  else if(mc.id==='jade'){/* Mando del Enjambre Jade: placas de mármol y cuchillas de cristal verde */
+    add(loftHull([[-100,.6,.5,.5],[-74,9,5,4],[-36,15,8,6],[10,16,8,6],[50,12,6,5],[66,8,4,4]]),hullM,0,0,0);
+    const crysM=new THREE.MeshStandardMaterial({color:gl,emissive:gl,emissiveIntensity:.6,transparent:true,opacity:.72,metalness:.3,roughness:.15,flatShading:true,fog:false});
+    for(let i=0;i<14;i++){const sd=i%2?1:-1,z=-50+Math.floor(i/2)*14;const b=new THREE.Mesh(new THREE.OctahedronGeometry(1,0),i%3?crysM:hullM);b.scale.set(R(2,4),R(10,22),R(14,30));
+      b.position.set(sd*R(10,18),R(2,10),z+20);b.rotation.set(-R(.6,1.1),sd*R(.2,.6),sd*R(.5,1.2));g.add(b);}
+    for(let i=0;i<10;i++){const p=new THREE.Mesh(new THREE.OctahedronGeometry(1,0),hullM);p.scale.set(R(6,10),R(1.4,2.4),R(8,14));p.position.set(R(-10,10),R(5,9),R(-70,40));p.rotation.set(R(-.3,.3),R(-.5,.5),R(-.4,.4));g.add(p);}
+    for(let i=0;i<8;i++){const sd=i%2?1:-1;const c=tube([[sd*8,-4,-40+i*9],[sd*14,-18,-50+i*9],[sd*10,-30,-66+i*9]],1.4,hullM,1);}
+    const cage=add(new THREE.SphereGeometry(12,14,10),new THREE.MeshBasicMaterial({color:0xffb040,wireframe:true,fog:false}),0,-10,0);const cg2=glowSprite(0xffb040,40,.7);cg2.position.set(0,-10,0);g.add(cg2);
+    for(const sd of [-1,1]){const an=tube([[sd*3,8,-70],[sd*8,30,-60],[sd*14,46,-30]],.6,hullM,1);}
+    for(const [x,y,r] of [[-5,0,3],[5,0,3]])engine(x,y,68,r);light(0,10,-96,0x40ff80);}
+  else if(mc.id==='segador'){/* Segador Orbital: anillo de púas con un sol en el centro */
+    ring=new THREE.Group();ring.position.z=24;g.add(ring);ring.add(new THREE.Mesh(new THREE.TorusGeometry(52,5.5,10,72),hullM));
+    ring.add(new THREE.Mesh(new THREE.TorusGeometry(52,1.2,6,72).translate(0,0,5),glowM));ring.add(new THREE.Mesh(new THREE.TorusGeometry(30,.8,6,60),glowM));
+    for(let i=0;i<22;i++){const a=i/22*Math.PI*2;const sp=new THREE.Mesh(new THREE.ConeGeometry(2.6,R(12,22),5),hullM);sp.position.set(Math.cos(a)*60,Math.sin(a)*60,0);sp.rotation.z=a-Math.PI/2;ring.add(sp);}
+    for(let i=0;i<4;i++){const a=i/4*Math.PI*2+.4;const s=new THREE.Mesh(new THREE.BoxGeometry(2,24,2),hullM);s.position.set(Math.cos(a)*40,Math.sin(a)*40,0);s.rotation.z=a-Math.PI/2;ring.add(s);}
+    const sun=add(new THREE.SphereGeometry(16,28,18),new THREE.MeshBasicMaterial({color:0xffa040,fog:false}),0,0,24);const sg2=glowSprite(0xff7a20,90,.85);sg2.position.set(0,0,24);g.add(sg2);
+    add(loftHull([[-112,.6,.5,.5],[-80,10,4,4],[-44,16,7,6],[-14,12,6,5],[0,6,4,3]]),hullM,0,0,0);
+    for(let i=0;i<10;i++){const sd=i%2?1:-1;const b=spire(sd*R(6,14),0,-90+i*8,R(1.5,3),R(14,28),hullM);b.rotation.z=sd*-1.2;b.rotation.x=.8;}
+    for(const sd of [-1,1])add(new THREE.BoxGeometry(.5,.5,80),glowM,sd*12,1,-50);
+    for(const [x,y,r] of [[-8,-8,3],[8,-8,3]])engine(x,y,30,r);light(0,62,24,0xff3030);}
+  else{/* helios */
+    add(new THREE.CylinderGeometry(25,25,14,6),hullM,0,0,0);add(new THREE.CylinderGeometry(21,23,4,6),plate,0,9,0);
+    const core=add(new THREE.CylinderGeometry(8,8,26,18),new THREE.MeshStandardMaterial({color:gl,emissive:gl,emissiveIntensity:1.1,transparent:true,opacity:.85,fog:false}),0,10,0);
+    for(const y of [2,10,18])add(new THREE.TorusGeometry(9,.45,6,24).rotateX(Math.PI/2),trim,0,y,0);const cg=glowSprite(gl,44,.55);cg.position.y=12;g.add(cg);
+    ring=new THREE.Group();g.add(ring);
+    for(let k=0;k<6;k++){const a=Math.PI/6+k*Math.PI/3,x=Math.cos(a)*52,z=Math.sin(a)*52;add(new THREE.CylinderGeometry(15,15,9,6),hullM,x,0,z);
+      add(new THREE.CylinderGeometry(12.5,12.5,.6,6),M(0x2a8a50,{emissive:0x0a3a1a}),x,4.8,z);const arm=add(new THREE.BoxGeometry(5,4,30),plate,Math.cos(a)*30,0,Math.sin(a)*30);arm.rotation.y=-a+Math.PI/2;
+      add(new THREE.BoxGeometry(1,1,30),glowM,Math.cos(a)*30,2.4,Math.sin(a)*30).rotation.y=-a+Math.PI/2;
+      for(let q=0;q<2;q++){const st=glowSprite(0xe8eef2,R(8,14),.35);st.position.set(x+R(-6,6),8+R(0,6),z+R(-6,6));g.add(st);}
+      spire(x,-4.5,z,R(1.5,3),R(14,26),trim,true);light(x+Math.cos(a)*15,5,z+Math.sin(a)*15,k%2?0xff3030:0x40ff80);}
+    for(let i=0;i<8;i++)spire(R(-12,12),-7,R(-12,12),R(1.2,3),R(14,40),trim,true);
+    for(let i=0;i<6;i++)spire(R(-14,14),7,R(-14,14),R(.4,1),R(6,14),trim);
+    for(const [x,y,r] of [[-12,0,3],[12,0,3],[0,0,3.4]])engine(x,y,64,r);
+    add(new THREE.BoxGeometry(30,6,30),plate,0,0,48);}
+  /* entrada para acoplarse (a la derecha) */
+  add(new THREE.BoxGeometry(5.5,9.4,30),plate,18.2,-1,6);add(new THREE.BoxGeometry(.3,7.2,24),basic(0x020308,{fog:false}),21,-1,6);
+  for(const y of [-4.9,2.9])add(new THREE.BoxGeometry(.35,.35,25),glowM,21.1,y,6);
+  for(let z=-6;z<=18;z+=3)for(const y of [-5.6,3.6]){const l=glowSprite(gl,1.1,1);l.position.set(21.4,y,z);g.add(l);}
+  const beamT=new THREE.Mesh(new THREE.CylinderGeometry(4,7,30,24,1,true).rotateZ(Math.PI/2),basic(gl,{transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide,fog:false}));beamT.position.set(36,-1,6);g.add(beamT);
+  const lab=new THREE.Sprite(new THREE.SpriteMaterial({map:labelTex((hostile?'ENEMIGA · ':'NODRIZA · ')+mc.name.toUpperCase(),hostile?'#ff4d6d':mcHex(gl)),transparent:true,depthWrite:false,fog:false}));lab.scale.set(70,8.75,1);lab.position.set(0,mc.id==='omega'?58:44,0);lab.visible=!asPlayer;g.add(lab);
+  g.userData.ring=ring;g.userData.flames=flames;g.userData.engines=engines;
+  return {g,blink,beamT};}
+
+function buildMotherEstrella(asPlayer){const g=new THREE.Group();const T=motherTex();
   const M=(c,o={})=>stdMat(c,Object.assign({fog:false},o));
   const hullM=new THREE.MeshStandardMaterial({color:0xc8d0dc,map:T.map,emissive:0xffffff,emissiveMap:T.em,emissiveIntensity:.9,metalness:.55,roughness:.5,flatShading:true,side:THREE.DoubleSide,fog:false});
   const plate=M(0x9aa6ba,{metalness:.6,roughness:.45,flatShading:true}),dark=M(0x262c38,{metalness:.5,roughness:.6}),trim=M(0x3a4458,{metalness:.7,roughness:.4});
@@ -1473,7 +1668,7 @@ function buildMother(asPlayer){const g=new THREE.Group();const T=motherTex();
   g.userData.ring=ring;g.userData.flames=flames;g.userData.engines=engines;
   return {g,blink,beamT};}
 function spawnMother(near){const b=buildMother();const sd=S.land?-S.land.side:(Math.random()<.5?-1:1);if(near){b.g.position.set(-62,10,-55);}else{b.g.position.copy(farDir(sd,1080));b.g.rotation.y=sd>0?Math.PI:0;}scene.add(b.g);
-  S.mother={o:b.g,blink:b.blink,beamT:b.beamT,side:sd,missed:false,leaving:false,cool:near?8:0};if(near)return;msg('Nave nodriza a la vista: acóplate para cargar combustible','var(--shield)',2.6);say('Nave nodriza a la vista. Puedes acoplarte para cargar combustible.');}
+  S.mother={o:b.g,blink:b.blink,beamT:b.beamT,side:sd,missed:false,leaving:false,cool:near?8:0};if(near)return;msg('Nave nodriza '+curMC().name+' a la vista: acóplate para cargar combustible','var(--shield)',2.6);say('Nave nodriza a la vista. Puedes acoplarte para cargar combustible.');}
 function removeMother(){if(!S.mother)return;disposeScene(S.mother.o);scene.remove(S.mother.o);S.mother=null;S.motherCool=18;setDockUI(false);}
 let dockShown=false;function setDockUI(v){if(v===dockShown)return;dockShown=v;const b=$('dockBtn');b.classList.toggle('mini',!!S.flyMother);b.innerHTML=S.flyMother?'Lanzar mi nave<kbd>N</kbd>':'Acoplar a la nave nodriza<kbd>N</kbd>';b.hidden=!v;}
 function startDock(){if(S.flyMother){if(!S.paused)motherToDeck();return;}const mo=S.mother;if(!mo||S.state!=='play'||mo.missed||mo.leaving||S.paused||mo.cool>0)return;S.state='dock';firing=false;beam.visible=false;setDockUI(false);setLandUI(null);
@@ -1799,7 +1994,7 @@ function drawFuel(x,w,h){const f=S.fuel/S.fuelMax,full=f>=.999;x.fillStyle='#0a0
 function drawLaunch(x,w,h,t){const on=((t*1.5)|0)%2===0;x.fillStyle='#120404';x.fillRect(0,0,w,h);x.font='bold 40px monospace';x.fillStyle=on?'#5dffa8':'#2a6a4a';x.fillText('BAHÍA DE LANZAMIENTO',30,70);x.font='28px monospace';x.fillStyle='#ffe0c0';x.fillText('COMPUERTA ABIERTA · CAMPO DE FUERZA ACTIVO',30,130);}
 function msLabel(text,col,x,y,z,w=12){const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:labelTex(text,col),transparent:true,depthWrite:false}));sp.scale.set(w,w/8,1);sp.position.set(x,y,z);return sp;}
 const MSPAD={x:0,z:22},ELEV={x:-15,z:47};
-function buildMotherInterior(){const L=LEVELS[S.lvl],acc=0x6fb8ff;const sc=new THREE.Scene();sc.background=new THREE.Color(0x03060c);sc.fog=new THREE.Fog(0x03060c,70,190);
+function buildMotherInterior(){const L=LEVELS[S.lvl],MC=curMC(),acc=MC.glow;const sc=new THREE.Scene();sc.background=new THREE.Color(0x03060c);sc.fog=new THREE.Fog(0x03060c,70,190);
   sc.add(new THREE.HemisphereLight(0x9ab0d8,0x141820,.8));sc.add(new THREE.AmbientLight(0x3a4458,.55));
   for(const z of [40,10,-20,-48]){const pl=new THREE.PointLight(0xd8e8ff,1.15,60);pl.position.set(0,16,z);sc.add(pl);}
   const fuelLight=new THREE.PointLight(0xff9a2a,1.4,26);fuelLight.position.set(5,6,22);sc.add(fuelLight);
@@ -1885,6 +2080,12 @@ function buildMotherInterior(){const L=LEVELS[S.lvl],acc=0x6fb8ff;const sc=new T
   for(let i=0;i<4;i++){const sd=i%2?1:-1,w=buildWarrior({type:'human',skin:'#c99a7a',suit:'#4a3a1a'},0xff8a30,true);const z0=R(-40,10);w.g.position.set(sd*17,0,z0);sc.add(w.g);crew.push({w,x:sd*17,z0,z:z0,dir:Math.random()<.5?-1:1,ph:R(0,6),y:0});}
   const mech=[];for(const [x,z] of [[-4.5,MSPAD.z+3],[3.5,MSPAD.z-4]]){const w=buildWarrior({type:'human',skin:'#d9a27c',suit:'#5a4a20'},0xffb547,true);w.g.position.set(x,0,z);w.g.rotation.y=Math.atan2(MSPAD.x-x,MSPAD.z-z);sc.add(w.g);mech.push(w);}
   const flaggers=[];for(const sd of [-1,1]){const w=buildWarrior({type:'human',skin:'#c99a7a',suit:'#2a3a5a'},0xff8a30,true);addFlags(w);w.g.position.set(sd*6.5,0,-52);sc.add(w.g);flaggers.push(w);}
+  /* lanzaderas que cruzan el hangar por arriba */
+  const shuttles=[];for(let i=0;i<6;i++){const s=buildShip(SHIPS[(i*4+S.lvl+1)%SHIPS.length]);s.scale.setScalar(.75);sc.add(s);shuttles.push({o:s,x:R(-15,15),y:R(13,19),z:R(-60,60),sp:R(9,16)*(i%2?1:-1)});}
+  /* puerta a la ciudad de la nave */
+  {const dz=-46;add(new THREE.BoxGeometry(1.2,12,10),metal(0x2a3240),21.2,6,dz);add(new THREE.PlaneGeometry(8.4,10),basic(acc,{transparent:true,opacity:.55,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}),20.5,5.2,dz).rotation.y=-Math.PI/2;
+    for(const s2 of [-1,1])add(new THREE.BoxGeometry(.6,11,.6),basic(acc),20.4,5.5,dz+s2*4.6);add(new THREE.BoxGeometry(.6,.6,9.8),basic(acc),20.4,11,dz);
+    const lb=msLabel('CIUDAD DE LA NAVE · '+MC.name.toUpperCase(),mcHex(acc),19.6,14,dz,12);sc.add(lb);}
   /* drones */
   const drones=[];for(let i=0;i<6;i++){const g=new THREE.Group();g.add(new THREE.Mesh(geo('drB',()=>new THREE.SphereGeometry(.5,12,8)),geo('drBM',()=>metal(0xc8d0dc))));const r=new THREE.Mesh(geo('drR',()=>new THREE.TorusGeometry(.75,.06,6,20).rotateX(Math.PI/2)),geo('drRM',()=>basic(0x6fb8ff)));g.add(r);
     const e=glowSprite(i%2?0x6fb8ff:0xffb547,1.1,1);g.add(e);sc.add(g);drones.push({g,ph:R(0,6),cx:R(-14,14),cz:R(-45,30),r:R(4,9),h:R(6,14),sp:R(.3,.7)});}
@@ -1894,11 +2095,11 @@ function buildMotherInterior(){const L=LEVELS[S.lvl],acc=0x6fb8ff;const sc=new T
   const sp=new Sparks(900,.5,sc);
   const pw=buildWarrior(PILOT.look,PILOT.acc,PILOT.look.type==='human');pw.g.visible=false;pw.g.position.set(-4,0,MSPAD.z+5);sc.add(pw.g);
   return {sc,myShip,fluid,tl,pring,hose,pulses,fuelLight,screens,buttons,doors,plat,deckY,cap,holo,crew,mech,flaggers,drones,guides,field,sparks:sp,fleet,fleetNames,
-    pilot:{w:pw,x:-4,y:0,z:MSPAD.z+5,face:Math.PI,ph:0},deck:'low',ride:null,near:null,t:0,scrT:0,landT:0,f0:0,said50:false,saidFull:false,launch:null,
+    shuttles,pilot:{w:pw,x:-4,y:0,z:MSPAD.z+5,face:Math.PI,ph:0},deck:'low',ride:null,near:null,t:0,scrT:0,landT:0,f0:0,said50:false,saidFull:false,launch:null,
     camPos:new THREE.Vector3(14,12,MSPAD.z+20),look:new THREE.Vector3(0,3,MSPAD.z)};}
 function enterMother(f0){S.state='mother';firing=false;$('hud').hidden=true;setLandUI(null);setDockUI(false);$('orbitHud').hidden=true;
   MS=buildMotherInterior();MS.f0=f0;MS.fleetNames.length&&MS.screens.forEach(s2=>{s2.draw(s2.x,s2.w,s2.h,0);s2.t.needsUpdate=true;});
-  $('hgEye').textContent='Nave nodriza · Galaxia '+LEVELS[S.lvl].name;$('hgTitle').textContent='Estrella Madre';$('hgMeet').hidden=true;$('hgArm').hidden=true;$('hgCard').hidden=true;$('hgAct').hidden=true;
+  $('hgEye').textContent='Nave nodriza '+curMC().cls+' · Galaxia '+LEVELS[S.lvl].name;$('hgTitle').textContent=curMC().name;$('hgMeet').hidden=true;$('hgArm').hidden=true;$('hgCard').hidden=true;$('hgAct').hidden=true;
   $('hgHint').textContent=(isTouch?'Tu nave está cargando combustible. Camina por la cubierta o toma el elevador al puente de mando.':'Tu nave está cargando. Camina con WASD y pulsa E para usar elevadores, puertas y tu nave.')+' En el puente está el timón: desde ahí pilotas la Estrella Madre, la única que cruza agujeros negros.';
   $('msFuel').hidden=false;$('msShip').textContent=SHIP.name;$('msHelm').hidden=false;msFuelUI();$('hangarUI').hidden=false;
   const tc=$('touch');tc.classList.add('walk');tc.hidden=!isTouch;$('joyhint').textContent='Arrastra para caminar';$('joyhint').hidden=false;
@@ -1911,12 +2112,14 @@ function msNearUI(){const n=MS.near,card=$('hgCard'),act=$('hgAct');if(!n||MS.ri
   if(n==='ship')set(SHIP.name,'Tu nave',f>=100?'Tanque lleno. Lista para despegar.':`Combustible al ${f}%. Puedes esperar a que se llene o salir ya.`,f>=100?'Subir y despegar':`Despegar con ${f}%`);
   else if(n==='elev')set('Elevador',MS.deck==='low'?'Cubierta de vuelo':'Puente de mando',MS.deck==='low'?'Sube al puente de mando, donde está la capitana.':'Baja a la cubierta de vuelo, donde está tu nave.',MS.deck==='low'?'Subir al puente':'Bajar a la cubierta');
   else if(n==='med')set('Enfermería','Reparación',`Casco al ${Math.ceil(S.hull)} de ${S.hullMax}. Los médicos reparan tu nave y a tu piloto.`,'Reparar casco');
+  else if(n==='city')set('Ciudad de la nave',curMC().name,'Una ciudad completa dentro de la nave nodriza: torres, naves estacionadas, tienda y juegos.','Entrar a la ciudad');
   else if(n==='ammo')set('Depósito de misiles','Munición',`Misiles: ${S.mis} · Bombas: ${S.bombs}.`,'Recargar misiles y bombas');
   else if(n==='helm')set('Timón de la Estrella Madre','Puente de mando','Pilota la nave nodriza: es muy rápida, dispara cañones de plasma y salvas de 4 misiles, y es la única que cruza los agujeros negros.','Tomar el timón');
   else if(n==='cap')set('Capitana Orión','Comandante de la flota',S.route?`Rumbo fijado: ${S.route.name} (${LEVELS[S.route.l].name}).`:'Te muestra los planetas habitados y las zonas para bajar en cápsula de cada galaxia.','Mapa estelar · fijar rumbo');
   else if(n==='map')set('Mapa holográfico',LEVELS[S.lvl].cat,`Estás en la galaxia ${LEVELS[S.lvl].name}. Has cruzado ${S.lvl} de ${LEVELS.length} portales.`,'Abrir mapa estelar');}
 function msAction(){if(!MS||MS.ride||MS.launch||S.state!=='mother')return;const n=MS.near;if(!n)return;
   if(n==='ship')msLaunch();
+  else if(n==='city')enterMotherCity();
   else if(n==='helm')takeHelm();
   else if(n==='elev'){const up=MS.deck==='low';MS.ride={t:0,from:up?.2:MS.deckY,to:up?MS.deckY:.2,up};MS.deck='ride';msNearUI();say(up?'Subiendo al puente de mando.':'Bajando a la cubierta de vuelo.');if(actx&&!S.muted)tone('sine',300,up?600:200,1.2,.05);}
   else if(n==='med'){S.hull=S.hullMax;S.shield=S.shieldMax;S.poison=0;sfx('pick');say('Casco reparado.');for(let i=0;i<30;i++)MS.sparks.emit(MS.pilot.x,R(.5,3),MS.pilot.z,R(-3,3),R(0,4),R(-3,3),.7,COL.green);msNearUI();}
@@ -1951,6 +2154,7 @@ function msUpdate(dt){const G=MS;G.t+=dt;const t=G.t,pv=G.pilot;
   for(const d of G.drones){d.g.position.set(d.cx+Math.cos(t*d.sp+d.ph)*d.r,d.h+Math.sin(t*1.7+d.ph)*.6,d.cz+Math.sin(t*d.sp+d.ph)*d.r);d.g.rotation.y+=dt*2;}
   for(const c of G.crew){if(c.fixed){c.w.armL.rotation.x=-.9+Math.sin(t*3+c.ph)*.25;c.w.armR.rotation.x=-.9+Math.cos(t*3.4+c.ph)*.25;continue;}c.z+=c.dir*2.2*dt;if(Math.abs(c.z-c.z0)>9)c.dir*=-1;c.ph+=dt*5;c.w.g.position.set(c.x,c.y,c.z);c.w.g.rotation.y=c.dir>0?0:Math.PI;animWalk(c.w,c.ph,.8);}
   for(const m of G.mech){m.armR.rotation.x=-1.2+Math.sin(t*6)*.4;m.armL.rotation.x=-.8;}
+  if(G.shuttles)for(const s2 of G.shuttles){s2.z+=s2.sp*dt;if(s2.z>64)s2.z=-64;else if(s2.z<-64)s2.z=64;s2.o.position.set(s2.x,s2.y+Math.sin(t+s2.x)*.4,s2.z);s2.o.rotation.y=s2.sp>0?Math.PI:0;}
   G.flaggers.forEach((w,i)=>waveFlags(w,t,i*1.3));G.cap.armR.rotation.x=G.near==='cap'?-1.2+Math.sin(t*4)*.3:0;
   G.holo.userData.gal.rotation.y+=dt*(.3+(G.holo.userData.boost||0));if(G.holo.userData.boost)G.holo.userData.boost=Math.max(0,G.holo.userData.boost-dt);
   const n=G.guides.length,act=Math.floor(((t*.9)%1)*n);G.guides.forEach((row,i)=>{const on=Math.abs(i-act)<2;for(const sp of row){sp.material.opacity=on?1:.3;const k=on?1.8:.9;sp.scale.set(k,k,1);}});
@@ -1975,7 +2179,7 @@ function msUpdate(dt){const G=MS;G.t+=dt;const t=G.t,pv=G.pilot;
     const w=pv.w;w.g.position.set(pv.x,pv.y,pv.z);w.g.rotation.y+=angD(pv.face,w.g.rotation.y)*Math.min(1,dt*10);animWalk(w,pv.ph,moving?1:0);
     let near=null;const onPlat=Math.abs(pv.x-ELEV.x)<3.4&&Math.abs(pv.z-ELEV.z)<3.4;
     if(onPlat)near='elev';
-    else if(!up){if(Math.hypot(pv.x-MSPAD.x,pv.z-MSPAD.z)<9.6)near='ship';else if(pv.x<-16&&Math.abs(pv.z+1)<4.5)near='med';else if(pv.x>16&&Math.abs(pv.z+1)<4.5)near='ammo';}
+    else if(!up){if(pv.x>15.5&&Math.abs(pv.z+46)<5)near='city';else if(Math.hypot(pv.x-MSPAD.x,pv.z-MSPAD.z)<9.6)near='ship';else if(pv.x<-16&&Math.abs(pv.z+1)<4.5)near='med';else if(pv.x>16&&Math.abs(pv.z+1)<4.5)near='ammo';}
     else{if(Math.hypot(pv.x-14,pv.z-55.2)<3.2)near='helm';else if(Math.hypot(pv.x-8,pv.z-55.8)<4.2)near='cap';else if(Math.hypot(pv.x+2,pv.z-53)<4.2)near='map';}
     if(near!==G.near){G.near=near;msNearUI();}}
   else{pv.w.g.position.set(pv.x,pv.y,pv.z);animWalk(pv.w,0,0);}
@@ -1998,31 +2202,45 @@ function windowTex(acc){const c=cv(128,256),x=c.getContext('2d');x.fillStyle='#1
   const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;return t;}
 function cityGround(p){const c=cv(512,512),x=c.getContext('2d');x.fillStyle=p[1];x.fillRect(0,0,512,512);for(let i=0;i<500;i++){x.fillStyle=`rgba(${Math.random()<.5?'0,0,0':'255,255,255'},${R(.02,.07)})`;x.beginPath();x.arc(R(0,512),R(0,512),R(2,14),0,7);x.fill();}
   const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(14,14);return t;}
-function buildCity(){const L=LEVELS[S.lvl],H=L.home,p=L.planets[0],acc=new THREE.Color(L.accent).getHex(),style=S.lvl%4;const sc=new THREE.Scene();
-  const fogc=new THREE.Color(p[1]).lerp(new THREE.Color(0x0a0a14),.45);sc.background=fogc;sc.fog=new THREE.Fog(fogc.getHex(),70,210);
+function buildCity(MC){const L=LEVELS[S.lvl],H=L.home,p=L.planets[0],acc=MC?MC.glow:new THREE.Color(L.accent).getHex(),style=MC?MC.style:S.lvl%4;const sc=new THREE.Scene();
+  const fogc=MC?new THREE.Color(MC.glow).multiplyScalar(.05):new THREE.Color(p[1]).lerp(new THREE.Color(0x0a0a14),.45);sc.background=fogc;sc.fog=new THREE.Fog(fogc.getHex(),MC?90:70,MC?260:210);
   sc.add(new THREE.HemisphereLight(new THREE.Color(p[2]).getHex(),0x202018,1.0));sc.add(new THREE.AmbientLight(0x404050,.5));const sun=new THREE.DirectionalLight(L.sun,1.1);sun.position.set(-40,60,-30);sc.add(sun);
   const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.6,metalness:.3,flatShading:true},o));const add=(gm,m,x,y,z)=>{const ms=new THREE.Mesh(gm,m);ms.position.set(x,y,z);sc.add(ms);return ms;};
+  if(MC){/* la ciudad vive dentro de un domo gigante */
+    const wt2=windowTex(mcHex(MC.glow));wt2.wrapS=wt2.wrapT=THREE.RepeatWrapping;wt2.repeat.set(40,6);
+    const wall=new THREE.Mesh(new THREE.CylinderGeometry(235,235,150,64,1,true),new THREE.MeshStandardMaterial({map:wt2,emissiveMap:wt2,emissive:0xffffff,emissiveIntensity:.5,side:THREE.BackSide,metalness:.5,roughness:.5,fog:false}));wall.position.y=72;sc.add(wall);
+    const ceil=new THREE.Mesh(new THREE.RingGeometry(60,236,64,1).rotateX(Math.PI/2),new THREE.MeshStandardMaterial({color:new THREE.Color(MC.hull).multiplyScalar(.35).getHex(),metalness:.7,roughness:.4,side:THREE.DoubleSide,fog:false}));ceil.position.y=147;sc.add(ceil);
+    for(let k=0;k<12;k++){const a=k/12*Math.PI*2;const bm=new THREE.Mesh(new THREE.BoxGeometry(2,2,176),basic(MC.glow,{fog:false}));bm.position.set(Math.cos(a)*148,146,Math.sin(a)*148);bm.rotation.y=-a+Math.PI/2;sc.add(bm);}
+    const skyW=new THREE.Mesh(new THREE.CircleGeometry(60,48).rotateX(Math.PI/2),new THREE.MeshBasicMaterial({map:skyTex(p),side:THREE.DoubleSide,fog:false}));skyW.position.y=148;sc.add(skyW);
+    const rimc=new THREE.Mesh(new THREE.TorusGeometry(60,1.6,8,64).rotateX(Math.PI/2),basic(MC.glow,{fog:false}));rimc.position.y=147;sc.add(rimc);
+    for(let k=0;k<5;k++){const pl=new THREE.PointLight(MC.glow,.9,180);const a=k/5*Math.PI*2;pl.position.set(Math.cos(a)*60,60,Math.sin(a)*60);sc.add(pl);}}
+  else{
   const sky=new THREE.Mesh(new THREE.SphereGeometry(400,32,16),new THREE.MeshBasicMaterial({map:skyTex(p),side:THREE.BackSide,fog:false}));sc.add(sky);
-  const sg=glowSprite(L.sun,90,.8);sg.position.set(-160,140,-260);sc.add(sg);
-  for(const [x,y,z,r,c] of [[120,120,-280,26,p[2]],[-60,170,-300,12,p[0]]]){const m=new THREE.Mesh(new THREE.SphereGeometry(r,24,16),new THREE.MeshStandardMaterial({map:planetTex([c,p[1],'#ffffff']),fog:false,roughness:1}));m.position.set(x,y,z);sc.add(m);}
-  const gr=new THREE.Mesh(new THREE.PlaneGeometry(600,600),new THREE.MeshStandardMaterial({map:cityGround(p),roughness:1}));gr.rotation.x=-Math.PI/2;sc.add(gr);
+  const sg=glowSprite(L.sun,90,.8);sg.position.set(-160,140,-260);sc.add(sg);}
+  if(!MC)for(const [x,y,z,r,c] of [[120,120,-280,26,p[2]],[-60,170,-300,12,p[0]]]){const m=new THREE.Mesh(new THREE.SphereGeometry(r,24,16),new THREE.MeshStandardMaterial({map:planetTex([c,p[1],'#ffffff']),fog:false,roughness:1}));m.position.set(x,y,z);sc.add(m);}
+  let gtx=MC?floorTex():cityGround(p);if(MC){gtx.wrapS=gtx.wrapT=THREE.RepeatWrapping;gtx.repeat.set(24,24);}const gr=new THREE.Mesh(new THREE.PlaneGeometry(600,600),new THREE.MeshStandardMaterial({map:gtx,roughness:MC?.45:1,metalness:MC?.6:0}));gr.rotation.x=-Math.PI/2;sc.add(gr);
   add(new THREE.CylinderGeometry(15,15,.2,48),M(0x8a8a98,{metalness:.1}),0,.1,0);add(new THREE.TorusGeometry(15,.25,6,64).rotateX(Math.PI/2),basic(acc),0,.25,0);
   for(const a of [0,Math.PI/2,Math.PI,-Math.PI/2]){const av=add(new THREE.BoxGeometry(7,.15,48),M(0x6a6a78,{metalness:.1}),Math.sin(a)*38,.08,Math.cos(a)*38);av.rotation.y=a;
     for(let k=0;k<5;k++)for(const sd of [-1,1]){const d=18+k*9,lx=Math.sin(a)*d+Math.cos(a)*sd*4.5,lz=Math.cos(a)*d-Math.sin(a)*sd*4.5;add(geo('cyLp',()=>new THREE.CylinderGeometry(.12,.15,5,6)),geo('cyLpM',()=>M(0x30343c)),lx,2.5,lz);const g=glowSprite(acc,1.6,1);g.position.set(lx,5.2,lz);sc.add(g);}}
   /* monumento central */
-  add(new THREE.CylinderGeometry(3,3.6,1.6,24),M(0x5a5a68),0,.8,0);const statue=buildWarrior(H.look,acc,H.look.type==='human');statue.g.scale.setScalar(2.4);statue.g.position.set(0,1.6,0);sc.add(statue.g);
-  statue.g.traverse(o=>{if(o.isMesh){o.material=geo('cyStatM',()=>new THREE.MeshStandardMaterial({color:0xd8c890,metalness:.85,roughness:.25}));}});statue.armR.rotation.x=-2.6;
+  add(new THREE.CylinderGeometry(3,3.6,1.6,24),M(0x5a5a68),0,.8,0);
+  if(MC){/* núcleo holográfico de la nave */const cm=new THREE.MeshStandardMaterial({color:MC.glow,emissive:MC.glow,emissiveIntensity:1,transparent:true,opacity:.75});
+    add(new THREE.CylinderGeometry(1.4,1.4,9,16),cm,0,6,0);const cr=add(new THREE.OctahedronGeometry(2.2,0),cm,0,12,0);cr.scale.y=1.6;const cgl=glowSprite(MC.glow,16,.6);cgl.position.y=9;sc.add(cgl);
+    for(const [y,r] of [[4,3.2],[8,2.6],[13,3.6]])add(new THREE.TorusGeometry(r,.12,6,40).rotateX(Math.PI/2),basic(MC.glow,{transparent:true,opacity:.8,blending:THREE.AdditiveBlending}),0,y,0);
+    const beamUp=add(new THREE.CylinderGeometry(.8,.8,130,10,1,true),basic(MC.glow,{transparent:true,opacity:.18,blending:THREE.AdditiveBlending,depthWrite:false}),0,80,0);}
+  else{const statue=buildWarrior(H.look,acc,H.look.type==='human');statue.g.scale.setScalar(2.4);statue.g.position.set(0,1.6,0);sc.add(statue.g);
+  statue.g.traverse(o=>{if(o.isMesh){o.material=geo('cyStatM',()=>new THREE.MeshStandardMaterial({color:0xd8c890,metalness:.85,roughness:.25}));}});statue.armR.rotation.x=-2.6;}
   const ring=add(new THREE.TorusGeometry(4.2,.1,6,48).rotateX(Math.PI/2),basic(acc,{transparent:true,opacity:.7,blending:THREE.AdditiveBlending}),0,3,0);
   for(let i=0;i<14;i++){const a=i/14*Math.PI*2;const j=glowSprite(acc,1,.8);j.position.set(Math.cos(a)*3.4,1.8,Math.sin(a)*3.4);sc.add(j);}
-  sc.add(msLabel('CIUDAD DE '+H.planet.toUpperCase(),L.accent,0,10.5,0,16));
+  sc.add(msLabel(MC?'CIUDAD · '+MC.name.toUpperCase():'CIUDAD DE '+H.planet.toUpperCase(),MC?mcHex(MC.glow):L.accent,0,MC?17:10.5,0,16));
   /* puerto espacial (de donde sales) */
   add(new THREE.BoxGeometry(46,16,10),M(0x3a4050),0,8,57);add(new THREE.BoxGeometry(48,1.4,12),M(0x2a2e38),0,16.7,57);
   for(const dx of [-3.4,3.4])add(new THREE.BoxGeometry(.8,9,.8),basic(0x5dffa8),dx,4.5,51.8);add(new THREE.BoxGeometry(7.6,.8,.8),basic(0x5dffa8),0,9,51.8);
   add(new THREE.PlaneGeometry(6,8.6),basic(0x9fffd0,{transparent:true,opacity:.35,blending:THREE.AdditiveBlending,depthWrite:false}),0,4.3,51.9);
-  sc.add(msLabel('PUERTO ESPACIAL · '+H.planet.toUpperCase(),'#5dffa8',0,13,51,18));
+  sc.add(msLabel(MC?'HANGAR · VOLVER A LA NAVE':'PUERTO ESPACIAL · '+H.planet.toUpperCase(),'#5dffa8',0,13,51,18));
   for(let i=0;i<10;i++){const w=add(geo('cyPw',()=>new THREE.BoxGeometry(3,1.2,.2)),geo('cyPwM',()=>basic(0xffe7b0)),-20+i*4.4,12,51.9);if(Math.abs(-20+i*4.4)<5)w.visible=false;}
   /* edificios */
-  const wt=windowTex(L.accent),winM=new THREE.MeshStandardMaterial({map:wt,emissiveMap:wt,emissive:0xffffff,emissiveIntensity:.55,roughness:.5,metalness:.4});
+  const wt=windowTex(MC?mcHex(MC.glow):L.accent),winM=new THREE.MeshStandardMaterial({map:wt,emissiveMap:wt,emissive:0xffffff,emissiveIntensity:.55,roughness:.5,metalness:.4});
   const bodyM=[M(new THREE.Color(p[0]).lerp(new THREE.Color(0x808090),.5).getHex()),M(new THREE.Color(p[2]).lerp(new THREE.Color(0x606070),.5).getHex()),M(0x7a7f8c)],accM=basic(acc);
   const blocks=[{x:0,z:0,r:4.2},{x:0,z:56,r:0}];let placed=0;
   for(let k=0;k<70&&placed<34;k++){const a=R(0,Math.PI*2),d=R(30,78),x=Math.sin(a)*d,z=Math.cos(a)*d;const ang=((a%(Math.PI/2))+Math.PI/2)%(Math.PI/2);if(ang<.22||ang>Math.PI/2-.22)continue;if(z>40&&Math.abs(x)<30)continue;
@@ -2035,7 +2253,14 @@ function buildCity(){const L=LEVELS[S.lvl],H=L.home,p=L.planets[0],acc=new THREE
     else{const st=new THREE.Mesh(new THREE.CylinderGeometry(w*.18,w*.3,h,10),pick(bodyM));st.position.y=h/2;g.add(st);const capm=new THREE.Mesh(new THREE.SphereGeometry(w*.8,20,10,0,Math.PI*2,0,Math.PI*.55),winM);capm.position.y=h;capm.scale.y=.6;g.add(capm);
       for(let q=0;q<5;q++){const sp2=glowSprite(acc,1.2,1);const qa=q/5*Math.PI*2;sp2.position.set(Math.cos(qa)*w*.8,h-.2,Math.sin(qa)*w*.8);g.add(sp2);}}
     blocks.push({x,z,r:w*.75});}
-  for(let i=0;i<14;i++){const a=i/14*Math.PI*2,d=R(150,190),h=R(40,110);const m=new THREE.Mesh(new THREE.ConeGeometry(R(30,60),h,5),M(new THREE.Color(p[1]).multiplyScalar(.6).getHex()));m.position.set(Math.sin(a)*d,h/2-2,Math.cos(a)*d);sc.add(m);}
+  if(MC){/* megatorres hasta el techo y muelles flotantes con naves */
+    for(let i=0;i<18;i++){const a=i/18*Math.PI*2+R(-.08,.08),d=R(115,190),hh=R(70,145),w=R(12,24);const m=new THREE.Mesh(new THREE.BoxGeometry(w,hh,w),winM);m.position.set(Math.sin(a)*d,hh/2,Math.cos(a)*d);sc.add(m);
+      const tp=new THREE.Mesh(new THREE.BoxGeometry(w+3,1.2,w+3),basic(MC.glow));tp.position.set(m.position.x,hh*R(.4,.8),m.position.z);sc.add(tp);}
+    for(let i=0;i<10;i++){const a=i/10*Math.PI*2+.3,d=R(52,80),y=R(16,34);const dock=new THREE.Group();dock.position.set(Math.sin(a)*d,y,Math.cos(a)*d);sc.add(dock);
+      const pad=new THREE.Mesh(new THREE.CylinderGeometry(6,6.4,.8,24),M(0x3a4050,{metalness:.7}));dock.add(pad);const rr=new THREE.Mesh(new THREE.TorusGeometry(5.6,.15,6,40).rotateX(Math.PI/2),basic(MC.glow));rr.position.y=.45;dock.add(rr);
+      const leg=new THREE.Mesh(new THREE.CylinderGeometry(.5,.8,y,8),M(0x2a2e38));leg.position.y=-y/2;dock.add(leg);const shp=buildShip(SHIPS[(i*2+S.lvl)%SHIPS.length]);shp.scale.setScalar(1.6);shp.position.y=1.8;shp.rotation.y=-a;dock.add(shp);
+      const ug=glowSprite(MC.glow,7,.35);ug.position.y=-.6;dock.add(ug);}}
+  else for(let i=0;i<14;i++){const a=i/14*Math.PI*2,d=R(150,190),h=R(40,110);const m=new THREE.Mesh(new THREE.ConeGeometry(R(30,60),h,5),M(new THREE.Color(p[1]).multiplyScalar(.6).getHex()));m.position.set(Math.sin(a)*d,h/2-2,Math.cos(a)*d);sc.add(m);}
   /* estaciones: tienda, caza de cristales, galería de tiro */
   const st={};
   {const g=new THREE.Group();g.position.set(-22,0,-4);sc.add(g);const c1=new THREE.Mesh(new THREE.BoxGeometry(6,1.2,2.4),M(0x7a5a3a));c1.position.y=.6;g.add(c1);
@@ -2059,13 +2284,13 @@ function buildCity(){const L=LEVELS[S.lvl],H=L.home,p=L.planets[0],acc=new THREE
   const people=[];for(let i=0;i<16;i++){const lk=looks[i%looks.length],hu=lk.type==='human';const w=buildWarrior(lk,pick([acc,0xffb547,0x6fb8ff,0xff7ad0]),hu);if(lk.type!=='human'&&i%3===0)w.g.scale.setScalar(R(.8,1.25));
     const r=R(17,33),a0=R(0,Math.PI*2);sc.add(w.g);people.push({w,r,a:a0,sp:R(.05,.11)*(Math.random()<.5?-1:1),ph:R(0,6),stop:0,line:i%CITY_LINES.length,x:0,z:0});}
   /* autos voladores */
-  const cars=[];for(let i=0;i<10;i++){const g=new THREE.Group();const b=new THREE.Mesh(geo('carB',()=>new THREE.SphereGeometry(1,14,8)),M(pick([0xd04040,0x40a0d0,0xe0c040,0xe0e0e0,0x8040c0]),{metalness:.8,roughness:.2}));b.scale.set(1.4,.6,2.4);g.add(b);
+  const cars=[];for(let i=0;i<(MC?16:10);i++){const g=new THREE.Group();if(MC&&i%2===0){const shp=buildShip(SHIPS[(i+S.lvl*3)%SHIPS.length]);shp.scale.setScalar(1.3);g.add(shp);sc.add(g);cars.push({g,r:R(30,95),h:R(14,60),a:R(0,7),sp:R(.12,.3)*(Math.random()<.5?-1:1)});continue;}const b=new THREE.Mesh(geo('carB',()=>new THREE.SphereGeometry(1,14,8)),M(pick([0xd04040,0x40a0d0,0xe0c040,0xe0e0e0,0x8040c0]),{metalness:.8,roughness:.2}));b.scale.set(1.4,.6,2.4);g.add(b);
     const cp=new THREE.Mesh(geo('carC',()=>new THREE.SphereGeometry(.7,12,8)),geo('carCM',()=>new THREE.MeshStandardMaterial({color:0x9fd0ff,metalness:.9,roughness:.05})));cp.position.set(0,.45,-.3);g.add(cp);
     const tl=glowSprite(0xff3030,1.2,1);tl.position.z=2.4;g.add(tl);const hl=glowSprite(0xfff0c0,1.4,1);hl.position.z=-2.4;g.add(hl);sc.add(g);cars.push({g,r:R(28,70),h:R(10,30),a:R(0,7),sp:R(.12,.3)*(Math.random()<.5?-1:1)});}
   const sp=new Sparks(800,.5,sc);
   const pw=buildWarrior(PILOT.look,PILOT.acc,PILOT.look.type==='human');pw.g.position.set(0,0,48);sc.add(pw.g);
   /* autódromo de Turbo Circuito: solo en la Tierra */
-  if(S.lvl===0){const g=new THREE.Group();g.position.set(0,0,-44);sc.add(g);
+  if(S.lvl===0&&!MC){const g=new THREE.Group();g.position.set(0,0,-44);sc.add(g);
     const chk=cv(256,64),cx2=chk.getContext('2d');for(let i=0;i<16;i++)for(let j=0;j<4;j++){cx2.fillStyle=(i+j)%2?'#111':'#fff';cx2.fillRect(i*16,j*16,16,16);}
     for(const sd of [-1,1]){const pil=new THREE.Mesh(new THREE.BoxGeometry(1.4,12,1.4),M(0xe5242b));pil.position.set(sd*9,6,0);g.add(pil);const tp=glowSprite(0xffd23f,2.4,1);tp.position.set(sd*9,12.6,0);g.add(tp);}
     const ban=new THREE.Mesh(new THREE.BoxGeometry(19.4,2.6,.6),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(chk)}));ban.position.set(0,11,0);g.add(ban);
@@ -2080,12 +2305,19 @@ function buildCity(){const L=LEVELS[S.lvl],H=L.home,p=L.planets[0],acc=new THREE
     camPos:new THREE.Vector3(0,9,62),look:new THREE.Vector3(0,2,30)};}
 function cryUI(){$('cyCry').textContent=savedCry;}
 function addCry(n){savedCry=Math.max(0,savedCry+n);try{localStorage.setItem('hde_cry',String(savedCry));}catch(_){}cryUI();}
+function enterMotherCity(){if(!MS||S.state!=='mother')return;const MC=curMC();S.state='city';$('hangarUI').hidden=true;CT=buildCity(MC);CT.fromMother=true;
+  $('cyEye').textContent='Nave nodriza '+MC.cls+' · '+LEVELS[S.lvl].name;$('cyTitle').textContent='Ciudad de la '+MC.name;
+  $('cyHint').textContent=MC.d+' '+(isTouch?'Camina con el joystick y prueba la tienda y los juegos.':'Camina con WASD y pulsa E para hablar, jugar o comprar.');
+  $('cyCard').hidden=true;$('cyAct').hidden=true;$('cyGame').hidden=true;$('cyShop').hidden=true;cryUI();$('cityUI').hidden=false;$('touch').hidden=!isTouch;
+  hgCam.position.copy(CT.camPos);hgCam.lookAt(CT.look);fadeFlash();if(actx)musicMuffle(false);say('Bienvenido a la ciudad de la nave nodriza.');}
 function enterCity(){if(!HG)return;S.state='city';$('hangarUI').hidden=true;CT=buildCity();const H=LEVELS[S.lvl].home;
   $('cyEye').textContent='Planeta '+H.planet+' · '+LEVELS[S.lvl].name;$('cyTitle').textContent='Ciudad de '+H.planet;
   $('cyHint').textContent=(isTouch?'Camina con el joystick. Habla con los habitantes y prueba los juegos de la plaza.':'Camina con WASD y pulsa E para hablar, jugar o comprar.')+(S.lvl===0?' El autódromo de Turbo Circuito está al fondo de la avenida.':'');
   $('cyCard').hidden=true;$('cyAct').hidden=true;$('cyGame').hidden=true;$('cyShop').hidden=true;cryUI();$('cityUI').hidden=false;$('touch').hidden=!isTouch;
   hgCam.position.copy(CT.camPos);hgCam.lookAt(CT.look);fadeFlash();if(actx)musicMuffle(false);say(`Bienvenido a la ciudad de ${H.planet}.`);}
-function exitCity(){if(!CT)return;disposeScene(CT.sc);CT=null;$('cityUI').hidden=true;S.state='hangar';$('hangarUI').hidden=false;$('touch').hidden=!isTouch;fadeFlash();if(actx)musicMuffle(true);
+function exitCity(){if(!CT)return;if(CT.fromMother){disposeScene(CT.sc);CT=null;$('cityUI').hidden=true;S.state='mother';$('hangarUI').hidden=false;$('touch').hidden=!isTouch;fadeFlash();if(actx)musicMuffle(true);
+    if(MS){MS.pilot.x=15;MS.pilot.z=-46;MS.pilot.face=-Math.PI/2;MS.near=null;msNearUI();}return;}
+  disposeScene(CT.sc);CT=null;$('cityUI').hidden=true;S.state='hangar';$('hangarUI').hidden=false;$('touch').hidden=!isTouch;fadeFlash();if(actx)musicMuffle(true);
   if(HG){HG.pilot.x=-14;HG.pilot.z=DOORZ;HG.pilot.face=Math.PI/2;HG.near=null;HG.mode='walk';hgNearUI();}}
 function cyNearUI(){const n=CT.near,card=$('cyCard'),act=$('cyAct');if(!n||CT.mode!=='walk'){card.hidden=true;act.hidden=true;return;}card.hidden=false;act.hidden=false;
   const set=(a,b,c,d)=>{$('cyName').textContent=a;$('cyCls').textContent=b;$('cyDesc').textContent=c;act.textContent=d;};const H=LEVELS[S.lvl].home;
@@ -2551,7 +2783,10 @@ $('smClear').onclick=()=>{S.route=null;smRouteUI();};
 function openPilotSel(lvl){pendingLvl=lvl;initAudio();$('menu').hidden=true;const box=$('pilots');box.innerHTML='';
   PILOTS.forEach((pl,i)=>{const b=document.createElement('button');b.className='pcard'+(i===savedPilot?' sel':'');b.dataset.i=i;const im=document.createElement('img');im.src=pl.img;im.alt='';im.loading='lazy';b.appendChild(im);
     b.insertAdjacentHTML('beforeend',`<span class="pn">${pl.name}</span><span class="lbl">${pl.from}</span><span class="pb">${pl.bonus}</span>`);box.appendChild(b);});
-  $('pilotSel').hidden=false;}
+  facUI();$('pilotSel').hidden=false;}
+function facUI(){for(const b of $('facPick').children){if(b.dataset&&b.dataset.f)b.classList.toggle('on',b.dataset.f===FACTION);}$('facTxt').textContent=FACTIONS[FACTION].d;}
+$('facPick').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;FACTION=b.dataset.f;try{localStorage.setItem('hde_fac',FACTION);}catch(_){}facUI();if(actx&&!S.muted)tone('sine',400,700,.1,.05);
+  say(FACTION==='umbra'?'Te uniste al Imperio Umbra. La Alianza Estelar es tu enemiga.':'Te uniste a la Alianza Estelar. El Imperio Umbra es tu enemigo.');});
 $('pilots').addEventListener('click',e=>{const b=e.target.closest('.pcard');if(!b)return;savedPilot=+b.dataset.i;try{localStorage.setItem('hde_pilot',String(savedPilot));}catch(_){}
   for(const c of $('pilots').children)c.classList.toggle('sel',+c.dataset.i===savedPilot);if(actx&&!S.muted)tone('sine',500,800,.08,.05);});
 $('pilotGo').onclick=()=>{$('pilotSel').hidden=true;startGame(pendingLvl);};$('pilotBack').onclick=()=>{$('pilotSel').hidden=true;$('menu').hidden=false;};
@@ -2885,6 +3120,7 @@ function drawNav(){const W=navC.clientWidth||innerWidth,H=navC.clientHeight||inn
   if(S.land&&!S.landedHere)items.push([S.land.o.position,'#5dffa8',LEVELS[S.lvl].home.planet,1]);
   if(S.mother)items.push([S.mother.o.position,'#6fb8ff','Nave nodriza',1]);
   if(S.site)items.push([S.site.o.position,'#c58bff',EXPLORE[S.lvl].n,1]);
+  if(S.rival)items.push([S.rival.o.position,'#ff4d6d','Enemigo · '+S.rival.mc.name,1]);
   {const rp=routeTarget();if(rp){const it=items.find(i=>i[0]===rp);if(it){it[1]='#ffd23f';it[2]='RUMBO · '+it[2];}}}
   if(S.boss&&S.boss.alive)items.push([S.boss.o.position,'#ff5a4a',S.boss.B.name,1]);
   const m=small?38:52,top=small?150:120,bot=small?190:96;
@@ -2995,8 +3231,8 @@ function update(dt){const L=LEVELS[S.lvl];S.time+=dt;const T=S.time;const playin
   else setLandUI(null);
   /* nave nodriza */
   if(S.state==='play'&&!S.mother&&!S.flyMother){S.motherCool-=dt*(S.bh?6:S.fuel<S.fuelMax*.35?3:1);if(S.motherCool<=0)spawnMother();}
-  siteUpdate(dt,spd,playing);if(S.state==='poddrop')podDropUpdate(dt);
-  if(S.mother){const mo=S.mother,p=mo.o.position;if(mo.o.userData.ring)mo.o.userData.ring.rotation.z+=dt*.25;if(mo.cool>0)mo.cool-=dt;mo.blink.forEach((b,i)=>{b.material.opacity=((T*1.3+i*.3)%1)<.5?1:.15;});
+  siteUpdate(dt,spd,playing);rivalUpdate(dt,spd,playing);if(S.state==='poddrop')podDropUpdate(dt);
+  if(S.mother){const mo=S.mother,p=mo.o.position;if(mo.o.userData.ring)mo.o.userData.ring.rotation.z+=dt*.25;animEscorts(mo.o,S.time);if(mo.cool>0)mo.cool-=dt;mo.blink.forEach((b,i)=>{b.material.opacity=((T*1.3+i*.3)%1)<.5?1:.15;});
     if(playing){p.z+=spd*.8*dt;keepOut(mo.o,70);mo.dist=p.length();if(mo.dist>2900)removeMother();}else mo.dist=p.length();}
   setDockUI(S.flyMother?S.state==='play':!!(S.mother&&!S.mother.missed&&!S.mother.leaving&&!(S.mother.cool>0)&&S.state==='play'&&S.mother.dist<420));
   if(S.state==='dock')updateDock(dt);
