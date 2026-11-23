@@ -211,6 +211,23 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
 .bubble{position:relative}
 .bubble .x{position:absolute;top:4px;right:8px;background:none;border:0;color:var(--dim);font-size:20px;cursor:pointer;pointer-events:auto;line-height:1}
 .pilots{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;width:100%}
+.smList{display:flex;flex-direction:column;gap:10px;width:100%}
+.smGal{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+.smGal.here{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.smGal.locked{opacity:.45}
+.smHead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.smHead b{font-size:17px}
+.smHead .num{font:500 12px var(--f-mono);color:var(--accent)}
+.smHead .tagHere{font:700 10px var(--f-disp);letter-spacing:.14em;text-transform:uppercase;color:#04060f;background:var(--accent);border-radius:4px;padding:2px 6px}
+.smDest{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}
+.smBtn{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 10px;align-items:center;text-align:left;font:inherit;color:var(--ink);background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;pointer-events:auto}
+.smBtn:disabled{cursor:not-allowed}
+.smBtn .ico{grid-row:1/3;width:30px;height:30px;border-radius:50%;box-shadow:inset -6px -6px 10px rgba(0,0,0,.55)}
+.smBtn b{font-size:15px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.smBtn small{font-size:12px;color:var(--dim)}
+.smBtn.sel{border-color:#ffd23f;box-shadow:0 0 0 1px #ffd23f inset;background:rgba(255,210,63,.1)}
+.smBtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.smRoute{width:100%;box-sizing:border-box;padding:10px 14px;border-radius:12px;border:1px solid #ffd23f;background:rgba(255,210,63,.1);color:#ffd23f;font-weight:700;letter-spacing:.04em}
 .pcard{text-align:left;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:4px;cursor:pointer;min-width:0}
 .pcard canvas,.pcard img{width:100%;aspect-ratio:1;border-radius:8px;display:block;object-fit:cover;background:#0a0e1a}
 .pcard.sel{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
@@ -475,6 +492,17 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
   </div>
   <div class="hgBottom"><button class="btn actbtn" id="exAct" hidden>Acción</button></div>
   <button class="tb" id="exJump" hidden aria-label="Saltar">SALTAR</button>
+</div>
+
+<div class="over" id="starMap" hidden style="z-index:20;background:rgba(3,4,10,.95)">
+  <div class="pane wide">
+    <div class="eyebrow">Capitana Orión · Mapa estelar</div>
+    <h2>¿A dónde quieres ir?</h2>
+    <p>Elige un planeta con aeropuerto o una zona para bajar en cápsula. La Estrella Madre fija el rumbo y, si está en otra galaxia, hace el salto al hiperespacio cuando despegues.</p>
+    <div id="smRoute" class="smRoute" hidden></div>
+    <div id="smList" class="smList"></div>
+    <div class="btns"><button class="btn" id="smClose">Listo</button><button class="btn ghost" id="smClear" hidden>Quitar rumbo</button></div>
+  </div>
 </div>
 
 <div class="over" id="installHelp" hidden style="z-index:60">
@@ -984,7 +1012,7 @@ function takeHelm(){if(!MS||S.state!=='mother'||MS.launch)return;disposeScene(MS
   if(S.mother){disposeScene(S.mother.o);scene.remove(S.mother.o);S.mother=null;}
   setMotherShip();S.state='play';S.mis=Math.max(S.mis,20);S.fuelWarn=S.fuelOut=false;S.fuel=S.fuelMax;P.x=0;P.y=1;P.vx=P.vy=0;S.inv=2;S.thr=1.2;S.cockpit=false;S.viewSet=false;S.mvT=0;
   ship.visible=true;ship.up.set(0,1,0);ship.rotation.set(0,0,0);camBase.set(16,7,34);camLook.set(0,1,-10);S.camBlend=1.4;$('hud').hidden=false;$('touch').hidden=!isTouch;fadeFlash();musicMuffle(false);
-  msg('Tienes el mando de la Estrella Madre','var(--shield)',2.2);sayAttendant('Atención, tripulación. El piloto tiene el mando de la Estrella Madre. Motores al máximo.');updHud();}
+  $('starMap').hidden=true;msg('Tienes el mando de la Estrella Madre','var(--shield)',2.2);setTimeout(()=>{if(S.state==='play')routeDepart();},1200);sayAttendant('Atención, tripulación. El piloto tiene el mando de la Estrella Madre. Motores al máximo.');updHud();}
 function motherToDeck(){if(!S.flyMother||!canAct())return;$('card').classList.remove('on');firing=false;beam.visible=false;const f=S.fuel;restoreSmallShip();ship.visible=false;S.motherDeck=true;enterMother(f);}
 function setPlayerShip(i){i=clamp(i,0,SHIPS.length-1);if(ship)scene.remove(ship);S.shipIdx=i;SHIP=SHIPS[i];ship=buildShip(SHIP);SHIPSC=.72;ship.scale.setScalar(.72);scene.add(ship);attachShipPod();
   shipCol=C(SHIP.glow);engineLight.color.set(SHIP.glow);shotCore=basic(new THREE.Color(SHIP.glow).lerp(C(0xffffff),.65));shotGlow=basic(SHIP.glow,{transparent:true,opacity:.38,blending:THREE.AdditiveBlending,depthWrite:false});
@@ -1507,7 +1535,7 @@ function updatePortLanding(dt){const LP=S.landPath;if(!LP)return;LP.t+=dt;const 
   dir.normalize();ship.position.copy(pos);ship.up.copy(LP.n);ship.lookAt(tmpV.copy(pos).sub(dir));
   camDes.copy(pos).addScaledVector(dir,-10).addScaledVector(LP.n,3.5);lookDes.copy(pos).addScaledVector(dir,8);
   if(t>6.6)$('flash').style.opacity=Math.min(1,(t-6.6)/.6);if(t>=7.2){S.landPath=null;openLanding();}}
-function openLanding(){S.landedHere=true;const H=LEVELS[S.lvl].home;
+function openLanding(){S.landedHere=true;routeDone('land');const H=LEVELS[S.lvl].home;
   S.hull=S.hullMax;S.shield=S.shieldMax;S.mis=Math.max(S.mis,14);S.bombs=Math.min(5+(PILOT.b.bombs||0),S.bombs+1);S.fuel=S.fuelMax;S.fuelWarn=S.fuelOut=false;
   removeLand();enterHangar('planet');fadeFlash();musicMuffle(true);say(H.greet,H.pitch,H.rate,null,H.race,'h'+S.lvl);}
 function takeoff(){try{if(hasSpeech)speechSynthesis.cancel();}catch(e){}
@@ -1885,28 +1913,28 @@ function msNearUI(){const n=MS.near,card=$('hgCard'),act=$('hgAct');if(!n||MS.ri
   else if(n==='med')set('Enfermería','Reparación',`Casco al ${Math.ceil(S.hull)} de ${S.hullMax}. Los médicos reparan tu nave y a tu piloto.`,'Reparar casco');
   else if(n==='ammo')set('Depósito de misiles','Munición',`Misiles: ${S.mis} · Bombas: ${S.bombs}.`,'Recargar misiles y bombas');
   else if(n==='helm')set('Timón de la Estrella Madre','Puente de mando','Pilota la nave nodriza: es muy rápida, dispara cañones de plasma y salvas de 4 misiles, y es la única que cruza los agujeros negros.','Tomar el timón');
-  else if(n==='cap')set('Capitana Orión','Comandante de la flota','La líder de la Estrella Madre. Habla con ella.','Hablar con la capitana');
-  else if(n==='map')set('Mapa holográfico',LEVELS[S.lvl].cat,`Estás en la galaxia ${LEVELS[S.lvl].name}. Has cruzado ${S.lvl} de ${LEVELS.length} portales.`,'Ver la ruta');}
+  else if(n==='cap')set('Capitana Orión','Comandante de la flota',S.route?`Rumbo fijado: ${S.route.name} (${LEVELS[S.route.l].name}).`:'Te muestra los planetas habitados y las zonas para bajar en cápsula de cada galaxia.','Mapa estelar · fijar rumbo');
+  else if(n==='map')set('Mapa holográfico',LEVELS[S.lvl].cat,`Estás en la galaxia ${LEVELS[S.lvl].name}. Has cruzado ${S.lvl} de ${LEVELS.length} portales.`,'Abrir mapa estelar');}
 function msAction(){if(!MS||MS.ride||MS.launch||S.state!=='mother')return;const n=MS.near;if(!n)return;
   if(n==='ship')msLaunch();
   else if(n==='helm')takeHelm();
   else if(n==='elev'){const up=MS.deck==='low';MS.ride={t:0,from:up?.2:MS.deckY,to:up?MS.deckY:.2,up};MS.deck='ride';msNearUI();say(up?'Subiendo al puente de mando.':'Bajando a la cubierta de vuelo.');if(actx&&!S.muted)tone('sine',300,up?600:200,1.2,.05);}
   else if(n==='med'){S.hull=S.hullMax;S.shield=S.shieldMax;S.poison=0;sfx('pick');say('Casco reparado.');for(let i=0;i<30;i++)MS.sparks.emit(MS.pilot.x,R(.5,3),MS.pilot.z,R(-3,3),R(0,4),R(-3,3),.7,COL.green);msNearUI();}
   else if(n==='ammo'){S.mis=20;S.bombs=5+(PILOT.b.bombs||0);sfx('pick');say('Misiles y bombas recargados.');msNearUI();}
-  else if(n==='cap')say('Bienvenido a la Estrella Madre, piloto. Solo esta nave puede cruzar los agujeros negros. Toma el timón aquí en el puente cuando quieras pilotarla.',1,1,null,'Capitana Orión','cap');
-  else if(n==='map'){MS.holo.userData.boost=3;say(`De vuelta en el universo ${LEVELS[S.lvl].de}.`);}}
-function msKey(k,e){if(!MS||MS.launch)return;if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();if(k==='e'||k==='enter'||k===' ')msAction();}
+  else if(n==='cap'){openStarMap();say('Elige el planeta y yo fijo el rumbo.',1,1,null,'Capitana Orión','cap');}
+  else if(n==='map'){MS.holo.userData.boost=3;openStarMap();}}
+function msKey(k,e){if(!MS||MS.launch)return;if(!$('starMap').hidden){if(k==='escape')$('smClose').click();return;}if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();if(k==='e'||k==='enter'||k===' ')msAction();}
 function msLaunch(){const pv=MS.pilot;pv.w.g.visible=false;for(let k=0;k<30;k++)MS.sparks.emit(pv.x,R(.5,2.5),pv.z,R(-3,3),R(0,4),R(-3,3),.6,C(PILOT.acc));
   MS.launch={t:0};S.state='mlaunch';$('hangarUI').hidden=true;$('touch').hidden=true;sfx('missile');sayAttendant('Compuerta de lanzamiento abierta. Buen viaje, piloto.');}
 function exitMother(){disposeScene(MS.sc);MS=null;$('hangarUI').hidden=true;$('touch').classList.remove('walk');$('joyhint').textContent='Arrastra aquí para volar';fadeFlash();musicMuffle(false);
   S.state='play';S.fuelWarn=S.fuel<S.fuelMax*.3;S.fuelOut=S.fuel<=0;if(S.mother)S.mother.cool=8;else if(S.motherDeck)spawnMother(true);S.motherDeck=false;P.x=0;P.y=1;P.vx=P.vy=0;S.inv=1.5;
   ship.visible=true;ship.up.set(0,1,0);ship.rotation.set(0,0,0);ship.scale.setScalar(.72);camBase.set(0,3.2,11);camLook.set(0,.6,-24);S.camBlend=60;$('hud').hidden=false;$('touch').hidden=!isTouch;
-  msg(S.fuel>=S.fuelMax-.5?'Tanque lleno':'Combustible al '+Math.floor(S.fuel/S.fuelMax*100)+'%','var(--shield)',1.6);updHud();}
+  msg(S.fuel>=S.fuelMax-.5?'Tanque lleno':'Combustible al '+Math.floor(S.fuel/S.fuelMax*100)+'%','var(--shield)',1.6);updHud();$('starMap').hidden=true;routeDepart();}
 const msTmp=new THREE.Vector3();
 function msUpdate(dt){const G=MS;G.t+=dt;const t=G.t,pv=G.pilot;
   /* llegada: la nave baja sobre la plataforma */
   if(G.landT<2.2){G.landT+=dt;const u=Math.min(1,G.landT/2),e=1-(1-u)**3;G.myShip.position.y=7-(7-1.7)*e;for(let i=0;i<3;i++)G.sparks.emit(MSPAD.x+R(-3,3),.4,MSPAD.z+R(-3,3),R(-6,6),R(0,2),R(-6,6),.5,COL.shield);
-    if(G.landT>=2.2){pv.w.g.visible=true;for(let k=0;k<30;k++)G.sparks.emit(pv.x,R(.5,2.5),pv.z,R(-3,3),R(0,4),R(-3,3),.6,C(PILOT.acc));sayAttendant('Bienvenido a bordo de la Estrella Madre. Carga de combustible iniciada.');}}
+    if(G.landT>=2.2){pv.w.g.visible=true;for(let k=0;k<30;k++)G.sparks.emit(pv.x,R(.5,2.5),pv.z,R(-3,3),R(0,4),R(-3,3),.6,C(PILOT.acc));sayAttendant('Bienvenido a bordo de la Estrella Madre. Carga de combustible iniciada.');G.auto=[[-8,33],[-14,40],[ELEV.x,ELEV.z]];G.autoStage='low';}}
   /* recarga */
   const charging=G.landT>=2.2&&S.fuel<S.fuelMax;
   if(charging){S.fuel=Math.min(S.fuelMax,S.fuel+S.fuelMax/14*dt);if(!G.said50&&S.fuel>=S.fuelMax*.5&&G.f0<S.fuelMax*.5){G.said50=true;sayAttendant('Carga de combustible al cincuenta por ciento.');}
@@ -1931,9 +1959,16 @@ function msUpdate(dt){const G=MS;G.t+=dt;const t=G.t,pv=G.pilot;
   if(G.ride){const R2=G.ride;R2.t+=dt;const u=Math.min(1,R2.t/2.6),e=u*u*(3-2*u),y=R2.from+(R2.to-R2.from)*e;G.plat.position.y=y;pv.y=y+.2;if(u>=1){G.deck=R2.up?'up':'low';G.ride=null;G.near=null;}}
   /* caminar */
   const L=G.launch;
-  if(!L&&!G.ride&&G.landT>=2.2){let ix=(keys.a||keys.arrowleft?-1:0)+(keys.d||keys.arrowright?1:0)+joy.x,iz=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0)+joy.y;const m=Math.hypot(ix,iz);if(m>1){ix/=m;iz/=m;}
-    const up=G.deck==='up';if(up){iz=-iz;ix=-ix;}
-    const moving=m>.08;if(moving){pv.x+=ix*10*dt;pv.z+=iz*10*dt;pv.face=Math.atan2(ix,iz);pv.ph+=dt*13;}
+  if(!L&&!G.ride&&G.landT>=2.2){let ix=(keys.a||keys.arrowleft?-1:0)+(keys.d||keys.arrowright?1:0)+joy.x,iz=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0)+joy.y;let m=Math.hypot(ix,iz);if(m>1){ix/=m;iz/=m;}
+    const up=G.deck==='up';
+    /* caminata automática hasta la capitana (si tocas los controles, la tomas tú) */
+    if(G.auto&&m>.25){G.auto=null;msg('Caminas tú','var(--dim)',.8);}
+    if(G.auto&&G.auto.length&&$('starMap').hidden){const wp=G.auto[0],dx=wp[0]-pv.x,dz=wp[1]-pv.z,dd=Math.hypot(dx,dz);
+      if(dd<.8){G.auto.shift();if(!G.auto.length){if(G.autoStage==='low'){G.near='elev';msAction();G.auto=[[-8,48.5],[6,52.4]];G.autoStage='up';}else{G.auto=null;pv.face=Math.atan2(8-pv.x,55.8-pv.z);G.near='cap';msNearUI();
+        say('Bienvenido a bordo, piloto. Elige el planeta y yo fijo el rumbo.',1,1,null,'Capitana Orión','cap');openStarMap();}}}
+      else{ix=dx/dd*.85;iz=dz/dd*.85;m=.85;if(up){ix=-ix;iz=-iz;}}}
+    if(up){iz=-iz;ix=-ix;}
+    const moving=m>.08;if(moving){pv.x+=ix*(G.auto?7:10)*dt;pv.z+=iz*10*dt;pv.face=Math.atan2(ix,iz);pv.ph+=dt*13;}
     if(up){pv.z=clamp(pv.z,44.8,60);pv.x=clamp(pv.x,pv.z<=50.2?-18.2:-11.2,19.5);pv.y=G.deckY;}
     else{pv.x=clamp(pv.x,-19.5,19.5);const lane=pv.x<-11.2;pv.z=clamp(pv.z,-57,lane?50.2:40);if(pv.z>40.2&&pv.x>-11.2)pv.x=-11.2;pv.y=0;
       for(const o of G.fleet.concat([{x:MSPAD.x,z:MSPAD.z,r:6.3},{x:8.5,z:MSPAD.z+2,r:2.4}])){const r=o.r||4.6,dx=pv.x-o.x,dz=pv.z-o.z,dd=Math.hypot(dx,dz);if(dd<r&&dd>.001){pv.x=o.x+dx/dd*r;pv.z=o.z+dz/dd*r;}}}
@@ -2303,7 +2338,7 @@ function exitExplore(){if(!EX)return;const G=EX,done=G.done,l=G.l;disposeScene(G
   say(done?'Cápsula acoplada. Buen trabajo, explorador.':'Cápsula acoplada. Puedes volver a intentarlo más tarde.');updHud();}
 /* la cápsula se suelta de la nave y baja al lugar */
 function startPod(){if(!S.site||S.state!=='play'||S.flyMother||S.paused)return;if(S.site.dist>S.site.r+280)return;
-  S.state='poddrop';S.podT=0;firing=false;setPodUI(false);setLandUI(null);setDockUI(false);setShipPod(false);
+  routeDone('site');S.state='poddrop';S.podT=0;firing=false;setPodUI(false);setLandUI(null);setDockUI(false);setShipPod(false);
   const pg=buildPod(new THREE.Color(LEVELS[S.lvl].accent).getHex());pg.scale.setScalar(.32);pg.position.set(P.x,P.y-.7,0);pg.userData.flame.visible=true;scene.add(pg);S.podObj=pg;
   msg('Cápsula desacoplada','var(--accent)',1.6);say('Cápsula de aterrizaje desacoplada. Descenso iniciado.');}
 function podDropUpdate(dt){S.podT+=dt;const pg=S.podObj,t=S.podT;if(!pg||!S.site){enterExplore();return;}
@@ -2484,6 +2519,35 @@ addEventListener('message',e=>{const d=e.data;if(d&&typeof d==='object'&&d.tipo=
 
 /* ---------- SALA DE PILOTOS ---------- */
 let pendingLvl=0,badgeT=0;
+/* ---------- MAPA ESTELAR Y RUMBO ---------- */
+const MIS_CORTO={muestras:'recoger muestras',balizas:'encender balizas',rescate:'rescate de astronautas',carrera:'carrera de rover',meteoros:'lluvia de meteoritos'};
+let smBtns=[];function openStarMap(){const box=$('smList');box.innerHTML='';smBtns=[];
+  LEVELS.forEach((L,l)=>{const locked=l>maxReached,here=l===S.lvl,E=EXPLORE[l];const d=document.createElement('div');d.className='smGal'+(here?' here':'')+(locked?' locked':'');
+    d.innerHTML=`<div class="smHead"><span class="num">${String(l+1).padStart(2,'0')}</span><b>${L.name}</b><span class="lbl">${L.cat}</span>${here?'<span class="tagHere">Estás aquí</span>':''}${locked?'<span class="lbl">🔒 Cruza su agujero negro para desbloquearla</span>':''}</div>`;
+    const row=document.createElement('div');row.className='smDest';
+    const mk=(kind,name,sub,col)=>{const b=document.createElement('button');b.className='smBtn'+(S.route&&S.route.l===l&&S.route.kind===kind?' sel':'');b.disabled=locked;b.dataset.l=l;b.dataset.k=kind;
+      smBtns.push(b);b.innerHTML=`<span class="ico" style="background:radial-gradient(circle at 35% 35%,#fff8,transparent 45%),${col}"></span><b>${name}</b><small>${sub}</small>`;row.appendChild(b);};
+    const pc=L.planets&&L.planets[0]?L.planets[0][0]||L.accent:L.accent;
+    mk('land',L.home.planet.charAt(0).toUpperCase()+L.home.planet.slice(1),'Planeta habitado · aeropuerto, ciudad y hangar',typeof pc==='string'?pc:'#5dffa8');
+    mk('site',E.n,E.k+' · bajar en cápsula · '+MIS_CORTO[siteMission(l)],E.gr);
+    d.appendChild(row);box.appendChild(d);});
+  smRouteUI();$('starMap').hidden=false;}
+function smRouteUI(){const r=S.route,el=$('smRoute');el.hidden=!r;$('smClear').hidden=!r;if(r)el.textContent=`Rumbo fijado: ${r.name} · galaxia ${LEVELS[r.l].name}`+(r.l!==S.lvl?' · salto al hiperespacio al despegar':'');
+  for(const b of smBtns)b.classList.toggle('sel',!!r&&+b.dataset.l===r.l&&b.dataset.k===r.kind);}
+function setRoute(l,kind){if(l>maxReached)return;const L=LEVELS[l];S.route={l,kind,name:kind==='land'?L.home.planet.charAt(0).toUpperCase()+L.home.planet.slice(1):EXPLORE[l].n};smRouteUI();if(actx&&!S.muted)tone('sine',500,900,.12,.06);
+  say(l!==S.lvl?'Rumbo fijado. Haremos un salto al hiperespacio hasta esa galaxia cuando despegues.':'Rumbo fijado. Cuando despegues, el piloto automático te llevará hasta allá.',1,1,null,'Capitana Orión','cap');}
+/* al despegar desde la nave nodriza */
+function routeDepart(){const r=S.route;if(!r)return;if(r.l!==S.lvl){hyperJump(r.l);return;}routeSpawn();}
+function hyperJump(l){S.state='warp';S.warpT=0;S.warpSwapped=false;S.warpTo=l;sfx('warp');firing=false;beam.visible=false;$('touch').hidden=true;setLandUI(null);setDockUI(false);setPodUI(false);
+  msg('Salto al hiperespacio','#ffd23f',1.6);say('Salto al hiperespacio. Sujétate, piloto.');}
+function routeSpawn(){const r=S.route;if(!r||r.l!==S.lvl)return;let o=null;
+  if(r.kind==='land'){S.landedHere=false;if(!S.land)spawnLandPlanet();o=S.land.o;}else{if(!S.site)spawnSite();o=S.site.o;}
+  o.position.copy(farDir(Math.random()<.5?-1:1,620,.05,.45));r.obj=o;msg('Rumbo a '+r.name,'#ffd23f',2.2);}
+function routeTarget(){const r=S.route;if(!r||r.l!==S.lvl||!r.obj)return null;const ok=(r.kind==='land'&&S.land&&S.land.o===r.obj)||(r.kind==='site'&&S.site&&S.site.o===r.obj);if(!ok){S.route=null;return null;}return r.obj.position;}
+function routeDone(kind){if(S.route&&S.route.kind===kind&&S.route.l===S.lvl){S.route=null;}}
+$('smList').addEventListener('click',e=>{const b=e.target.closest('.smBtn');if(!b||b.disabled)return;setRoute(+b.dataset.l,b.dataset.k);});
+$('smClose').onclick=()=>{$('starMap').hidden=true;if(MS&&S.state==='mother'){MS.mapShown=true;msNearUI();}};
+$('smClear').onclick=()=>{S.route=null;smRouteUI();};
 function openPilotSel(lvl){pendingLvl=lvl;initAudio();$('menu').hidden=true;const box=$('pilots');box.innerHTML='';
   PILOTS.forEach((pl,i)=>{const b=document.createElement('button');b.className='pcard'+(i===savedPilot?' sel':'');b.dataset.i=i;const im=document.createElement('img');im.src=pl.img;im.alt='';im.loading='lazy';b.appendChild(im);
     b.insertAdjacentHTML('beforeend',`<span class="pn">${pl.name}</span><span class="lbl">${pl.from}</span><span class="pb">${pl.bonus}</span>`);box.appendChild(b);});
@@ -2821,6 +2885,7 @@ function drawNav(){const W=navC.clientWidth||innerWidth,H=navC.clientHeight||inn
   if(S.land&&!S.landedHere)items.push([S.land.o.position,'#5dffa8',LEVELS[S.lvl].home.planet,1]);
   if(S.mother)items.push([S.mother.o.position,'#6fb8ff','Nave nodriza',1]);
   if(S.site)items.push([S.site.o.position,'#c58bff',EXPLORE[S.lvl].n,1]);
+  {const rp=routeTarget();if(rp){const it=items.find(i=>i[0]===rp);if(it){it[1]='#ffd23f';it[2]='RUMBO · '+it[2];}}}
   if(S.boss&&S.boss.alive)items.push([S.boss.o.position,'#ff5a4a',S.boss.B.name,1]);
   const m=small?38:52,top=small?150:120,bot=small?190:96;
   for(const [p,c,name] of items){tmpV.copy(p).project(camera);const behind=tmpV.z>1;let dx=tmpV.x*W/2,dy=-tmpV.y*H/2;if(behind){dx=-dx;dy=-dy;if(Math.abs(dx)+Math.abs(dy)<1)dy=1;}
@@ -2858,8 +2923,8 @@ function update(dt){const L=LEVELS[S.lvl];S.time+=dt;const T=S.time;const playin
     const trn=(1.05+ag*.012)*(S.fuel<=0?.6:1),kt=Math.min(1,dt*4.5);FLY.yr+=(ix*trn-FLY.yr)*kt;FLY.pr+=(iy*trn*.85-FLY.pr)*kt;
     let yaw=FLY.yr*dt,pitch=-FLY.pr*dt;
     if(L.hazards.includes('pull')){S.pull=Math.sin(T*.42)*11;yaw+=S.pull*.02*dt;}else S.pull=0;
-    const tgt=S.bh&&S.flyMother?S.bh.o.position:(S.autoBrake&&S.land?S.land.o.position:null);
-    if(tgt){const d=tgt.length(),f=S.bh?Math.max(0,1-d/380)*1.7:1.3;if(f>0){yaw+=clamp(Math.atan2(tgt.x,-tgt.z),-1,1)*f*dt;pitch-=clamp(Math.atan2(tgt.y-1.5,Math.hypot(tgt.x,tgt.z)),-1,1)*f*dt;}}
+    const rt=(Math.abs(ix)+Math.abs(iy)<.1)?routeTarget():null;const tgt=S.bh&&S.flyMother?S.bh.o.position:(S.autoBrake&&S.land?S.land.o.position:rt);
+    if(tgt){const d=tgt.length(),f=tgt===rt?.9:S.bh?Math.max(0,1-d/380)*1.7:1.3;if(f>0){yaw+=clamp(Math.atan2(tgt.x,-tgt.z),-1,1)*f*dt;pitch-=clamp(Math.atan2(tgt.y-1.5,Math.hypot(tgt.x,tgt.z)),-1,1)*f*dt;}}
     if(S.state==='play')worldTurn(yaw,pitch);
     P.x+=(ix*3.2-P.x)*Math.min(1,dt*2.5);P.y+=(1+iy*1.6-P.y)*Math.min(1,dt*2.5);
     S.inv=Math.max(0,S.inv-dt);S.fireCd-=dt;S.misCd-=dt;
@@ -3044,8 +3109,8 @@ function update(dt){const L=LEVELS[S.lvl];S.time+=dt;const T=S.time;const playin
   /* viaje por el portal */
   if(S.state==='warp'){S.warpT+=dt;const w=S.warpT;const fl=$('flash');
     if(w<1.6)fl.style.opacity=Math.max(0,(w-1.1)/.5);else fl.style.opacity=Math.max(0,1-(w-1.6)/1.2);
-    if(w>=1.6&&!S.warpSwapped){S.warpSwapped=true;if(S.lvl>=LEVELS.length-1){fl.style.opacity=0;clearWorld();winGame();return;}
-      S.hull=Math.min(S.hullMax,S.hull+30);S.bombs=Math.min(5,S.bombs+1);S.fuel=Math.min(S.fuelMax,S.fuel+20);setupLevel(S.lvl+1);fl.style.opacity=1;startMusic(S.lvl);
+    if(w>=1.6&&!S.warpSwapped){S.warpSwapped=true;const jump=S.warpTo!=null;if(!jump&&S.lvl>=LEVELS.length-1){fl.style.opacity=0;clearWorld();winGame();return;}
+      S.hull=Math.min(S.hullMax,S.hull+30);S.bombs=Math.min(5,S.bombs+1);S.fuel=Math.min(S.fuelMax,S.fuel+20);setupLevel(jump?S.warpTo:S.lvl+1);S.warpTo=null;fl.style.opacity=1;startMusic(S.lvl);if(jump){if(!S.flyMother)spawnMother(true);routeSpawn();}
       const NL=LEVELS[S.lvl];sayAttendant(`Atención, pasajeros. Entraste al universo ${NL.de}.`+(SHIPS.some(x=>x.unlock===S.lvl)?` Una nueva nave los espera en el puerto de ${NL.home.planet}.`:' Gracias por volar con nosotros.'));}
     if(w>=3.2){fl.style.opacity=0;ship.scale.setScalar(SHIPSC);ship.rotation.set(0,0,0);$('touch').hidden=!isTouch;showCard();}}
   if(S.state==='intro'){S.introT-=dt;if(S.introT<=0){S.state='play';$('card').classList.remove('on');}}
