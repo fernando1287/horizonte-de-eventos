@@ -12,3 +12,8 @@ Archivos:
 Para publicarlo: sube esta carpeta a un repositorio de GitHub y activa GitHub Pages
 (Settings → Pages → Branch: main, carpeta / (root)). Abre el enlace en el teléfono y elige
 "Instalar app" o "Agregar a pantalla de inicio".
+
+## Instalar en el teléfono
+
+- **Android (Chrome):** abre https://fernando1287.github.io/horizonte-de-eventos/ en Chrome y toca **📲 Instalar app** en el menú del juego, o el menú ⋮ → **Agregar a la pantalla principal**.
+- **iPhone (Safari):** botón Compartir → **Agregar a inicio**.
