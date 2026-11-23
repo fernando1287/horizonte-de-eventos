@@ -240,6 +240,7 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
 .pcard.sel{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
 .pcard .pb{font-size:12px;color:var(--good);line-height:1.3}
 .pcard .pn{font-weight:700;font-size:15px}
+.pcard .pp{font:600 11px var(--f-mono);color:var(--dim)}.pcard .pp.on{color:#ffd23f}
 .pcard:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 #fightUI{position:fixed;inset:0;pointer-events:none}
 .fTop{position:absolute;top:0;left:0;right:0;padding-top:calc(env(safe-area-inset-top,0px) + 10px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:12px;align-items:start;background:linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,0));padding-bottom:20px}
@@ -319,6 +320,13 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
 #pilotBadge .lbl{font-size:7px;letter-spacing:.16em}
 #pilotBadge b{font-size:10px;text-align:center;text-shadow:0 1px 6px #000;max-width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .top .gal,#hangarUI .hgTop,#cityUI .hgTop,#exUI .hgTop{padding-left:66px}
+#enemyComm{position:fixed;z-index:6;right:max(12px,env(safe-area-inset-right,0px));top:calc(env(safe-area-inset-top,0px) + 150px);width:min(330px,calc(100% - 24px));display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:center;padding:10px;border-radius:14px;background:rgba(20,4,10,.86);border:1px solid #ff4d6d;box-shadow:0 0 22px rgba(255,60,90,.35);pointer-events:none;animation:ecIn .35s ease-out}
+@keyframes ecIn{from{opacity:0;transform:translateX(30px)}}
+@media (max-width:600px){#enemyComm{top:calc(env(safe-area-inset-top,0px) + 268px)}}
+#enemyComm img{width:72px;height:72px;border-radius:10px;object-fit:cover;border:2px solid #ff4d6d}
+#enemyComm .lbl{color:#ff8aa0;font-size:9px}
+#enemyComm b{display:block;font-size:17px;color:#fff;letter-spacing:.04em}
+#enemyComm p{margin:2px 0 0;font-size:12px;line-height:1.35;color:#ffd8e0}
 #card{position:fixed;left:0;right:0;top:24%;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;pointer-events:none;opacity:0;transition:opacity .5s;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 #card.on{opacity:1}
 #cardNum{font:500 13px var(--f-mono);letter-spacing:.3em;color:var(--accent)}
@@ -409,6 +417,8 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
 </div>
 
 <div id="pilotBadge" hidden><img id="pbImg" alt=""><div><span class="lbl">Piloto</span><b id="pbName"></b><span id="pbFac"></span></div></div>
+
+<div id="enemyComm" hidden><img id="ecImg" alt=""><div><span class="lbl" id="ecFac">Transmisión enemiga</span><b id="ecName"></b><p id="ecTxt"></p></div></div>
 
 <div id="card"><div id="cardNum">GALAXIA 01</div><div id="cardName">Vía Láctea</div><div id="cardSub"></div><div id="cardGoal"></div><div id="cardShip"></div></div>
 
@@ -690,10 +700,45 @@ const PILOTS=[
  {name:'Rhaz Kor',img:'pilots/rhaz-kor.jpg',from:'Brasa Real',bonus:'+15% blindaje',b:{hull:.15},look:{type:'alien',skin:'#b0905a',eye:'#40e0ff',head:'wide',eyes:2,bg:'#2a2010',mark:'#ffe0a0'},acc:0x40e0ff},
  {name:'Soraya IX',img:'pilots/soraya-ix.jpg',from:'Verdania',bonus:'+12% agilidad',b:{agil:.12},look:{type:'alien',skin:'#5a9a4a',eye:'#ffb020',head:'round',eyes:2,bg:'#0a2a10',mark:'#e0ffd0'},acc:0xffb020},
  {name:'Nem Vor',img:'pilots/nem-vor.jpg',from:'Glaciar Blanco',bonus:'+2 bombas extra',b:{bombs:2},look:{type:'alien',skin:'#7a8aa8',eye:'#e0e8ff',head:'wide',eyes:2,bg:'#141c2a',mark:'#e0e8ff',tentacles:true},acc:0xa0c0ff}];
+/* guerreros dragón del Imperio Umbra */
+const UPILOTS=[
+ {name:'Varkul',img:'pilots/u-varkul.jpg',from:'Trono Umbra · Imperio Umbra',bonus:'+30% fuerza en la arena',b:{fight:.3,dmg:.06},look:{type:'alien',skin:'#a02a24',eye:'#ffc040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffc040'},acc:0xffc040},
+ {name:'Zhessa',img:'pilots/u-zhessa.jpg',from:'Forja Escarlata · Imperio Umbra',bonus:'+18% agilidad',b:{agil:.18},look:{type:'alien',skin:'#2a8a7a',eye:'#ffe060',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffe060'},acc:0xffe060},
+ {name:'Drakth',img:'pilots/u-drakth.jpg',from:'Abismo de Ceniza · Imperio Umbra',bonus:'Escudo 40% más rápido',b:{regen:.4},look:{type:'alien',skin:'#d8d4c8',eye:'#40c0ff',head:'wide',eyes:2,bg:'#1a0a10',mark:'#40c0ff'},acc:0x40c0ff},
+ {name:'Razhik',img:'pilots/u-razhik.jpg',from:'Nido de Hierro · Imperio Umbra',bonus:'+25% blindaje',b:{hull:.25},look:{type:'alien',skin:'#3a7a3a',eye:'#ffd040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffd040'},acc:0xffd040},
+ {name:'Kthor',img:'pilots/u-kthor.jpg',from:'Volcán Negro · Imperio Umbra',bonus:'+15% daño del arma',b:{dmg:.15},look:{type:'alien',skin:'#2a2030',eye:'#c040ff',head:'wide',eyes:2,bg:'#1a0a10',mark:'#c040ff'},acc:0xc040ff},
+ {name:'Morgax',img:'pilots/u-morgax.jpg',from:'Trono Umbra · Imperio Umbra',bonus:'+15% blindaje',b:{hull:.15},look:{type:'alien',skin:'#a06a40',eye:'#ffb040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb040'},acc:0xffb040},
+ {name:'Sirak',img:'pilots/u-sirak.jpg',from:'Forja Escarlata · Imperio Umbra',bonus:'+12% agilidad',b:{agil:.12},look:{type:'alien',skin:'#2a4aa0',eye:'#ffc040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffc040'},acc:0xffc040},
+ {name:'Thulvex',img:'pilots/u-thulvex.jpg',from:'Abismo de Ceniza · Imperio Umbra',bonus:'35% menos combustible',b:{fuel:.35},look:{type:'alien',skin:'#3a7a68',eye:'#ffb040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb040'},acc:0xffb040},
+ {name:'Ulkara',img:'pilots/u-ulkara.jpg',from:'Nido de Hierro · Imperio Umbra',bonus:'+25% daño de misiles',b:{mis:.25},look:{type:'alien',skin:'#6a3a9a',eye:'#ffb020',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb020'},acc:0xffb020},
+ {name:'Xeroth',img:'pilots/u-xeroth.jpg',from:'Volcán Negro · Imperio Umbra',bonus:'+2 bombas extra',b:{bombs:2},look:{type:'alien',skin:'#c8a060',eye:'#ff8040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ff8040'},acc:0xff8040},
+ {name:'Kraz Vor',img:'pilots/u-kraz-vor.jpg',from:'Trono Umbra · Imperio Umbra',bonus:'+15% daño del arma',b:{dmg:.15},look:{type:'alien',skin:'#d8c8a8',eye:'#ff3030',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ff3030'},acc:0xff3030},
+ {name:'Nyxar',img:'pilots/u-nyxar.jpg',from:'Forja Escarlata · Imperio Umbra',bonus:'+18% agilidad',b:{agil:.18},look:{type:'alien',skin:'#2a40b0',eye:'#ffb020',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb020'},acc:0xffb020},
+ {name:'Gravok',img:'pilots/u-gravok.jpg',from:'Abismo de Ceniza · Imperio Umbra',bonus:'+25% blindaje',b:{hull:.25},look:{type:'alien',skin:'#8a6040',eye:'#ffb040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb040'},acc:0xffb040},
+ {name:'Veskara',img:'pilots/u-veskara.jpg',from:'Nido de Hierro · Imperio Umbra',bonus:'Escudo 40% más rápido',b:{regen:.4},look:{type:'alien',skin:'#b8a0d8',eye:'#ffc040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffc040'},acc:0xffc040},
+ {name:'Thrak',img:'pilots/u-thrak.jpg',from:'Volcán Negro · Imperio Umbra',bonus:'+30% fuerza en la arena',b:{fight:.3,dmg:.06},look:{type:'alien',skin:'#4a7a3a',eye:'#ffd040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffd040'},acc:0xffd040},
+ {name:'Ommul',img:'pilots/u-ommul.jpg',from:'Trono Umbra · Imperio Umbra',bonus:'+25% daño de misiles',b:{mis:.25},look:{type:'alien',skin:'#3a2a48',eye:'#c060ff',head:'wide',eyes:2,bg:'#1a0a10',mark:'#c060ff'},acc:0xc060ff},
+ {name:'Reth Ix',img:'pilots/u-reth-ix.jpg',from:'Forja Escarlata · Imperio Umbra',bonus:'+15% blindaje',b:{hull:.15},look:{type:'alien',skin:'#a05a30',eye:'#ffb040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb040'},acc:0xffb040},
+ {name:'Zorvex',img:'pilots/u-zorvex.jpg',from:'Abismo de Ceniza · Imperio Umbra',bonus:'+12% agilidad',b:{agil:.12},look:{type:'alien',skin:'#a0a040',eye:'#ffff40',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffff40'},acc:0xffff40},
+ {name:'Keldra',img:'pilots/u-keldra.jpg',from:'Nido de Hierro · Imperio Umbra',bonus:'35% menos combustible',b:{fuel:.35},look:{type:'alien',skin:'#4a5a8a',eye:'#ffb040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb040'},acc:0xffb040},
+ {name:'Morth',img:'pilots/u-morth.jpg',from:'Volcán Negro · Imperio Umbra',bonus:'+30% fuerza en la arena',b:{fight:.3,dmg:.06},look:{type:'alien',skin:'#a02a2a',eye:'#ffd040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffd040'},acc:0xffd040},
+ {name:'Sulketh',img:'pilots/u-sulketh.jpg',from:'Trono Umbra · Imperio Umbra',bonus:'Escudo 40% más rápido',b:{regen:.4},look:{type:'alien',skin:'#8a9098',eye:'#ffb040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb040'},acc:0xffb040},
+ {name:'Aurkon',img:'pilots/u-aurkon.jpg',from:'Forja Escarlata · Imperio Umbra',bonus:'+2 bombas extra',b:{bombs:2},look:{type:'alien',skin:'#d8a840',eye:'#ffb040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb040'},acc:0xffb040},
+ {name:'Vyrak',img:'pilots/u-vyrak.jpg',from:'Abismo de Ceniza · Imperio Umbra',bonus:'+18% agilidad',b:{agil:.18},look:{type:'alien',skin:'#2a9a9a',eye:'#ffb020',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb020'},acc:0xffb020},
+ {name:'Drazha',img:'pilots/u-drazha.jpg',from:'Nido de Hierro · Imperio Umbra',bonus:'+25% blindaje',b:{hull:.25},look:{type:'alien',skin:'#5a6a2a',eye:'#ffd040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffd040'},acc:0xffd040},
+ {name:'Korrum',img:'pilots/u-korrum.jpg',from:'Volcán Negro · Imperio Umbra',bonus:'+15% daño del arma',b:{dmg:.15},look:{type:'alien',skin:'#c06a2a',eye:'#ffd040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffd040'},acc:0xffd040},
+ {name:'Ythril',img:'pilots/u-ythril.jpg',from:'Trono Umbra · Imperio Umbra',bonus:'+25% daño de misiles',b:{mis:.25},look:{type:'alien',skin:'#7a4ab0',eye:'#ffb020',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb020'},acc:0xffb020},
+ {name:'Xal Vek',img:'pilots/u-xal-vek.jpg',from:'Forja Escarlata · Imperio Umbra',bonus:'35% menos combustible',b:{fuel:.35},look:{type:'alien',skin:'#c8b090',eye:'#40a0ff',head:'wide',eyes:2,bg:'#1a0a10',mark:'#40a0ff'},acc:0x40a0ff},
+ {name:'Jhezza',img:'pilots/u-jhezza.jpg',from:'Abismo de Ceniza · Imperio Umbra',bonus:'+12% agilidad',b:{agil:.12},look:{type:'alien',skin:'#3ab0b8',eye:'#ffb040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb040'},acc:0xffb040},
+ {name:'Vorlath',img:'pilots/u-vorlath.jpg',from:'Nido de Hierro · Imperio Umbra',bonus:'+30% fuerza en la arena',b:{fight:.3,dmg:.06},look:{type:'alien',skin:'#202024',eye:'#80ff40',head:'wide',eyes:2,bg:'#1a0a10',mark:'#80ff40'},acc:0x80ff40},
+ {name:'Thulrak',img:'pilots/u-thulrak.jpg',from:'Volcán Negro · Imperio Umbra',bonus:'+15% blindaje',b:{hull:.15},look:{type:'alien',skin:'#c86a80',eye:'#ffb040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb040'},acc:0xffb040}];
 let PILOT=PILOTS[0];
+function pilotList(f){return (f||FACTION)==='umbra'?UPILOTS:PILOTS;}
+function enemyList(){return FACTION==='umbra'?PILOTS:UPILOTS;}
+function pickEnemy(){return pick(enemyList());}
 function pilotBadgeUI(){const b=$('pilotBadge');if(!b)return;const show=S.state!=='menu'&&S.state!=='arena'&&S.state!=='carrera'&&$('pilotSel').hidden&&$('menu').hidden;
   if(show&&b.dataset.n!==PILOT.name+FACTION){b.dataset.n=PILOT.name+FACTION;const fe=$('pbFac');fe.textContent=FACTIONS[FACTION].short;fe.style.color=FACTIONS[FACTION].col;$('pbImg').src=PILOT.img;$('pbName').textContent=PILOT.name;b.style.setProperty('--accent','#'+new THREE.Color(PILOT.acc).getHexString());}b.hidden=!show;}
-function drawPilotPhoto(c){const x=c.getContext('2d');drawPortrait(c,PILOT.look);if(typeof Image==='undefined')return;const im=new Image();im.onload=()=>{x.clearRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);};im.src=PILOT.img;}
+function drawPilotPhoto(c,W){W=W||PILOT;const x=c.getContext('2d');drawPortrait(c,W.look);if(typeof Image==='undefined')return;const im=new Image();im.onload=()=>{x.clearRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);};im.src=W.img;}
 const DRAGONS={G:{body:0x2f8a3a,belly:0x9adf6a,eye:0xffe040,breath:'poison'},F:{body:0xb02a10,belly:0xffb040,eye:0xffff80,breath:'fire'},W:{body:0xdfe8ff,belly:0xa8c8ff,eye:0x40a0ff,breath:'ice'}};
 /* ---------- MISILES (se montan en las naves desde la armería del hangar) ---------- */
 const MISSILES=[
@@ -920,7 +965,7 @@ function attachMissiles(g,d,type){const old=g.getObjectByName('mounts');if(old)g
   for(const s of [-1,1]){const py=new THREE.Mesh(geo('pylon',()=>new THREE.BoxGeometry(.12,.3,.7)),geo('pylonM',()=>stdMat(0x2a3040)));py.position.set(s*x,-.32,.2);m.add(py);
     const ms=buildMissileModel(type);ms.position.set(s*x,-.58,.1);ms.userData.side=s;m.add(ms);}
   g.add(m);}
-function setMissileType(i){S.misType=clamp(i,0,MISSILES.length-1);if(ship)attachMissiles(ship,SHIP,S.misType);savedMis=S.misType;try{localStorage.setItem('hde_mis',String(S.misType));}catch(_){}
+function setMissileType(i){S.misType=clamp(i,0,MISSILES.length-1);if(ship)attachMissiles(ship,SHIP,S.misType);savedMis=S.misType;try{localStorage.setItem('hde_mis',String(S.misType));saveProf();}catch(_){}
   $('cMisName').textContent=MISSILES[S.misType].name;$('tMisT').textContent=MISSILES[S.misType].short;}
 
 /* ---------- ENEMY BUILDERS ---------- */
@@ -998,7 +1043,16 @@ const S={state:'menu',lvl:0,score:0,hull:100,hullMax:100,shield:0,shieldMax:0,la
 const P={x:0,y:0,vx:0,vy:0};
 let clouds=[];
 let vortices=[],shots=[],missiles=[],bombs=[],ebul=[],enemies=[],rocks=[],mines=[],pickups=[],planets=[],bigstars=[],flashes=[],shocks=[],bolts=[];
-let maxReached=0,savedShip=0,savedMis=0,savedPilot=0,savedCry=0;
+let maxReached=0,savedShip=0,savedMis=0,savedPilot=0,savedPilotU=0,savedCry=0;try{savedPilotU=parseInt(localStorage.getItem('hde_pilot_u')||'0',10)||0;}catch(_){}
+function selIdx(){return FACTION==='umbra'?savedPilotU:savedPilot;}
+/* cada piloto tiene su propio progreso: galaxias, naves, misiles, cristales y exploraciones */
+let profKey=null;
+function pKey(f,i){return 'hde_prof_'+f+'_'+i;}
+function readProf(f,i){try{const j=JSON.parse(localStorage.getItem(pKey(f,i))||'null');if(j)return j;}catch(_){}return null;}
+function saveProf(){if(!profKey)return;try{localStorage.setItem(profKey,JSON.stringify({max:maxReached,ship:savedShip,mis:savedMis,cry:savedCry,sites:typeof siteCount!=='undefined'?siteCount:[]}));}catch(_){}}
+function loadProf(f,i){profKey=pKey(f,i);const j=readProf(f,i)||{max:0,ship:0,mis:0,cry:0,sites:[]};maxReached=Math.min(14,j.max|0);savedShip=j.ship|0;savedMis=j.mis|0;savedCry=j.cry|0;siteCount=Array.isArray(j.sites)?j.sites:[];
+  try{localStorage.setItem('hde_max',String(maxReached));localStorage.setItem('hde_ship',String(savedShip));localStorage.setItem('hde_mis',String(savedMis));localStorage.setItem('hde_cry',String(savedCry));localStorage.setItem('hde_sites',JSON.stringify(siteCount));}catch(_){}
+  saveProf();}
 try{maxReached=Math.min(14,parseInt(localStorage.getItem('hde_max')||'0',10)||0);savedCry=parseInt(localStorage.getItem('hde_cry')||'0',10)||0;savedPilot=parseInt(localStorage.getItem('hde_pilot')||'0',10)||0;savedShip=parseInt(localStorage.getItem('hde_ship')||'0',10)||0;savedMis=parseInt(localStorage.getItem('hde_mis')||'0',10)||0;}catch(e){}
 
 /* ---------- PLAYER SHIP ---------- */
@@ -1378,20 +1432,22 @@ function damage(t,dmg){if(!t.alive)return;t.hp-=dmg;
   else if(t.kind==='mine'){t.alive=false;const p=t.o.position;explosion(p.x,p.y,p.z,1.8,COL.red);S.score+=80*ptsMul();sfx('small');}
   else if(t.kind==='boss'){t.flash=.06;if(t.hp<=0)killBoss();}
   else if(t.kind==='rival'){t.flash=.06;if(Math.random()<.3){const p=t.o.position;sparks.emit(p.x*(1-40/Math.max(t.dist,41)),p.y,p.z*(1-40/Math.max(t.dist,41)),R(-6,6),R(-6,6),R(-6,6),.5,C(0xffd080));}if(t.hp<=0)killRival();}}
+const EC_TXT=['Esta galaxia ya es nuestra. Ríndete, piloto.','Mi flota te hará polvo de estrellas.','Ninguna nave escapa de mí.','Has entrado en territorio enemigo. Prepárate.','Tu facción caerá esta noche.'];
+let ecT=0;function enemyComm(W,txt,sec){$('ecImg').src=W.img;$('ecName').textContent='Comandante '+W.name;$('ecFac').textContent='Transmisión · '+(FACTION==='umbra'?'Alianza Estelar':'Imperio Umbra');$('ecTxt').textContent=txt;$('enemyComm').hidden=false;ecT=sec||6;}
 function spawnRival(){const mc=rivalMC();const b=buildMother(false,mc,true);const sd=Math.random()<.5?-1:1;b.g.position.copy(farDir(sd,1050,.2,1.2));scene.add(b.g);b.beamT.visible=false;
-  const hp=900+S.lvl*140;S.rival={o:b.g,blink:b.blink,mc,hp,max:hp,r:42,alive:true,kind:'rival',launchT:4,fireT:3,launched:0,flash:0,told:false,dist:1050};
-  msg('¡Alerta! Nave nodriza enemiga: '+mc.name,'var(--danger)',2.8);say('Alerta. Nave nodriza enemiga detectada. Destrúyela antes de que lance a su flota.');}
+  const hp=900+S.lvl*140;const cmd=pickEnemy();S.rival={o:b.g,blink:b.blink,mc,cmd,hp,max:hp,r:42,alive:true,kind:'rival',launchT:4,fireT:3,launched:0,flash:0,told:false,dist:1050};
+  msg('¡Alerta! Nave nodriza enemiga: '+mc.name,'var(--danger)',2.8);enemyComm(cmd,pick(EC_TXT),7);say('Alerta. Nave nodriza enemiga detectada. Destrúyela antes de que lance a su flota.');}
 function killRival(){const R0=S.rival;if(!R0)return;R0.alive=false;const p=R0.o.position;for(let k=0;k<8;k++)setTimeout(()=>{if(!R0.o.parent)return;explosion(p.x+R(-30,30),p.y+R(-15,15),p.z+R(-30,30),4,new THREE.Color(R0.mc.glow));sfx('boom');S.shake=1;},k*180);
   setTimeout(()=>{scene.remove(R0.o);disposeScene(R0.o);},1700);S.score+=6000*ptsMul();addCry(10);S.rival=null;S.rivalCool=110;$('bossbar').hidden=!(S.boss&&S.boss.alive);
-  msg('¡Nave nodriza enemiga destruida! +10 cristales','var(--good)',3);say('Nave nodriza enemiga destruida. Gran victoria para tu facción.');}
-function rivalUpdate(dt,spd,playing){if(S.state==='play'&&!S.rival&&!S.bh){S.rivalCool=(S.rivalCool==null?45:S.rivalCool)-dt;if(S.rivalCool<=0)spawnRival();}
+  msg('¡Nave nodriza enemiga destruida! +10 cristales','var(--good)',3);enemyComm(R0.cmd,'¡Imposible! Retirada… esto no ha terminado.',4);say('Nave nodriza enemiga destruida. Gran victoria para tu facción.');}
+function rivalUpdate(dt,spd,playing){if(ecT>0){ecT-=dt;if(ecT<=0||S.state!=='play'&&S.state!=='intro')$('enemyComm').hidden=true;}if(S.state==='play'&&!S.rival&&!S.bh){S.rivalCool=(S.rivalCool==null?45:S.rivalCool)-dt;if(S.rivalCool<=0)spawnRival();}
   const rv=S.rival;if(!rv)return;const p=rv.o.position;rv.blink.forEach((b,i)=>{b.material.opacity=((S.time*1.3+i*.3)%1)<.5?1:.15;});if(rv.o.userData.ring)rv.o.userData.ring.rotation.z+=dt*.3;animEscorts(rv.o,S.time);
   if(playing){p.z+=spd*.7*dt;keepOut(rv.o,75);}rv.dist=p.length();
   if(playing&&rv.dist>3000){scene.remove(rv.o);disposeScene(rv.o);S.rival=null;S.rivalCool=40;$('bossbar').hidden=!(S.boss&&S.boss.alive);return;}
   if(S.state==='play'){if(rv.dist<760){rv.launchT-=dt;if(rv.launchT<=0&&rv.launched<14&&enemies.length<14){rv.launchT=R(5,8)-Math.min(2,S.lvl*.15);rv.launched++;
         for(let k=0;k<2;k++){exTmp.copy(p).multiplyScalar(1-55/Math.max(rv.dist,60));spawnEnemy(Math.random()<.5?'fighter':'scout',exTmp.x+R(-8,8),exTmp.y+R(-6,6),exTmp.z+R(-8,8));}}}
     if(rv.dist<360){rv.fireT-=dt;if(rv.fireT<=0){rv.fireT=Math.max(.8,1.8-S.lvl*.06);exTmp.copy(p).multiplyScalar(1-45/Math.max(rv.dist,50));for(const s of [-1,0,1])enemyShoot(exTmp.x+s*6,exTmp.y,exTmp.z,P.x+s*3,P.y,0,46+S.lvl*2);}}}
-  const show=rv.dist<520&&!(S.boss&&S.boss.alive)&&S.state==='play';if(show){$('bossbar').hidden=false;$('bossname').textContent='Nave enemiga · '+rv.mc.name;$('bossnum').textContent=Math.ceil(rv.hp);$('bossfill').style.transform='scaleX('+Math.max(0,rv.hp/rv.max)+')';}
+  const show=rv.dist<520&&!(S.boss&&S.boss.alive)&&S.state==='play';if(show){$('bossbar').hidden=false;$('bossname').textContent=rv.mc.name+' · Cmdte. '+rv.cmd.name;if(!rv.told){rv.told=true;enemyComm(rv.cmd,'¡Fuego a discreción! Destruyan a ese piloto.',5);}$('bossnum').textContent=Math.ceil(rv.hp);$('bossfill').style.transform='scaleX('+Math.max(0,rv.hp/rv.max)+')';}
   else if(!(S.boss&&S.boss.alive))$('bossbar').hidden=true;
   if(rv.flash>0){rv.flash-=dt;}}
 function killEnemy(e){e.alive=false;const p=e.o.position,T=ETYPES[e.type];explosion(p.x,p.y,p.z,e.type==='tank'?2.4:1.4,new THREE.Color(LEVELS[S.lvl].glow));sfx('boom');S.score+=T.score*ptsMul();S.kills++;S.shake=Math.max(S.shake,.25);
@@ -1918,7 +1974,7 @@ function hgNearUI(){if(!HG)return;const n=HG.near,card=$('hgCard'),act=$('hgAct'
 function hgAction(){if(MS){msAction();return;}if(!HG||HG.launch||S.state!=='hangar')return;if(HG.mode==='armory'){hgMount();return;}const n=HG.near;if(!n)return;
   if(n[0]==='s')hgBoard(+n.slice(1));else if(n[0]==='a')openArmory(+n.slice(1));else if(n==='r')startArena();else if(n==='c')enterCity();}
 function hgBoard(i){if(SHIPS[i].unlock>unlockedMax()){msg('Esa nave está bloqueada','var(--danger)',1.2);return;}
-  if(i!==S.shipIdx){const om=HG.ships[S.shipIdx].getObjectByName('mounts');if(om)HG.ships[S.shipIdx].remove(om);setPlayerShip(i);S.hull=S.hullMax;S.shield=S.shieldMax;savedShip=i;try{localStorage.setItem('hde_ship',String(i));}catch(_){}attachMissiles(HG.ships[i],SHIPS[i],S.misType);}
+  if(i!==S.shipIdx){const om=HG.ships[S.shipIdx].getObjectByName('mounts');if(om)HG.ships[S.shipIdx].remove(om);setPlayerShip(i);S.hull=S.hullMax;S.shield=S.shieldMax;savedShip=i;try{localStorage.setItem('hde_ship',String(i));saveProf();}catch(_){}attachMissiles(HG.ships[i],SHIPS[i],S.misType);}
   hgLaunch(i);}
 function openArmory(side){HG.mode='armory';const first=side<0?0:8;if((S.misType<8?-1:1)===side)HG.msel=S.misType;else HG.msel=first;$('hgAct').hidden=true;$('hgArm').hidden=false;$('hgCard').hidden=false;$('hgHint').textContent='Elige un misil y móntalo en tu '+SHIP.name+'.';hgMisCard();sfx('pick');}
 function closeArmory(){if(!HG)return;HG.mode='walk';HG.rack.forEach(r=>{r.g.rotation.y=0;});$('hgArm').hidden=true;HG.near=null;$('hgHint').textContent='Acércate a una nave y pulsa la acción para subir y despegar.';}
@@ -2304,7 +2360,7 @@ function buildCity(MC){const L=LEVELS[S.lvl],H=L.home,p=L.planets[0],acc=MC?MC.g
   return {sc,blocks,st,people,cars,ring,sparks:sp,pilot:{w:pw,x:0,z:48,face:Math.PI,ph:0},near:null,mode:'walk',t:0,hunt:null,gal:null,
     camPos:new THREE.Vector3(0,9,62),look:new THREE.Vector3(0,2,30)};}
 function cryUI(){$('cyCry').textContent=savedCry;}
-function addCry(n){savedCry=Math.max(0,savedCry+n);try{localStorage.setItem('hde_cry',String(savedCry));}catch(_){}cryUI();}
+function addCry(n){savedCry=Math.max(0,savedCry+n);try{localStorage.setItem('hde_cry',String(savedCry));saveProf();}catch(_){}cryUI();}
 function enterMotherCity(){if(!MS||S.state!=='mother')return;const MC=curMC();S.state='city';$('hangarUI').hidden=true;CT=buildCity(MC);CT.fromMother=true;
   $('cyEye').textContent='Nave nodriza '+MC.cls+' · '+LEVELS[S.lvl].name;$('cyTitle').textContent='Ciudad de la '+MC.name;
   $('cyHint').textContent=MC.d+' '+(isTouch?'Camina con el joystick y prueba la tienda y los juegos.':'Camina con WASD y pulsa E para hablar, jugar o comprar.');
@@ -2423,6 +2479,8 @@ const MIS_TXT={muestras:'Recoge las muestras de cristal',balizas:'Enciende las b
 const MIS_VOZ={muestras:'Misión: recoge todas las muestras de cristal. Usa el rover para llegar más rápido.',balizas:'Misión: enciende las balizas de comunicación. Bájate del rover para activarlas.',
   rescate:'Misión: rescata a los astronautas perdidos y tráelos a la cápsula.',carrera:'Misión: súbete al rover y cruza todos los anillos antes de que se acabe el tiempo.',meteoros:'Misión: recoge las celdas de energía. Cuidado con la lluvia de meteoritos.'};
 let siteCount=[];try{siteCount=JSON.parse(localStorage.getItem('hde_sites')||'[]');}catch(_){}
+try{if(!localStorage.getItem('hde_prof_ok')){profKey=pKey('alianza',savedPilot);saveProf();localStorage.setItem('hde_prof_ok','1');}}catch(_){}
+profKey=pKey(FACTION,selIdx());{const j=readProf(FACTION,selIdx());if(j){maxReached=Math.min(14,j.max|0);savedShip=j.ship|0;savedMis=j.mis|0;savedCry=j.cry|0;siteCount=Array.isArray(j.sites)?j.sites:[];}else{maxReached=0;savedShip=0;savedMis=0;savedCry=0;siteCount=[];}}
 function siteMission(l){return MISIONES[(l+2*(siteCount[l]||0))%5];}
 
 /* cápsula de aterrizaje (la misma en la nave y en el suelo) */
@@ -2560,7 +2618,7 @@ function enterExplore(){const l=S.lvl,mis=siteMission(l);S.state='explore';firin
   exProgUI();hgCam.fov=60;hgCam.updateProjectionMatrix();fadeFlash();if(actx)musicMuffle(false);
   EX.pod.position.y=EX.podY+70;EX.pod.userData.flame.visible=true;}
 function exitExplore(){if(!EX)return;const G=EX,done=G.done,l=G.l;disposeScene(G.sc);EX=null;$('exUI').hidden=true;$('touch').classList.remove('walk');$('joyhint').textContent='Arrastra aquí para volar';
-  let cry=0,pts=0;if(done){cry=5+l;pts=Math.round(2500*(1+l*.25));S.mis=Math.max(S.mis,12);S.hull=Math.min(S.hullMax,S.hull+S.hullMax*.3);siteCount[l]=(siteCount[l]||0)+1;try{localStorage.setItem('hde_sites',JSON.stringify(siteCount));}catch(_){}}
+  let cry=0,pts=0;if(done){cry=5+l;pts=Math.round(2500*(1+l*.25));S.mis=Math.max(S.mis,12);S.hull=Math.min(S.hullMax,S.hull+S.hullMax*.3);siteCount[l]=(siteCount[l]||0)+1;try{localStorage.setItem('hde_sites',JSON.stringify(siteCount));saveProf();}catch(_){}}
   else{cry=Math.floor(G.got/2);pts=G.got*300;}
   if(cry)addCry(cry);S.score+=pts;
   S.state='play';$('hud').hidden=false;$('touch').hidden=!isTouch;P.x=0;P.y=1;P.vx=P.vy=0;S.inv=2;S.thr=Math.max(S.thr,1);ship.visible=true;ship.rotation.set(0,0,0);setShipPod(true);
@@ -2781,15 +2839,19 @@ $('smList').addEventListener('click',e=>{const b=e.target.closest('.smBtn');if(!
 $('smClose').onclick=()=>{$('starMap').hidden=true;if(MS&&S.state==='mother'){MS.mapShown=true;msNearUI();}};
 $('smClear').onclick=()=>{S.route=null;smRouteUI();};
 function openPilotSel(lvl){pendingLvl=lvl;initAudio();$('menu').hidden=true;const box=$('pilots');box.innerHTML='';
-  PILOTS.forEach((pl,i)=>{const b=document.createElement('button');b.className='pcard'+(i===savedPilot?' sel':'');b.dataset.i=i;const im=document.createElement('img');im.src=pl.img;im.alt='';im.loading='lazy';b.appendChild(im);
-    b.insertAdjacentHTML('beforeend',`<span class="pn">${pl.name}</span><span class="lbl">${pl.from}</span><span class="pb">${pl.bonus}</span>`);box.appendChild(b);});
+  pilotCards();
   facUI();$('pilotSel').hidden=false;}
+function pilotCards(){const box=$('pilots');box.innerHTML='';
+  pilotList().forEach((pl,i)=>{const b=document.createElement('button');b.className='pcard'+(i===selIdx()?' sel':'');b.dataset.i=i;const im=document.createElement('img');im.src=pl.img;im.alt='';im.loading='lazy';b.appendChild(im);
+    const pr=readProf(FACTION,i);const prog=pr&&(pr.max>0||pr.cry>0)?`Galaxia ${(pr.max|0)+1} · ${pr.cry|0} cristales`:'Nuevo · empieza de cero';
+    b.insertAdjacentHTML('beforeend',`<span class="pn">${pl.name}</span><span class="pp${pr&&pr.max>0?' on':''}">${prog}</span>`);b.insertAdjacentHTML('beforeend',`<span class="lbl">${pl.from}</span><span class="pb">${pl.bonus}</span>`);box.appendChild(b);});
+}
 function facUI(){for(const b of $('facPick').children){if(b.dataset&&b.dataset.f)b.classList.toggle('on',b.dataset.f===FACTION);}$('facTxt').textContent=FACTIONS[FACTION].d;}
-$('facPick').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;FACTION=b.dataset.f;try{localStorage.setItem('hde_fac',FACTION);}catch(_){}facUI();if(actx&&!S.muted)tone('sine',400,700,.1,.05);
+$('facPick').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;FACTION=b.dataset.f;try{localStorage.setItem('hde_fac',FACTION);}catch(_){}facUI();pilotCards();if(actx&&!S.muted)tone('sine',400,700,.1,.05);
   say(FACTION==='umbra'?'Te uniste al Imperio Umbra. La Alianza Estelar es tu enemiga.':'Te uniste a la Alianza Estelar. El Imperio Umbra es tu enemigo.');});
-$('pilots').addEventListener('click',e=>{const b=e.target.closest('.pcard');if(!b)return;savedPilot=+b.dataset.i;try{localStorage.setItem('hde_pilot',String(savedPilot));}catch(_){}
-  for(const c of $('pilots').children)c.classList.toggle('sel',+c.dataset.i===savedPilot);if(actx&&!S.muted)tone('sine',500,800,.08,.05);});
-$('pilotGo').onclick=()=>{$('pilotSel').hidden=true;startGame(pendingLvl);};$('pilotBack').onclick=()=>{$('pilotSel').hidden=true;$('menu').hidden=false;};
+$('pilots').addEventListener('click',e=>{const b=e.target.closest('.pcard');if(!b)return;const i=+b.dataset.i;if(FACTION==='umbra'){savedPilotU=i;try{localStorage.setItem('hde_pilot_u',String(i));}catch(_){}}else{savedPilot=i;try{localStorage.setItem('hde_pilot',String(i));}catch(_){}}
+  for(const c of $('pilots').children)c.classList.toggle('sel',+c.dataset.i===i);if(actx&&!S.muted)tone('sine',500,800,.08,.05);});
+$('pilotGo').onclick=()=>{$('pilotSel').hidden=true;loadProf(FACTION,selIdx());cryUI&&cryUI();renderMenu();startGame(pendingLvl==='cont'?maxReached:0);};$('pilotBack').onclick=()=>{$('pilotSel').hidden=true;$('menu').hidden=false;};
 
 /* ---------- ARENA: RING DE PELEA PROFESIONAL ---------- */
 let AR=null;
@@ -2920,16 +2982,16 @@ function startArena(){if(!HG)return;const L=LEVELS[S.lvl],H=L.home,acc=new THREE
   const flashes=[];for(let i=0;i<22;i++){const f=glowSprite(0xffffff,1.4,0);const a=R(0,Math.PI*2),r=R(12,21);f.position.set(Math.cos(a)*r,R(1.5,6),Math.sin(a)*r);sc.add(f);flashes.push(f);}
   /* peleadores y réferi */
   const me=buildBoxer(PILOT.look,PILOT.acc,PILOT.look.type==='human',{guante:0xd8202a});me.g.position.set(-2.4,1.28,0);me.g.rotation.y=Math.PI/2;sc.add(me.g);
-  const op=buildBoxer(H.look,acc,H.look.type==='human',{guante:0x1f4fd8});op.g.position.set(2.4,1.28,0);op.g.rotation.y=-Math.PI/2;op.g.scale.setScalar(1.04);sc.add(op.g);
+  const EN=pickEnemy();const op=buildBoxer(EN.look,EN.acc,EN.look.type==='human',{guante:0x1f4fd8});op.g.position.set(2.4,1.28,0);op.g.rotation.y=-Math.PI/2;op.g.scale.setScalar(1.04);sc.add(op.g);
   const rayas=texCanvas(64,64,(x,w,h)=>{for(let i=0;i<8;i++){x.fillStyle=i%2?'#111':'#f2f2f2';x.fillRect(i*8,0,8,h);}});
   const ref=buildBoxer({type:'human',skin:'#c99a7a',hair:'#cfcfcf'},0x111111,true,{ref:true,camisa:rayas});ref.g.position.set(0,1.28,-4.3);ref.g.scale.setScalar(.96);sc.add(ref.g);
   const glowL=glowSprite(0xffd060,1.2,0);me.glR.add(glowL);const glowO=glowSprite(0x80c0ff,1.2,0);op.glR.add(glowO);
   const nuevo=(b,x,face,glow)=>({w:b,x,hp:100,chip:100,en:0,act:null,at:0,cd:0,block:false,dodge:0,dodgeCd:0,stun:0,kb:0,face,ph:0,down:0,ko:false,inv:0,combo:0,lastP:-9,wins:0,react:0,reactT:null,glow,pose:Object.assign({},POSE.guardia)});
   AR={sc,spots,crowd,bodyI,headI,dm,flashes,jumbo,jumboC,jumboT,ref,sp:new Sparks(900,.35,sc),t:0,ts:1,slowT:0,shake:0,round:1,time:ROUND_T,over:false,pausa:2.4,cuenta:null,cheer:.4,hits:0,hitsT:0,
-    ctrl:{l:false,r:false,block:false},opName:'Campeón de los '+H.race,camPos:new THREE.Vector3(0,3,11),camLook:new THREE.Vector3(0,1.9,0),fov:42,
+    ctrl:{l:false,r:false,block:false},opName:EN.name,opWar:EN,camPos:new THREE.Vector3(0,3,11),camLook:new THREE.Vector3(0,1.9,0),fov:42,
     me:nuevo(me,-2.4,1,glowL),op:nuevo(op,2.4,-1,glowO),ai:{t:1.2,plan:null,blockT:0},estado:'intro'};
   for(const f of [AR.me,AR.op])aplicarPose(f.w,f.pose);aplicarPose(ref,POSE.refe);
-  $('fMeName').textContent=PILOT.name;$('fOpName').textContent=AR.opName;drawPilotPhoto($('fMePort'));drawPortrait($('fOpPort'),H.look);
+  $('fMeName').textContent=PILOT.name;$('fOpName').textContent=AR.opName;drawPilotPhoto($('fMePort'));drawPilotPhoto($('fOpPort'),EN);
   $('fEnd').hidden=true;$('fightUI').hidden=false;$('fCombo').classList.remove('on');arHud();dibujaJumbo('ROUND 1');
   arCam.position.set(0,6,16);arCam.lookAt(0,1.9,0);arCrowdStart();
   say(`Bienvenidos a la arena de ${H.planet}. ${PILOT.name} contra el campeón. ¡A pelear!`,1,1.05);
@@ -3046,8 +3108,8 @@ function finRound(ganador,como){const A=AR;if(A.estado==='entre'||A.estado==='fi
     fadeFlash();iniciaRound();},2800);}
 function endFight(win){const A=AR;if(!A||A.over)return;A.over=true;
   $('fEndT').textContent=win?'¡Victoria!':'Derrota';
-  if(win){S.score+=2500;S.laserLvl=Math.min(3,S.laserLvl+1);S.mis=Math.min(20,S.mis+6);addCry&&addCry(3);$('fEndP').textContent=`Venciste al ${A.opName} ${A.me.wins} rounds a ${A.op.wins}. Premio: +2500 puntos, +1 nivel de potencia, +6 misiles y 3 cristales.`;say('¡Victoria! El público te aclama.');}
-  else{$('fEndP').textContent=`El ${A.opName} ganó ${A.op.wins} rounds a ${A.me.wins}. Puedes pedir la revancha o volver al hangar.`;say('Has caído. Puedes pedir la revancha.');}
+  if(win){S.score+=2500;S.laserLvl=Math.min(3,S.laserLvl+1);S.mis=Math.min(20,S.mis+6);addCry&&addCry(3);$('fEndP').textContent=`Venciste a ${A.opName} (${FACTION==='umbra'?'Alianza Estelar':'Imperio Umbra'}) ${A.me.wins} rounds a ${A.op.wins}. Premio: +2500 puntos, +1 nivel de potencia, +6 misiles y 3 cristales.`;say('¡Victoria! El público te aclama.');}
+  else{$('fEndP').textContent=`${A.opName} ganó ${A.op.wins} rounds a ${A.me.wins}. Puedes pedir la revancha o volver al hangar.`;say('Has caído. Puedes pedir la revancha.');}
   $('fEnd').hidden=false;}
 function exitArena(again){if(!AR)return;arCrowdStop();disposeScene(AR.sc);AR=null;renderer.shadowMap.enabled=false;$('fightUI').hidden=true;$('fMsg').classList.remove('on');$('fFloat').innerHTML='';if(again){startArena();return;}
   S.state='hangar';$('hangarUI').hidden=false;$('touch').hidden=!isTouch;if(HG){HG.near=null;HG.mode='walk';}}
@@ -3068,7 +3130,7 @@ function showCard(){const L=LEVELS[S.lvl];$('cardNum').textContent=`GALAXIA ${St
   $('card').classList.add('on');S.state='intro';S.introT=3.4;if(actx&&(!M.timer||M.song!==SONGS[S.lvl]))startMusic(S.lvl);musicMuffle(false);}
 function startGame(lvl){initAudio();if(actx&&actx.state==='suspended')actx.resume();
   S.score=0;S.mis=10;S.bombs=3;S.laserLvl=lvl>=4?2:1;P.x=P.y=P.vx=P.vy=0;
-  PILOT=PILOTS[savedPilot]||PILOTS[0];setPlayerShip(SHIPS[savedShip]&&SHIPS[savedShip].unlock<=Math.max(maxReached,lvl)?savedShip:0);S.hull=S.hullMax;S.shield=S.shieldMax;S.fuel=S.fuelMax;S.fuelWarn=S.fuelOut=false;S.bombs=3+(PILOT.b.bombs||0);ship.visible=true;ship.rotation.set(0,0,0);ship.scale.setScalar(.72);
+  PILOT=pilotList()[selIdx()]||pilotList()[0];setPlayerShip(SHIPS[savedShip]&&SHIPS[savedShip].unlock<=Math.max(maxReached,lvl)?savedShip:0);S.hull=S.hullMax;S.shield=S.shieldMax;S.fuel=S.fuelMax;S.fuelWarn=S.fuelOut=false;S.bombs=3+(PILOT.b.bombs||0);ship.visible=true;ship.rotation.set(0,0,0);ship.scale.setScalar(.72);
   setMissileType(MISSILES[savedMis]&&MISSILES[savedMis].unlock<=Math.max(maxReached,lvl)?savedMis:0);
   $('menu').hidden=true;$('over').hidden=true;S.paused=false;setupLevel(lvl);enterHangar('home');}
 function retryLevel(){initAudio();if(EX){disposeScene(EX.sc);EX=null;$('exUI').hidden=true;}restoreSmallShip();S.hull=S.hullMax;S.shield=S.shieldMax;S.fuel=S.fuelMax;S.fuelWarn=S.fuelOut=false;S.chill=S.poison=S.ink=0;S.mis=Math.max(S.mis,8);S.bombs=Math.max(S.bombs,2);P.x=P.y=P.vx=P.vy=0;ship.visible=true;ship.scale.setScalar(.72);ship.rotation.set(0,0,0);S.score=Math.floor(S.score*.7);
@@ -3083,14 +3145,14 @@ function playerDead(){S.state='dead';S.deadT=1.6;ship.visible=false;beam.visible
 function showDead(){$('overEye').textContent='Nave destruida';$('overTitle').textContent='Caíste en '+LEVELS[S.lvl].name;$('overText').textContent=`Puntuación: ${Math.floor(S.score).toLocaleString('es')}. Puedes reintentar esta galaxia con el casco reparado.`;
   $('overA').textContent='Reintentar galaxia';$('overA').onclick=retryLevel;$('overB').onclick=toMenu;$('over').hidden=false;$('hud').hidden=true;}
 function startWarp(){S.state='warp';S.warpT=0;S.warpSwapped=false;sfx('warp');firing=false;beam.visible=false;$('touch').hidden=true;setLandUI(null);
-  const next=S.lvl+1;if(next>maxReached){maxReached=Math.min(LEVELS.length-1,next);try{localStorage.setItem('hde_max',String(maxReached));}catch(e){}}}
+  const next=S.lvl+1;if(next>maxReached){maxReached=Math.min(LEVELS.length-1,next);try{localStorage.setItem('hde_max',String(maxReached));saveProf();}catch(e){}}}
 function winGame(){S.state='win';$('hud').hidden=true;$('touch').hidden=true;$('overEye').textContent='Quince galaxias cruzadas';$('overTitle').textContent='Has atravesado el Horizonte';
   $('overText').textContent=`Venciste al Kraken Abisal en Centauro A y saliste por el último portal. Puntuación final: ${Math.floor(S.score).toLocaleString('es')}.`;$('overA').textContent='Jugar de nuevo';$('overA').onclick=()=>startGame(0);$('overB').onclick=toMenu;$('over').hidden=false;
   sayAttendant('Atención, pasajeros. Has atravesado las quince galaxias. Eres una leyenda del universo.');}
 function renderMenu(){const p=$('pips');p.innerHTML='';for(let i=0;i<LEVELS.length;i++){const d=document.createElement('div');d.className='pip'+(i<=maxReached?' done':'');d.textContent=i+1;d.title=LEVELS[i].name;p.appendChild(d);}
   const c=$('contBtn');if(maxReached>0){c.hidden=false;c.textContent='Continuar · '+LEVELS[maxReached].name;}else c.hidden=true;}
 
-$('startBtn').onclick=()=>{initAudio();if(actx&&actx.state==='suspended')actx.resume();openPilotSel(0);say('Elige a tu guerrero.');};$('contBtn').onclick=()=>{initAudio();if(actx&&actx.state==='suspended')actx.resume();openPilotSel(maxReached);say('Elige a tu guerrero.');};
+$('startBtn').onclick=()=>{initAudio();if(actx&&actx.state==='suspended')actx.resume();openPilotSel(0);say('Elige a tu guerrero.');};$('contBtn').onclick=()=>{initAudio();if(actx&&actx.state==='suspended')actx.resume();openPilotSel('cont');say('Elige a tu guerrero.');};
 $('pauseBtn').onclick=togglePause;
 $('muteBtn').onclick=()=>{S.muted=!S.muted;$('muteBtn').classList.toggle('off',S.muted);};
 $('musicBtn').onclick=()=>{M.on=!M.on;$('musicBtn').classList.toggle('off',!M.on);if(M.bus)M.bus.gain.setTargetAtTime(M.on?MUSIC_VOL:0,actx.currentTime,.1);};
