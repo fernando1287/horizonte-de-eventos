@@ -1,13 +1,14 @@
 /* Horizonte de Eventos: guarda el juego en el teléfono para jugar sin internet */
-const VERSION = 'horizonte-v20';
+const VERSION = 'horizonte-v21';
 const ARCHIVOS = [
   './', 'index.html', 'three.min.js', 'turbo-circuito.html', 'manifest.webmanifest',
-  'vox-es.json', 'vox-en.json',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png', 'icons/apple-touch-icon.png'
 ];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(VERSION).then((c) => c.addAll(ARCHIVOS)).then(() => self.skipWaiting()));
+  // Las voces se guardan aparte, sin frenar la instalación.
+  caches.open(VERSION).then((c) => c.addAll(['vox-es.json', 'vox-en.json'])).catch(() => {});
 });
 
 self.addEventListener('activate', (e) => {

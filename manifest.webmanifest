@@ -3,6 +3,7 @@
   "short_name": "Horizonte",
   "description": "Juego de naves en 3D: 15 galaxias, nave nodriza, exploración con rover y más.",
   "lang": "es",
+  "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "fullscreen",
