@@ -1266,7 +1266,7 @@ function updHud(){const L=LEVELS[S.lvl];
 /* ---------- LEVEL SETUP ---------- */
 function rm(o){scene.remove(o.o);if(o.mat&&o.mat.dispose)o.mat.dispose();if(o.o.isSprite&&!o.o.userData.shared)o.o.material.dispose();if(o.geo)o.geo.dispose();}
 function clearList(list){for(const o of list)rm(o);return [];}
-function removeLand(){if(!S.land)return;scene.remove(S.land.o);S.land.m.material.map.dispose();S.land.m.material.dispose();S.land.label.material.map.dispose();S.land=null;S.landCool=14;S.autoBrake=false;setLandUI(null);$('orbitHud').hidden=true;}
+function removeLand(){if(!S.land)return;scene.remove(S.land.o);if(S.land.m.material.map)S.land.m.material.map.dispose();S.land.m.material.dispose();S.land.label.material.map.dispose();S.land=null;S.landCool=14;S.autoBrake=false;setLandUI(null);$('orbitHud').hidden=true;}
 function clearWorld(){if(S.rival){scene.remove(S.rival.o);disposeScene(S.rival.o);S.rival=null;}S.rivalCool=45;if(S.site){disposeScene(S.site.o);scene.remove(S.site.o);S.site=null;}S.siteCool=14;setPodUI(false);shots=clearList(shots);missiles=clearList(missiles);bombs=clearList(bombs);ebul=clearList(ebul);enemies=clearList(enemies);rocks=clearList(rocks);mines=clearList(mines);pickups=clearList(pickups);flashes=clearList(flashes);shocks=clearList(shocks);bolts=clearList(bolts);
   if(S.boss){scene.remove(S.boss.o);S.boss=null;}if(S.bh){scene.remove(S.bh.o);S.bh=null;}removeLand();removeMother();vortices=[];S.dock=null;S.chill=S.poison=S.ink=0;S.orbit=null;S.landPath=null;beam.visible=false;sparks.clear();puffs.clear();}
 function setupLevel(i){const L=LEVELS[i];S.lvl=i;clearWorld();
@@ -1323,14 +1323,37 @@ function animPort(u,T){const n=u.rabbit.length,act=n-1-Math.floor(((T*1.4)%1)*n)
   u.rabbit.forEach((sp,i)=>{const on=i===act||i===act+1;sp.material.opacity=on?1:.22;const sc=on?3.2:1.3;sp.scale.set(sc,sc,1);});
   u.beacon.material.color.setHex(((T*1.6)|0)%2?0x40ff80:0xffffff);u.beacon.material.opacity=.55+.45*Math.abs(Math.sin(T*4));
   u.red.material.opacity=((T*1.2)%1)<.5?1:.15;if(u.flaggers)u.flaggers.forEach((w,i)=>waveFlags(w,T,i*.8));}
+const EARTH_CITIES=[['Ciudad de México',19.43,-99.13],['Nueva York',40.71,-74.0],['Los Ángeles',34.05,-118.24],['Toronto',43.65,-79.38],['Bogotá',4.71,-74.07],['Lima',-12.05,-77.04],
+ ['São Paulo',-23.55,-46.63],['Buenos Aires',-34.6,-58.38],['Santiago',-33.45,-70.67],['Madrid',40.42,-3.7],['Londres',51.5,-.13],['París',48.85,2.35],['Moscú',55.75,37.62],['El Cairo',30.04,31.24],
+ ['Lagos',6.52,3.38],['Dubái',25.2,55.27],['Nueva Delhi',28.61,77.2],['Pekín',39.9,116.4],['Tokio',35.68,139.69],['Sídney',-33.87,151.2],['Ciudad del Cabo',-33.92,18.42],['Anchorage',61.2,-149.9],['Honolulu',21.3,-157.86]];
+function latLon(lat,lon,r){const ph=(lon+180)/360*Math.PI*2,th=(90-lat)*Math.PI/180;return new THREE.Vector3(-Math.cos(ph)*Math.sin(th),Math.cos(th),Math.sin(ph)*Math.sin(th)).multiplyScalar(r||1);}
+let EARTH_TEX=null;function earthTex(){if(EARTH_TEX)return EARTH_TEX;if(typeof THREE.TextureLoader==='undefined')return null;const tl=new THREE.TextureLoader(),ld=f=>{const t=tl.load('earth/'+f);t.anisotropy=4;return t;};
+  EARTH_TEX={day:ld('earth_day.jpg'),night:ld('earth_night.jpg'),spec:ld('earth_spec.jpg'),clouds:ld('earth_clouds.jpg')};return EARTH_TEX;}
+function buildEarth(r){const T=earthTex();if(!T||typeof THREE.ShaderMaterial==='undefined')return null;const sun={value:new THREE.Vector3(-.6,.5,.6).normalize()};
+  const mat=new THREE.ShaderMaterial({uniforms:{dayT:{value:T.day},nightT:{value:T.night},specT:{value:T.spec},sunDir:sun},
+    vertexShader:'varying vec2 vUv;varying vec3 vN;varying vec3 vP;void main(){vUv=uv;vN=normalize(mat3(modelMatrix)*normal);vec4 w=modelMatrix*vec4(position,1.);vP=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}',
+    fragmentShader:'uniform sampler2D dayT;uniform sampler2D nightT;uniform sampler2D specT;uniform vec3 sunDir;varying vec2 vUv;varying vec3 vN;varying vec3 vP;void main(){vec3 N=normalize(vN);float d=dot(N,sunDir);float k=smoothstep(-.15,.22,d);'+
+      'vec3 day=texture2D(dayT,vUv).rgb;vec3 night=texture2D(nightT,vUv).rgb;float sp=texture2D(specT,vUv).r;vec3 V=normalize(cameraPosition-vP);vec3 H=normalize(sunDir+V);'+
+      'vec3 col=day*(.05+1.1*max(d,0.))*k+night*vec3(1.,.82,.55)*1.6*(1.-k);col+=sp*pow(max(dot(N,H),0.),36.)*.55*vec3(.85,.92,1.)*k;float fr=pow(1.-max(dot(N,V),0.),2.6);col+=vec3(.32,.58,1.)*fr*.7*smoothstep(-.35,.4,d);gl_FragColor=vec4(col,1.);}'});
+  const m=new THREE.Mesh(geo('earthS',()=>new THREE.SphereGeometry(1,96,64)),mat);m.scale.setScalar(r);
+  const cl=new THREE.Mesh(geo('earthS',()=>new THREE.SphereGeometry(1,96,64)),new THREE.MeshLambertMaterial({color:0xffffff,alphaMap:T.clouds,transparent:true,opacity:.9,depthWrite:false,fog:false}));cl.scale.setScalar(r*1.012);
+  const halo=new THREE.Mesh(geo('earthH',()=>new THREE.SphereGeometry(1,64,40)),new THREE.ShaderMaterial({uniforms:{sunDir:sun},side:THREE.BackSide,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,
+    vertexShader:'varying vec3 vNv;varying vec3 vN;void main(){vNv=normalize(normalMatrix*normal);vN=normalize(mat3(modelMatrix)*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+    fragmentShader:'uniform vec3 sunDir;varying vec3 vNv;varying vec3 vN;void main(){float i=pow(max(0.,.78+dot(vNv,vec3(0.,0.,1.))),4.)*3.;float l=smoothstep(-.4,.5,dot(normalize(vN),sunDir));gl_FragColor=vec4(vec3(.3,.6,1.)*i*l,1.);}'}));halo.scale.setScalar(r*1.08);
+  const dots=new THREE.Group();for(const [n,la,lo] of EARTH_CITIES){const p=latLon(la,lo,r*1.004);const d=glowSprite(n==='Ciudad de México'?0x5dffa8:0xffd27a,r*(n==='Ciudad de México'?.09:.05),1);d.position.copy(p);dots.add(d);
+    const lb=new THREE.Sprite(new THREE.SpriteMaterial({map:labelTex(n.toUpperCase(),n==='Ciudad de México'?'#5dffa8':'#ffe6b0'),transparent:true,depthWrite:false,fog:false}));lb.scale.set(r*.62,r*.078,1);lb.position.copy(latLon(la,lo,r*1.03));lb.center.set(.5,-.2);dots.add(lb);}
+  return {m,cl,halo,dots,sun};}
 function spawnLandPlanet(){const L=LEVELS[S.lvl],H=L.home,p=L.planets[0],r=30;const g=new THREE.Group(),body=new THREE.Group();g.add(body);
-  const m=new THREE.Mesh(geo('pl',()=>new THREE.SphereGeometry(1,48,32)),new THREE.MeshStandardMaterial({map:habitableTex(p),roughness:1,metalness:0,fog:false}));m.scale.setScalar(r);body.add(m);
-  const port=buildPort(r,L.glow,H.look);port.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),new THREE.Vector3(.25,.85,.45).normalize());body.add(port);
-  const atm=glowSprite(new THREE.Color(p[2]),r*2.9,.55);g.add(atm);
+  const E=S.lvl===0?buildEarth(r):null;let m;
+  if(E){m=E.m;body.add(m,E.cl,E.dots);g.add(E.halo);}
+  else{m=new THREE.Mesh(geo('pl',()=>new THREE.SphereGeometry(1,48,32)),new THREE.MeshStandardMaterial({map:habitableTex(p),roughness:1,metalness:0,fog:false}));m.scale.setScalar(r);body.add(m);}
+  const port=buildPort(r,L.glow,H.look);port.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),E?latLon(19.43,-99.13).normalize():new THREE.Vector3(.25,.85,.45).normalize());body.add(port);
+  const atm=glowSprite(E?new THREE.Color(0x4a90ff):new THREE.Color(p[2]),r*2.9,E?.32:.55);g.add(atm);
   const beacon=new THREE.Mesh(geo('beacon',()=>new THREE.TorusGeometry(1.3,.018,6,90)),basic(0x5dffa8,{transparent:true,opacity:.9,blending:THREE.AdditiveBlending,fog:false}));beacon.scale.setScalar(r);beacon.rotation.x=1.2;g.add(beacon);
   const label=new THREE.Sprite(new THREE.SpriteMaterial({map:labelTex('PUERTO ESPACIAL · '+H.planet.toUpperCase(),'#5dffa8'),transparent:true,depthWrite:false,fog:false}));label.scale.set(r*4,r*.5,1);label.position.y=r*1.6;g.add(label);
   const side=S.mother?-S.mother.side:(Math.random()<.5?-1:1);g.position.copy(farDir(side,980));scene.add(g);
-  S.land={o:g,m,body,port,atm,beacon,label,side,r,missed:false};msg('Planeta habitado a la vista: '+H.planet,'var(--good)',2.4);say('Planeta habitado a la vista. Frena para entrar en órbita.');}
+  if(E){const v=latLon(19.43,-99.13);body.rotation.y=Math.atan2(-g.position.x,-g.position.z)-Math.atan2(v.x,v.z)+side*.35;}
+  S.land={o:g,m,body,port,atm,beacon,label,side,r,missed:false,E};msg('Planeta habitado a la vista: '+H.planet,'var(--good)',2.4);say('Planeta habitado a la vista. Frena para entrar en órbita.');}
 function spawnBigStar(){const L=LEVELS[S.lvl];const s=new THREE.Sprite(new THREE.SpriteMaterial({map:FLARE,color:pick([0xffffff,0xbfd8ff,0xfff0c0,new THREE.Color(L.accent).getHex()]),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,fog:false}));
   const sc=R(8,22);s.scale.set(sc,sc,1);s.position.set(R(30,140)*(Math.random()<.5?-1:1),R(-50,70),-800);scene.add(s);
   const core=glowSprite(0xffffff,sc*.25,1);core.position.copy(s.position);scene.add(core);bigstars.push({o:s,core,tw:R(0,6)});}
@@ -1810,12 +1833,12 @@ function setLandUI(mode){if(mode===landMode)return;landMode=mode;const b=$('land
   b.classList.toggle('warn',mode==='slow');
   b.innerHTML=mode==='slow'?`Frenar y orbitar ${pl}<kbd>L</kbd>`:mode==='braking'?`Frenando… entrando en órbita`:mode==='orbit'?`Entrar en órbita de ${pl}<kbd>L</kbd>`:`Descender a ${pl}<kbd>L</kbd>`;b.hidden=false;}
 function landAction(){if(S.paused)return;if(landMode==='orbit')startOrbit();else if(landMode==='slow'){S.autoBrake=true;msg('Frenando para entrar en órbita','var(--warn)',1.6);}else if(landMode==='land')enterAtmo();}
-function orbitPos(O,a){return new THREE.Vector3(O.C.x+Math.cos(a)*O.R,O.C.y+O.R*.35,O.C.z+Math.sin(a)*O.R);}
+function orbitPos(O,a){return new THREE.Vector3(O.C.x+Math.cos(a)*O.R,O.C.y+O.R*.42,O.C.z+Math.sin(a)*O.R);}
 function startOrbit(){const lp=S.land;if(!lp||S.state!=='play')return;if(S.thr>.72){msg('Demasiado rápido para orbitar','var(--warn)',1.4);return;}
   S.state='orbit';firing=false;beam.visible=false;
   for(const e of enemies)e.alive=false;for(const r of rocks)r.alive=false;for(const m of mines)m.alive=false;for(const b of ebul)b.alive=false;for(const k of pickups)k.alive=false;
   const C=lp.o.position.clone(),from=ship.position.clone();const a0=Math.atan2(from.z-C.z,from.x-C.x);
-  S.orbit={C,R:lp.r*1.75,a0,a:a0,w:Math.PI*2/8,t:0,prog:0,done:false,from,warn:false};
+  S.orbit={C,R:lp.r*2.7,a0,a:a0,w:Math.PI*2/8,t:0,prog:0,done:false,from,warn:false};
   lp.label.visible=false;lp.atm.material.opacity=.3;
   $('orbitName').textContent=LEVELS[S.lvl].home.planet;$('orbitPct').textContent='0%';$('orbitbar').style.transform='scaleX(0)';$('orbitHud').hidden=false;
   msg('Entrando en órbita','var(--good)',1.6);say('Entrando en órbita. Mantén la velocidad baja y da una vuelta completa al planeta.');sfx('land');}
@@ -1829,7 +1852,7 @@ function updateOrbit(dt){const O=S.orbit;if(!O)return;O.t+=dt;const tr=Math.min(
   const pos=tr<1?O.from.clone().lerp(op,e):op;let dir=T3;if(tr<1)dir=op.clone().sub(O.from).normalize().lerp(T3,e).normalize();
   ship.position.copy(pos);ship.up.set(0,1,0);ship.lookAt(tmpV.copy(pos).sub(dir));ship.rotateZ(-.35*e);
   const out=new THREE.Vector3(Math.cos(O.a),0,Math.sin(O.a));
-  camDes.copy(pos).addScaledVector(dir,-11).add(tmpV.set(0,5,0)).addScaledVector(out,5*e);lookDes.copy(pos).lerp(O.C,.35);
+  camDes.copy(pos).addScaledVector(dir,-11-9*e).add(tmpV.set(0,5+9*e,0)).addScaledVector(out,12*e);lookDes.copy(pos).lerp(O.C,.35+.08*e);
   if(!O.done){$('orbitPct').textContent=Math.floor(O.prog*100)+'%';$('orbitbar').style.transform=`scaleX(${O.prog})`;const tip=$('orbitTip');tip.classList.toggle('warn',O.warn);
     tip.textContent=tr<1?'Aproximación orbital…':O.warn?`¡Muy rápido (${S.thr.toFixed(1)}x)! Frena para seguir la órbita`:`Velocidad ${S.thr.toFixed(1)}x · mantenla baja hasta completar la vuelta`;}}
 function bez(a,b,c,u){const v=1-u;return new THREE.Vector3().addScaledVector(a,v*v).addScaledVector(b,2*v*u).addScaledVector(c,u*u);}
@@ -2878,17 +2901,18 @@ const DISCO={ruinas:{n:'Ruinas antiguas',d:'Columnas de una civilización perdid
 const DISCO_ORDER=['ruinas','nave','cristal','criatura','templo','geiser','monolito','arco'];
 let AT=null;const atV=new THREE.Vector3(),atV2=new THREE.Vector3();
 function smooth01(a,b,x){const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t);}
-function buildAtmo(){const l=S.lvl,L=LEVELS[l],H=L.home,p=L.planets[0],acc=new THREE.Color(L.accent).getHex(),rnd=rng32(l*977+13),seed=l*2.3+.7;const sc=new THREE.Scene();
-  const skyC=new THREE.Color(p[2]).lerp(new THREE.Color(L.accent),.25),hz=skyC.clone().lerp(new THREE.Color(p[0]),.35);sc.background=hz;sc.fog=new THREE.Fog(hz.getHex(),260,1350);
+function earthSky(){const c=cv(64,256),x=c.getContext('2d'),g=x.createLinearGradient(0,0,0,256);g.addColorStop(0,'#071a3e');g.addColorStop(.3,'#1d55a8');g.addColorStop(.47,'#7fb3e6');g.addColorStop(.5,'#cfe2f2');g.addColorStop(.53,'#9fb8c8');g.addColorStop(1,'#3a4a3a');x.fillStyle=g;x.fillRect(0,0,64,256);return new THREE.CanvasTexture(c);}
+function buildAtmo(){const l=S.lvl,L=LEVELS[l],H=L.home,EA=l===0,p=EA?['#567536','#33602a','#f2f4f6']:L.planets[0],acc=new THREE.Color(L.accent).getHex(),rnd=rng32(l*977+13),seed=l*2.3+.7;const sc=new THREE.Scene();
+  const skyC=EA?new THREE.Color('#5d9be0'):new THREE.Color(p[2]).lerp(new THREE.Color(L.accent),.25),hz=EA?new THREE.Color('#b9d3ec'):skyC.clone().lerp(new THREE.Color(p[0]),.35);sc.background=hz;sc.fog=new THREE.Fog(hz.getHex(),260,1350);
   sc.add(new THREE.HemisphereLight(skyC.getHex(),new THREE.Color(p[1]).getHex(),.55));const sun=new THREE.DirectionalLight(L.sun,1.15);sun.position.set(-300,500,-200);sc.add(sun);sc.add(new THREE.AmbientLight(0x404050,.35));
-  const sky=new THREE.Mesh(new THREE.SphereGeometry(2600,32,16),new THREE.MeshBasicMaterial({map:skyTex(p),side:THREE.BackSide,fog:false}));sc.add(sky);
+  const sky=new THREE.Mesh(new THREE.SphereGeometry(2600,32,16),new THREE.MeshBasicMaterial({map:EA?earthSky():skyTex(p),side:THREE.BackSide,fog:false}));sc.add(sky);
   const sg=glowSprite(L.sun,420,.85);sg.position.set(-900,1100,-1500);sg.material.fog=false;sc.add(sg);
-  for(const [x,y,z,r,c] of [[900,700,-1800,160,p[1]],[-1300,900,-1600,60,p[2]]]){const m=new THREE.Mesh(new THREE.SphereGeometry(r,28,16),new THREE.MeshBasicMaterial({map:planetTex([c,p[0],'#ffffff']),fog:false,transparent:true,opacity:.75}));m.position.set(x,y,z);sc.add(m);}
+  for(const [x,y,z,r,c] of (EA?[[-1300,900,-1600,70,'#d8d8d0']]:[[900,700,-1800,160,p[1]],[-1300,900,-1600,60,p[2]]])){const m=new THREE.Mesh(new THREE.SphereGeometry(r,28,16),new THREE.MeshBasicMaterial(EA?{color:0xd8d8d4,fog:false,transparent:true,opacity:.8}:{map:planetTex([c,p[0],'#ffffff']),fog:false,transparent:true,opacity:.75}));m.position.set(x,y,z);sc.add(m);}
   /* lugares del planeta */
   const locs=[];const place=(kind,dmin,dmax,flat)=>{let x,z,t=0;do{const a=rnd()*Math.PI*2,d=dmin+rnd()*(dmax-dmin);x=Math.sin(a)*d;z=Math.cos(a)*d;t++;}while(t<60&&locs.some(o=>Math.hypot(o.x-x,o.z-z)<o.flat+flat+70));
     const o={kind,x,z,flat,done:false};locs.push(o);return o;};
   const port=place('port',140,260,40);const enemyPort=planetOwner(l)!==FACTION;port.name=enemyPort?'Puerto enemigo ('+(planetOwner(l)==='umbra'?'Umbra':'Alianza')+')':'Puerto espacial';port.col=enemyPort?'#ff4d6d':'#5dffa8';
-  const cities=[];for(let k=0;k<3;k++){const c=place('city',380,950,95);c.name=CITY_POOL[(l*3+k)%CITY_POOL.length];c.ck=CITY_KIND[(l+k)%4];c.col='#7fd4ff';c.idx=k;cities.push(c);}
+  const cities=[];for(let k=0;k<3;k++){const c=place('city',380,950,95);c.name=EA?['Ciudad de México','Puebla','Toluca'][k]:CITY_POOL[(l*3+k)%CITY_POOL.length];c.ck=EA?CITY_KIND[0]:CITY_KIND[(l+k)%4];c.col='#7fd4ff';c.idx=k;cities.push(c);}
   const retos=[RETO_ORDER[l%4],RETO_ORDER[(l+1)%4]];const rlocs=retos.map(r=>{const o=r==='defensa'?cities[2]:place('reto',450,1050,r==='torretas'?90:60);if(r==='defensa'){o.defensa=true;}
     const R0={kind:'reto',type:r,x:o.x,z:o.z,flat:0,done:false,name:RETOS[r].n,col:RETOS[r].col,city:r==='defensa'?o:null};if(r!=='defensa')Object.assign(o,R0);else locs.push(R0);return r==='defensa'?R0:o;});
   const dl=[];for(let k=0;k<4;k++){const t=DISCO_ORDER[(l*3+k*2)%8];const o=place('disco',300,1150,t==='arco'?40:24);o.type=t;o.name=DISCO[t].n;o.col='#c58bff';dl.push(o);}
@@ -2898,18 +2922,20 @@ function buildAtmo(){const l=S.lvl,L=LEVELS[l],H=L.home,p=L.planets[0],acc=new T
   for(const o of locs){if(o.flat)o.g=Math.max(wet?W+3:0,base(o.x,o.z)*.5+2);}
   const Hf=(x,z)=>{let h=base(x,z);for(const o of locs){if(!o.flat)continue;const d=Math.hypot(x-o.x,z-o.z);if(d<o.flat*1.7){const k=smooth01(o.flat,o.flat*1.7,d);h=o.g+(h-o.g)*k;}}const d0=Math.hypot(x,z);if(d0>1300)h+=(d0-1300)*.6;return h;};
   const SZ=3200,SEG=170,gg=new THREE.PlaneGeometry(SZ,SZ,SEG,SEG).rotateX(-Math.PI/2),pos=gg.attributes.position,cols=new Float32Array(pos.count*3);
-  const cLo=new THREE.Color(p[1]),cMid=new THREE.Color(p[0]),cHi=new THREE.Color(p[2]),sand=new THREE.Color(p[0]).lerp(new THREE.Color('#e8d8a8'),.5),cc=new THREE.Color();
+  const cLo=new THREE.Color(p[1]),cMid=new THREE.Color(p[0]),cHi=new THREE.Color(EA?'#76674f':p[2]),snow=new THREE.Color('#f4f6f8'),sand=EA?new THREE.Color('#d9c99a'):new THREE.Color(p[0]).lerp(new THREE.Color('#e8d8a8'),.5),cc=new THREE.Color();
   for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i),h=Hf(x,z);pos.setY(i,h);const t=clamp((h+5)/(hill*3.4),0,1);
-    if(wet&&h<W+2.5)cc.copy(sand);else if(t<.72)cc.copy(cMid).lerp(cLo,.35*(1-t/.72));else cc.copy(cMid).lerp(cHi,.55*(t-.72)/.28);cc.offsetHSL(0,0,exNoise(x*1.3,z*1.3,seed+7)*.03);cols[i*3]=cc.r;cols[i*3+1]=cc.g;cols[i*3+2]=cc.b;}
+    if(wet&&h<W+2.5)cc.copy(sand);else if(t<.72)cc.copy(cMid).lerp(cLo,.35*(1-t/.72));else cc.copy(cMid).lerp(cHi,(EA?1:.55)*Math.min(1,(t-.72)/(EA?.14:.28)));if(EA&&h>110)cc.lerp(snow,Math.min(1,(h-110)/40));cc.offsetHSL(0,0,exNoise(x*1.3,z*1.3,seed+7)*.03);cols[i*3]=cc.r;cols[i*3+1]=cc.g;cols[i*3+2]=cc.b;}
   gg.setAttribute('color',new THREE.BufferAttribute(cols,3));gg.computeVertexNormals();sc.add(new THREE.Mesh(gg,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.95,flatShading:true})));
-  if(wet){const wc=new THREE.Color(p[1]).lerp(new THREE.Color('#1a6ab0'),.55);const wm=new THREE.Mesh(new THREE.PlaneGeometry(SZ,SZ).rotateX(-Math.PI/2),new THREE.MeshStandardMaterial({color:wc,metalness:.6,roughness:.15,transparent:true,opacity:.82}));wm.position.y=W;sc.add(wm);}
+  if(wet){const wc=EA?new THREE.Color('#1c5a96'):new THREE.Color(p[1]).lerp(new THREE.Color('#1a6ab0'),.55);const wm=new THREE.Mesh(new THREE.PlaneGeometry(SZ,SZ).rotateX(-Math.PI/2),new THREE.MeshStandardMaterial({color:wc,metalness:.6,roughness:.15,transparent:true,opacity:.82}));wm.position.y=W;sc.add(wm);}
   /* árboles, cristales o rocas */
-  {const N=700,tg=l%4===2?new THREE.OctahedronGeometry(1,0):new THREE.ConeGeometry(1,3,6),tm=new THREE.MeshStandardMaterial({color:new THREE.Color(p[0]).lerp(new THREE.Color(l%4===2?L.accent:'#1a4a20'),.5),flatShading:true,roughness:.8,emissive:l%4===2?acc:0,emissiveIntensity:l%4===2?.25:0});
+  {const N=700,tg=l%4===2?new THREE.OctahedronGeometry(1,0):new THREE.ConeGeometry(1,3,6),tm=new THREE.MeshStandardMaterial({color:EA?new THREE.Color('#2b5424'):new THREE.Color(p[0]).lerp(new THREE.Color(l%4===2?L.accent:'#1a4a20'),.5),flatShading:true,roughness:.8,emissive:l%4===2?acc:0,emissiveIntensity:l%4===2?.25:0});
     const inst=new THREE.InstancedMesh(tg,tm,N),mm=new THREE.Matrix4(),q=new THREE.Quaternion(),sv=new THREE.Vector3(),pv=new THREE.Vector3();let n=0;
     for(let k=0;k<N*3&&n<N;k++){const x=(rnd()-.5)*2400,z=(rnd()-.5)*2400,h=Hf(x,z);if(wet&&h<W+3)continue;if(locs.some(o=>o.flat&&Math.hypot(o.x-x,o.z-z)<o.flat*1.3))continue;const s=2+rnd()*4;
       pv.set(x,h+s*1.2,z);sv.set(s,s*(1+rnd()),s);mm.compose(pv,q,sv);inst.setMatrixAt(n++,mm);}inst.count=n;sc.add(inst);}
   /* nubes */
   for(let k=0;k<18;k++){const c=new THREE.Sprite(new THREE.SpriteMaterial({map:cloudTex(),color:0xffffff,transparent:true,opacity:.35,depthWrite:false,blending:THREE.NormalBlending}));const s=260+rnd()*260;c.scale.set(s,s*.4,1);c.position.set((rnd()-.5)*2600,300+rnd()*100,(rnd()-.5)*2600);sc.add(c);}
+  for(let k=0;k<26;k++){const c=new THREE.Sprite(new THREE.SpriteMaterial({map:cloudTex(),color:0xffffff,transparent:true,opacity:.55,depthWrite:false}));const s=180+rnd()*220;c.scale.set(s,s*.45,1);c.position.set((rnd()-.5)*1400,380+rnd()*90,(rnd()-.5)*1400);sc.add(c);}
+  const plasma=glowSprite(0xff7a20,30,0);plasma.material.fog=false;sc.add(plasma);
   /* puerto espacial pequeño */
   const wt=windowTex(L.accent),winM=new THREE.MeshStandardMaterial({map:wt,emissiveMap:wt,emissive:0xffffff,emissiveIntensity:.6,roughness:.5,metalness:.4});
   const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.6,metalness:.35,flatShading:true},o));
@@ -2956,15 +2982,15 @@ function buildAtmo(){const l=S.lvl,L=LEVELS[l],H=L.home,p=L.planets[0],acc=new T
   /* tu nave */
   const so=buildShip(SHIP);so.scale.setScalar(1.9);sc.add(so);
   const sp=new Sparks(1200,1.2,sc);
-  return {sc,l,Hf,wet,W,locs,port,cities,retos:rlocs,discos:dl,ship:{o:so,pos:new THREE.Vector3(port.x*.2,240,port.z*.2+500),yaw:Math.atan2(-(port.x-port.x*.2),-(port.z-port.z*.2-500))*-1,pitch:-.25,spd:60,thr:1,roll:0},
+  return {sc,l,EA,hz:hz.clone(),sky,plasma,space:new THREE.Color('#06102a'),reentry:0,Hf,wet,W,locs,port,cities,retos:rlocs,discos:dl,ship:{o:so,pos:new THREE.Vector3(port.x*.2,240,port.z*.2+500),yaw:Math.atan2(-(port.x-port.x*.2),-(port.z-port.z*.2-500))*-1,pitch:-.25,spd:60,thr:1,roll:0},
     shots:[],eb:[],sparks:sp,t:0,fireT:0,cam:new THREE.Vector3(0,300,800),look:new THREE.Vector3(),near:null,landing:null,hitT:0,uiT:0};}
 function enterAtmo(){const lp=S.land;S.orbit=null;S.landedHere=true;routeDone('land');removeLand();S.state='atmo';firing=false;beam.visible=false;
   $('hud').hidden=true;$('orbitHud').hidden=true;setLandUI(null);setDockUI(false);setPodUI&&setPodUI(false);
   if(!AT||AT.l!==S.lvl){if(AT)disposeScene(AT.sc);AT=buildAtmo();}
-  const s=AT.ship;s.pos.set(AT.port.x*.3,260,AT.port.z*.3+420);atAim(s,AT.port.x,AT.port.z);s.pitch=-.3;s.spd=60;AT.landing=null;AT.cam.set(s.pos.x,s.pos.y+40,s.pos.z+90);
+  const s=AT.ship;s.pos.set(AT.port.x*.3,415,AT.port.z*.3+640);atAim(s,AT.port.x,AT.port.z);s.pitch=-.42;s.spd=70;AT.landing=null;AT.reentry=4.5;AT.t=0;AT.cam.set(s.pos.x,s.pos.y+30,s.pos.z+60);
   hgCam.far=6000;hgCam.near=.5;hgCam.updateProjectionMatrix();
   $('atUI').hidden=false;$('touch').hidden=!isTouch;$('touch').classList.add('atmo');$('touch').classList.remove('walk');$('atPlanet').textContent=LEVELS[S.lvl].home.planet;$('atEye').textContent='Vuelo atmosférico · '+LEVELS[S.lvl].name;
-  fadeFlash();musicMuffle(false);msg('Entrando a la atmósfera de '+LEVELS[S.lvl].home.planet,'var(--good)',2.4);say('Entrando a la atmósfera. Explora el planeta: hay ciudades, batallas y descubrimientos.');atUI();}
+  fadeFlash();musicMuffle(false);msg('Reentrada atmosférica: '+LEVELS[S.lvl].home.planet,'var(--warn)',2.4);say('Entrando a la atmósfera. Explora el planeta: hay ciudades, batallas y descubrimientos.');atUI();}
 function atAim(s,x,z){s.yaw=Math.atan2(-(x-s.pos.x),-(z-s.pos.z));}
 function leaveAtmo(toSpace){$('atUI').hidden=true;$('touch').classList.remove('atmo');$('atAct').hidden=true;hgCam.far=1500;hgCam.near=.1;hgCam.updateProjectionMatrix();
   for(const b of AT.eb)AT.sc.remove(b.m);AT.eb=[];for(const s of AT.shots)AT.sc.remove(s.m);AT.shots=[];
@@ -2987,7 +3013,12 @@ function atUpdate(dt){const A=AT;A.t+=dt;const t=A.t,s=A.ship,Hf=A.Hf;if(A.hitT>
     const f=atV.set(-Math.sin(s.yaw)*Math.cos(s.pitch),Math.sin(s.pitch),-Math.cos(s.yaw)*Math.cos(s.pitch));s.pos.addScaledVector(f,s.spd*dt);
     const gy=Math.max(Hf(s.pos.x,s.pos.z),A.wet?A.W:-999)+3;if(s.pos.y<gy){s.pos.y=gy;if(s.pitch<-.2&&s.spd>40){atDamage(8);for(let k=0;k<16;k++)A.sparks.emit(s.pos.x,s.pos.y,s.pos.z,(Math.random()-.5)*20,Math.random()*10,(Math.random()-.5)*20,1,C(0xffb070));}s.pitch=Math.max(s.pitch,.2);}
     const d0=Math.hypot(s.pos.x,s.pos.z);if(d0>1250){s.yaw+=angD(Math.atan2(s.pos.x,s.pos.z),s.yaw)*Math.min(1,dt*1.5);if(!A.edgeT||t-A.edgeT>4){A.edgeT=t;msg('Límite de la zona: da la vuelta','var(--warn)',1.4);}}
-    if(s.pos.y>430){leaveAtmo(true);return;}
+    if(A.reentry>0){A.reentry-=dt;s.pitch=Math.min(s.pitch,-.32);const k=Math.min(1,A.reentry/2.5);S.shake=Math.max(S.shake,.35*k);
+      A.plasma.position.copy(s.pos).addScaledVector(f,7);A.plasma.material.opacity=.85*k;A.plasma.scale.setScalar(26+Math.sin(t*30)*4);
+      for(let i=0;i<3;i++)A.sparks.emit(s.pos.x+(Math.random()-.5)*5,s.pos.y+(Math.random()-.5)*4,s.pos.z+(Math.random()-.5)*5,-f.x*30+(Math.random()-.5)*10,-f.y*30+(Math.random()-.5)*10,-f.z*30+(Math.random()-.5)*10,.6,C(Math.random()<.5?0xff8a30:0xffe0a0));
+      if(A.reentry<=0){A.plasma.material.opacity=0;msg('Atmósfera estable: vuela sobre '+LEVELS[S.lvl].home.planet,'var(--good)',2.2);}}
+    {const hk=smooth01(300,440,s.pos.y);A.sc.background.copy(A.hz).lerp(A.space,hk*.9);A.sc.fog.color.copy(A.sc.background);A.sky.material.color.setScalar(1-hk*.7);}
+    if(s.pos.y>430&&A.reentry<=0&&A.t>7){leaveAtmo(true);return;}else if(s.pos.y>470)s.pos.y=470;
     /* disparos */
     A.fireT-=dt;if((firing||keys[' '])&&A.fireT<=0){A.fireT=.13;for(const sd of [-1,1]){const m=new THREE.Mesh(geo('atSh',()=>new THREE.BoxGeometry(.5,.5,6)),basic(new THREE.Color(SHIP.glow).getHex()));
         atV2.set(sd*2.2,-.3,-2).applyEuler(s.o.rotation).add(s.pos);m.position.copy(atV2);m.quaternion.copy(s.o.quaternion);A.sc.add(m);A.shots.push({m,v:f.clone().multiplyScalar(s.spd+300),life:1.3});}if(actx&&!S.muted&&Math.random()<.4)tone('square',900,500,.05,.02);}
@@ -3549,7 +3580,7 @@ function update(dt){const L=LEVELS[S.lvl];S.time+=dt;const T=S.time;const playin
   /* planeta habitado: puerto, órbita y aterrizaje */
   if(S.state==='play'&&!S.land&&!S.landedHere&&!S.bh){S.landCool-=dt;if(S.landCool<=0){S.landSpawns++;spawnLandPlanet();}}
   if(S.land){const lp=S.land,p=lp.o.position;
-    if(S.state!=='landing')lp.body.rotation.y+=dt*.04;
+    if(S.state!=='landing')lp.body.rotation.y+=dt*(lp.E?.012:.04);if(lp.E){const sv=lp.E.sun.value.copy(ship.position).sub(lp.o.position).normalize();sv.set(sv.x*.75-sv.z*.62,sv.y*.75+.3,sv.z*.75+sv.x*.62).normalize();lp.E.cl.rotation.y+=dt*.006;}
     lp.beacon.rotation.z+=dt*.8;animPort(lp.port.userData,T);
     if(playing){p.z+=spd*.8*dt;keepOut(lp.o,lp.r*1.25+4);lp.dist=p.length();if(lp.missed&&lp.dist>lp.r+430)lp.missed=false;if(lp.dist>2900)removeLand();}else lp.dist=p.length();}
   if(S.autoBrake){if(!S.land||S.land.missed||S.state!=='play')S.autoBrake=false;else{S.thr=Math.max(.6,S.thr-dt*1.4);if(S.thr<=.72&&S.land.dist<S.land.r+330){S.autoBrake=false;startOrbit();}}}
