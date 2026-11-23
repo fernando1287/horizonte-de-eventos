@@ -212,7 +212,7 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
 .bubble .x{position:absolute;top:4px;right:8px;background:none;border:0;color:var(--dim);font-size:20px;cursor:pointer;pointer-events:auto;line-height:1}
 .pilots{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;width:100%}
 .pcard{text-align:left;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:4px;cursor:pointer;min-width:0}
-.pcard canvas{width:100%;aspect-ratio:1;border-radius:8px;display:block}
+.pcard canvas,.pcard img{width:100%;aspect-ratio:1;border-radius:8px;display:block;object-fit:cover;background:#0a0e1a}
 .pcard.sel{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
 .pcard .pb{font-size:12px;color:var(--good);line-height:1.3}
 .pcard .pn{font-weight:700;font-size:15px}
@@ -289,6 +289,12 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
 #raceFallback{position:absolute;inset:0;display:grid;place-items:center;padding:16px;background:#0b0d16}
 #raceFallback .shopPane{text-align:left}
 #raceFallback a{color:var(--accent)}
+#pilotBadge{position:fixed;z-index:4;left:max(10px,env(safe-area-inset-left,0px));top:calc(env(safe-area-inset-top,0px) + 8px);display:flex;flex-direction:column;align-items:center;gap:2px;pointer-events:none;width:58px}
+#pilotBadge img{width:52px;height:52px;border-radius:12px;object-fit:cover;border:2px solid var(--accent);box-shadow:0 0 14px color-mix(in srgb,var(--accent) 45%,transparent),0 2px 10px rgba(0,0,0,.6);background:#0a0e1a}
+#pilotBadge div{display:flex;flex-direction:column;align-items:center;line-height:1.05}
+#pilotBadge .lbl{font-size:7px;letter-spacing:.16em}
+#pilotBadge b{font-size:10px;text-align:center;text-shadow:0 1px 6px #000;max-width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.top .gal,#hangarUI .hgTop,#cityUI .hgTop,#exUI .hgTop{padding-left:66px}
 #card{position:fixed;left:0;right:0;top:24%;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;pointer-events:none;opacity:0;transition:opacity .5s;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 #card.on{opacity:1}
 #cardNum{font:500 13px var(--f-mono);letter-spacing:.3em;color:var(--accent)}
@@ -377,6 +383,8 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
     <button class="tb" id="tBomb" aria-label="Bomba">BOMBA<span class="num" id="tBombN">3</span></button>
   </div>
 </div>
+
+<div id="pilotBadge" hidden><img id="pbImg" alt=""><div><span class="lbl">Piloto</span><b id="pbName"></b></div></div>
 
 <div id="card"><div id="cardNum">GALAXIA 01</div><div id="cardName">Vía Láctea</div><div id="cardSub"></div><div id="cardGoal"></div><div id="cardShip"></div></div>
 
@@ -615,17 +623,40 @@ SHIPS.push(
 const BEAM={beam:24,anni:26,beam2:36,omega:40};
 /* ---------- PILOTOS GUERREROS ---------- */
 const PILOTS=[
- {name:'Rex Valdés',from:'Tierra · Vía Láctea',bonus:'+15% blindaje',b:{hull:.15},look:{type:'human',skin:'#d9a27c',hair:'#2a1a10',suit:'#2a4a7a',bg:'#12304a',helmet:true},acc:0x4fd8ff},
- {name:'Kira Sol',from:'Marte · Vía Láctea',bonus:'+12% agilidad',b:{agil:.12},look:{type:'human',skin:'#a86a4a',hair:'#8a1a10',suit:'#6a2a1a',bg:'#3a1208',visor:true},acc:0xff7040},
- {name:'Thorn',from:'Roca Trianguli',bonus:'+25% blindaje',b:{hull:.25},look:{type:'rock',skin:'#8a6a4a',eye:'#ffb040',bg:'#2a1808'},acc:0xffb040},
- {name:'Lyra',from:'Andros Prime',bonus:'Escudo 40% más rápido',b:{regen:.4},look:{type:'alien',skin:'#c48ad8',eye:'#120818',head:'tall',eyes:2,bg:'#3a1040',mark:'#ffe0ff'},acc:0xff7ad0},
- {name:'Zéfiro',from:'Nubia Verde',bonus:'+18% agilidad',b:{agil:.18},look:{type:'alien',skin:'#7ae0b0',eye:'#04180e',head:'round',eyes:2,antenna:true,bg:'#0a3a28',mark:'#e0fff0'},acc:0x50ffb0},
- {name:'Ignar',from:'Ígnea',bonus:'+25% daño de misiles',b:{mis:.25},look:{type:'alien',skin:'#ff7a30',eye:'#ffe060',head:'wide',eyes:3,flame:true,bg:'#3a0c04',mark:'#ffd080'},acc:0xff5010},
- {name:'Nova Ríos',from:'Estación Vórtice',bonus:'+2 bombas extra',b:{bombs:2},look:{type:'human',skin:'#8a5a3c',hair:'#111',suit:'#3a3a6a',bg:'#141a4a',visor:true},acc:0x9db4ff},
- {name:'Kaito Ren',from:'Anillo Rojo',bonus:'+15% daño del arma',b:{dmg:.15},look:{type:'human',skin:'#e0b090',hair:'#101010',suit:'#5a1a20',bg:'#3a0810',cyber:true},acc:0xff4060},
- {name:'Oona',from:'Cola Azul',bonus:'35% menos combustible',b:{fuel:.35},look:{type:'alien',skin:'#3ab8d0',eye:'#002030',head:'round',eyes:1,tentacles:true,bg:'#032a3a',mark:'#c0f8ff'},acc:0x40f0ff},
- {name:'Drakón',from:'Verdania',bonus:'+30% fuerza en la arena',b:{fight:.3,dmg:.06},look:{type:'alien',skin:'#3a8a3a',eye:'#ffe040',head:'wide',eyes:2,bg:'#0a2a10',mark:'#d0ffd0'},acc:0x6aff70}];
+ {name:'Lira Voss',img:'pilots/lira-voss.jpg',from:'Tierra · Vía Láctea',bonus:'+15% blindaje',b:{hull:.15},look:{type:'human',skin:'#b88466',hair:'#1a1210',suit:'#2a4a9a',bg:'#12304a'},acc:0x4f8dff},
+ {name:'Kairo Ren',img:'pilots/kairo-ren.jpg',from:'Marte · Vía Láctea',bonus:'+15% daño del arma',b:{dmg:.15},look:{type:'human',skin:'#6a4430',hair:'#111111',suit:'#8a1a1a',bg:'#3a0c0c'},acc:0xff4040},
+ {name:'Nyx Tal',img:'pilots/nyx-tal.jpg',from:'Cola Azul',bonus:'Escudo 40% más rápido',b:{regen:.4},look:{type:'alien',skin:'#3aa89a',eye:'#0a2020',head:'tall',eyes:2,bg:'#063a34',mark:'#a0fff0',tentacles:true},acc:0x40f0d8},
+ {name:'Orun Vek',img:'pilots/orun-vek.jpg',from:'Roca Trianguli',bonus:'+25% blindaje',b:{hull:.25},look:{type:'alien',skin:'#6a6a88',eye:'#ffc040',head:'wide',eyes:2,bg:'#1a1a2a',mark:'#d0d0ff'},acc:0x7aff70},
+ {name:'Mira Sol',img:'pilots/mira-sol.jpg',from:'Estación Vórtice',bonus:'+18% agilidad',b:{agil:.18},look:{type:'human',skin:'#e0b48a',hair:'#111111',suit:'#d8d8e0',bg:'#2a2a3a'},acc:0xe8f0ff},
+ {name:'Zeth Ark',img:'pilots/zeth-ark.jpg',from:'Andros Prime',bonus:'+25% daño de misiles',b:{mis:.25},look:{type:'alien',skin:'#8a4ab8',eye:'#ffc040',head:'tall',eyes:2,bg:'#2a1040',mark:'#f0d0ff'},acc:0xd08a40},
+ {name:'Dax Mero',img:'pilots/dax-mero.jpg',from:'Tierra · Vía Láctea',bonus:'+2 bombas extra',b:{bombs:2},look:{type:'human',skin:'#7a4a30',hair:'#d8d8d8',suit:'#c05a18',bg:'#3a1a08'},acc:0xff8a30},
+ {name:'Elara Kyn',img:'pilots/elara-kyn.jpg',from:'Nubia Verde',bonus:'35% menos combustible',b:{fuel:.35},look:{type:'alien',skin:'#b890d8',eye:'#ffd040',head:'tall',eyes:2,bg:'#2a1a40',mark:'#ffffff',antenna:true},acc:0x40e0f0},
+ {name:'Sena Tor',img:'pilots/sena-tor.jpg',from:'Anillo Rojo',bonus:'+12% agilidad',b:{agil:.12},look:{type:'human',skin:'#f0c8a8',hair:'#a0401a',suit:'#1a1a22',bg:'#201014'},acc:0xff7040},
+ {name:'Voran IX',img:'pilots/voran-ix.jpg',from:'Verdania',bonus:'+30% fuerza en la arena',b:{fight:.3,dmg:.06},look:{type:'alien',skin:'#3a7a3a',eye:'#ffe040',head:'wide',eyes:2,bg:'#0a2a10',mark:'#d0ffd0'},acc:0xffd040},
+ {name:'Tali Venn',img:'pilots/tali-venn.jpg',from:'Iris',bonus:'Escudo 40% más rápido',b:{regen:.4},look:{type:'human',skin:'#5a3424',hair:'#e8e8e8',suit:'#2a3a9a',bg:'#101a40'},acc:0x5a7aff},
+ {name:'Rhem Solar',img:'pilots/rhem-solar.jpg',from:'Estación Vórtice',bonus:'+15% daño del arma',b:{dmg:.15},look:{type:'human',skin:'#d8a080',hair:'#2a1a10',suit:'#1a5a50',bg:'#0a2a28'},acc:0x40c0a0},
+ {name:'Amaya Kest',img:'pilots/amaya-kest.jpg',from:'Brasa Estelar',bonus:'+25% daño de misiles',b:{mis:.25},look:{type:'human',skin:'#9a6040',hair:'#1a0e08',suit:'#6a1a1a',bg:'#2a0808'},acc:0xff5050},
+ {name:'Jorin Vale',img:'pilots/jorin-vale.jpg',from:'Glaciar Blanco',bonus:'+15% blindaje',b:{hull:.15},look:{type:'human',skin:'#f0c8a8',hair:'#d8c080',suit:'#d8dce4',bg:'#20283a'},acc:0xe8f0ff},
+ {name:'Nira Dael',img:'pilots/nira-dael.jpg',from:'Abismo Violeta',bonus:'35% menos combustible',b:{fuel:.35},look:{type:'human',skin:'#9a6040',hair:'#111111',suit:'#5a2a8a',bg:'#1a0a2a'},acc:0xb070ff},
+ {name:'Kess Ardan',img:'pilots/kess-ardan.jpg',from:'Brasa Real',bonus:'+30% fuerza en la arena',b:{fight:.3,dmg:.06},look:{type:'human',skin:'#4a2a1a',hair:'#111111',suit:'#8a5a30',bg:'#2a1808'},acc:0xd08a40},
+ {name:'Ren Tavik',img:'pilots/ren-tavik.jpg',from:'Anillo Rojo',bonus:'+18% agilidad',b:{agil:.18},look:{type:'human',skin:'#c8956a',hair:'#111111',suit:'#22242c',bg:'#14161c'},acc:0x6aff90},
+ {name:'Elian Mora',img:'pilots/elian-mora.jpg',from:'Centauria',bonus:'+2 bombas extra',b:{bombs:2},look:{type:'human',skin:'#e8b898',hair:'#5a3420',suit:'#a05a30',bg:'#2a1408'},acc:0xff9a50},
+ {name:'Tomás Ryde',img:'pilots/tomas-ryde.jpg',from:'Tierra · Vía Láctea',bonus:'+25% blindaje',b:{hull:.25},look:{type:'human',skin:'#c8956a',hair:'#1a1210',suit:'#1a2a5a',bg:'#0a1430'},acc:0x4f8dff},
+ {name:'Zara Kai',img:'pilots/zara-kai.jpg',from:'Ígnea',bonus:'+15% daño del arma',b:{dmg:.15},look:{type:'human',skin:'#4a2a1a',hair:'#111111',suit:'#a08030',bg:'#2a2008'},acc:0xffd040},
+ {name:'Vesha Nol',img:'pilots/vesha-nol.jpg',from:'Cola Azul',bonus:'Escudo 40% más rápido',b:{regen:.4},look:{type:'alien',skin:'#4a6ad8',eye:'#05060c',head:'round',eyes:2,bg:'#0a1440',mark:'#c0d8ff'},acc:0x5a8aff},
+ {name:'Korvax',img:'pilots/korvax.jpg',from:'Ígnea',bonus:'+25% daño de misiles',b:{mis:.25},look:{type:'alien',skin:'#c0602a',eye:'#ffd040',head:'wide',eyes:3,bg:'#3a0c04',mark:'#ffd080'},acc:0xff5010},
+ {name:'Zyra Qel',img:'pilots/zyra-qel.jpg',from:'Andros Prime',bonus:'+18% agilidad',b:{agil:.18},look:{type:'alien',skin:'#9a5ab8',eye:'#f0f0f0',head:'tall',eyes:2,bg:'#2a1040',mark:'#ffe0ff'},acc:0xd070ff},
+ {name:'Thorin Vek',img:'pilots/thorin-vek.jpg',from:'Verdania',bonus:'+25% blindaje',b:{hull:.25},look:{type:'alien',skin:'#6a9a4a',eye:'#ffe040',head:'round',eyes:2,bg:'#0a2a10',mark:'#d0ffd0'},acc:0x6aff70},
+ {name:'Aeli Tass',img:'pilots/aeli-tass.jpg',from:'Cola Azul',bonus:'35% menos combustible',b:{fuel:.35},look:{type:'alien',skin:'#3ab0a0',eye:'#ffa020',head:'round',eyes:2,bg:'#033a34',mark:'#c0fff0',tentacles:true},acc:0x40f0d0},
+ {name:'Drak Omm',img:'pilots/drak-omm.jpg',from:'Roca Trianguli',bonus:'+30% fuerza en la arena',b:{fight:.3,dmg:.06},look:{type:'rock',skin:'#3a3a40',eye:'#ffb040',bg:'#141418'},acc:0xffb040},
+ {name:'Mirex Sai',img:'pilots/mirex-sai.jpg',from:'Iris',bonus:'+15% daño del arma',b:{dmg:.15},look:{type:'alien',skin:'#b02a7a',eye:'#300818',head:'tall',eyes:2,bg:'#3a0828',mark:'#ff8ad5'},acc:0xff5ab0},
+ {name:'Rhaz Kor',img:'pilots/rhaz-kor.jpg',from:'Brasa Real',bonus:'+15% blindaje',b:{hull:.15},look:{type:'alien',skin:'#b0905a',eye:'#40e0ff',head:'wide',eyes:2,bg:'#2a2010',mark:'#ffe0a0'},acc:0x40e0ff},
+ {name:'Soraya IX',img:'pilots/soraya-ix.jpg',from:'Verdania',bonus:'+12% agilidad',b:{agil:.12},look:{type:'alien',skin:'#5a9a4a',eye:'#ffb020',head:'round',eyes:2,bg:'#0a2a10',mark:'#e0ffd0'},acc:0xffb020},
+ {name:'Nem Vor',img:'pilots/nem-vor.jpg',from:'Glaciar Blanco',bonus:'+2 bombas extra',b:{bombs:2},look:{type:'alien',skin:'#7a8aa8',eye:'#e0e8ff',head:'wide',eyes:2,bg:'#141c2a',mark:'#e0e8ff',tentacles:true},acc:0xa0c0ff}];
 let PILOT=PILOTS[0];
+function pilotBadgeUI(){const b=$('pilotBadge');if(!b)return;const show=S.state!=='menu'&&S.state!=='arena'&&S.state!=='carrera'&&$('pilotSel').hidden&&$('menu').hidden;
+  if(show&&b.dataset.n!==PILOT.name){b.dataset.n=PILOT.name;$('pbImg').src=PILOT.img;$('pbName').textContent=PILOT.name;b.style.setProperty('--accent','#'+new THREE.Color(PILOT.acc).getHexString());}b.hidden=!show;}
+function drawPilotPhoto(c){const x=c.getContext('2d');drawPortrait(c,PILOT.look);if(typeof Image==='undefined')return;const im=new Image();im.onload=()=>{x.clearRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);};im.src=PILOT.img;}
 const DRAGONS={G:{body:0x2f8a3a,belly:0x9adf6a,eye:0xffe040,breath:'poison'},F:{body:0xb02a10,belly:0xffb040,eye:0xffff80,breath:'fire'},W:{body:0xdfe8ff,belly:0xa8c8ff,eye:0x40a0ff,breath:'ice'}};
 /* ---------- MISILES (se montan en las naves desde la armería del hangar) ---------- */
 const MISSILES=[
@@ -2452,9 +2483,9 @@ $('raceExit').onclick=exitRaceGame;
 addEventListener('message',e=>{const d=e.data;if(d&&typeof d==='object'&&d.tipo==='tc-salir')exitRaceGame();});
 
 /* ---------- SALA DE PILOTOS ---------- */
-let pendingLvl=0;
+let pendingLvl=0,badgeT=0;
 function openPilotSel(lvl){pendingLvl=lvl;initAudio();$('menu').hidden=true;const box=$('pilots');box.innerHTML='';
-  PILOTS.forEach((pl,i)=>{const b=document.createElement('button');b.className='pcard'+(i===savedPilot?' sel':'');b.dataset.i=i;const c=document.createElement('canvas');c.width=c.height=300;drawPortrait(c,pl.look);b.appendChild(c);
+  PILOTS.forEach((pl,i)=>{const b=document.createElement('button');b.className='pcard'+(i===savedPilot?' sel':'');b.dataset.i=i;const im=document.createElement('img');im.src=pl.img;im.alt='';im.loading='lazy';b.appendChild(im);
     b.insertAdjacentHTML('beforeend',`<span class="pn">${pl.name}</span><span class="lbl">${pl.from}</span><span class="pb">${pl.bonus}</span>`);box.appendChild(b);});
   $('pilotSel').hidden=false;}
 $('pilots').addEventListener('click',e=>{const b=e.target.closest('.pcard');if(!b)return;savedPilot=+b.dataset.i;try{localStorage.setItem('hde_pilot',String(savedPilot));}catch(_){}
@@ -2599,7 +2630,7 @@ function startArena(){if(!HG)return;const L=LEVELS[S.lvl],H=L.home,acc=new THREE
     ctrl:{l:false,r:false,block:false},opName:'Campeón de los '+H.race,camPos:new THREE.Vector3(0,3,11),camLook:new THREE.Vector3(0,1.9,0),fov:42,
     me:nuevo(me,-2.4,1,glowL),op:nuevo(op,2.4,-1,glowO),ai:{t:1.2,plan:null,blockT:0},estado:'intro'};
   for(const f of [AR.me,AR.op])aplicarPose(f.w,f.pose);aplicarPose(ref,POSE.refe);
-  $('fMeName').textContent=PILOT.name;$('fOpName').textContent=AR.opName;drawPortrait($('fMePort'),PILOT.look);drawPortrait($('fOpPort'),H.look);
+  $('fMeName').textContent=PILOT.name;$('fOpName').textContent=AR.opName;drawPilotPhoto($('fMePort'));drawPortrait($('fOpPort'),H.look);
   $('fEnd').hidden=true;$('fightUI').hidden=false;$('fCombo').classList.remove('on');arHud();dibujaJumbo('ROUND 1');
   arCam.position.set(0,6,16);arCam.lookAt(0,1.9,0);arCrowdStart();
   say(`Bienvenidos a la arena de ${H.planet}. ${PILOT.name} contra el campeón. ¡A pelear!`,1,1.05);
@@ -3038,6 +3069,7 @@ let last=performance.now();
 function frame(now){requestAnimationFrame(frame);let dt=(now-last)/1000;last=now;dt=Math.min(.05,Math.max(0,dt));
   const st=S.state;
   if(st==='carrera')return;
+  badgeT-=dt;if(badgeT<=0){badgeT=.3;pilotBadgeUI();}
   if(EX&&st==='explore'){exUpdate(dt);if(EX)renderer.render(EX.sc,hgCam);else renderer.render(scene,camera);return;}
   if(CT&&st==='city'){cityUpdate(dt);if(CT)renderer.render(CT.sc,hgCam);else if(HG)renderer.render(HG.sc,hgCam);return;}
   if(MS&&(st==='mother'||st==='mlaunch')){msUpdate(dt);if(MS)renderer.render(MS.sc,hgCam);else renderer.render(scene,camera);return;}
@@ -3051,7 +3083,6 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden&&(S.state==
 requestAnimationFrame(frame);
 })();
 </script>
-
 <script>
 /* botón para instalar la app */
 (function(){const b=document.getElementById('installBtn'),help=document.getElementById('installHelp'),txt=document.getElementById('installTxt');let ev=null;
