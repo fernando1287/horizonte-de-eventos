@@ -79,6 +79,19 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
 #podBtn{position:absolute;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 260px);pointer-events:auto;font:700 15px var(--f-disp);letter-spacing:.1em;text-transform:uppercase;padding:15px 24px;border-radius:999px;border:1px solid var(--violet);background:color-mix(in srgb,var(--violet) 22%,rgba(10,4,16,.72));color:var(--violet);cursor:pointer;white-space:nowrap;animation:beacon 1.1s ease-in-out infinite;max-width:calc(100% - 32px)}
 #podBtn kbd{font:500 11px var(--f-mono);background:var(--violet);color:#100418;border-radius:4px;padding:1px 5px;margin-left:6px}
 .touch #podBtn kbd{display:none}
+#atUI{position:fixed;inset:0;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between;gap:12px;padding-top:calc(env(safe-area-inset-top,0px) + 14px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 14px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));box-sizing:border-box}
+#atUI .hgBottom{align-items:center;width:100%;align-self:stretch}
+.touch #atUI .hgBottom{padding-bottom:240px}
+#atNav{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.atStats{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);text-shadow:0 1px 6px #000}
+.atStats b{color:var(--ink);font-family:var(--f-mono)}
+.atHullT{max-width:260px}
+#atHull{background:linear-gradient(90deg,var(--good),#b8ffd9)}
+#atTimer{font:700 16px var(--f-mono);color:#ffd23f;text-shadow:0 1px 8px #000}
+#atExit{position:absolute;right:max(16px,env(safe-area-inset-right,0px));top:calc(env(safe-area-inset-top,0px) + 14px);pointer-events:auto;padding:10px 14px;font-size:12px}
+#atAct kbd{font:500 11px var(--f-mono);background:#04060f;color:var(--accent);border-radius:4px;padding:1px 5px;margin-left:8px}
+#touch.atmo #tMis,#touch.atmo #tBomb,#touch.atmo #tView{display:none}
+@media (max-width:600px){#atUI .hgTop h2{font-size:24px}#atUI .hgTop{padding-right:120px}}
 #exUI{position:fixed;inset:0;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between;gap:12px;padding-top:calc(env(safe-area-inset-top,0px) + 14px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 14px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));box-sizing:border-box}
 #exUI .hgBottom{align-items:flex-end;width:100%;align-self:stretch}
 .touch #exUI .hgBottom{padding-bottom:104px}
@@ -90,6 +103,8 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
 #exJump{position:absolute;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 18px);width:84px;height:84px;pointer-events:auto;color:var(--accent);border-color:var(--accent)}
 @media (max-width:600px){#exUI .hgTop h2{font-size:24px}#exUI .hgHint{font-size:12px}}
 #landBtn,#dockBtn{position:absolute;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 132px);pointer-events:auto;font:700 15px var(--f-disp);letter-spacing:.1em;text-transform:uppercase;padding:15px 24px;border-radius:999px;border:1px solid var(--good);background:color-mix(in srgb,var(--good) 22%,rgba(4,10,8,.7));color:var(--good);cursor:pointer;white-space:nowrap;animation:beacon 1.1s ease-in-out infinite;max-width:calc(100% - 32px);overflow:hidden;text-overflow:ellipsis}
+#dockBtn.enemy{border-color:var(--danger);color:var(--danger);background:color-mix(in srgb,var(--danger) 20%,rgba(16,2,6,.75))}
+#dockBtn.enemy kbd{background:var(--danger)!important}
 #dockBtn.mini{top:calc(env(safe-area-inset-top,0px) + 124px);left:auto;right:max(16px,env(safe-area-inset-right,0px));transform:none;padding:9px 14px;font-size:12px;animation:none}
 #dockBtn{top:calc(env(safe-area-inset-top,0px) + 196px);border-color:var(--shield);color:var(--shield);background:color-mix(in srgb,var(--shield) 20%,rgba(2,8,16,.72))}
 #dockBtn kbd{background:var(--shield)!important}
@@ -319,7 +334,7 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
 #pilotBadge div{display:flex;flex-direction:column;align-items:center;line-height:1.05}
 #pilotBadge .lbl{font-size:7px;letter-spacing:.16em}
 #pilotBadge b{font-size:10px;text-align:center;text-shadow:0 1px 6px #000;max-width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.top .gal,#hangarUI .hgTop,#cityUI .hgTop,#exUI .hgTop{padding-left:66px}
+.top .gal,#hangarUI .hgTop,#cityUI .hgTop,#exUI .hgTop,#atUI .hgTop{padding-left:66px}
 #enemyComm{position:fixed;z-index:6;right:max(12px,env(safe-area-inset-right,0px));top:calc(env(safe-area-inset-top,0px) + 150px);width:min(330px,calc(100% - 24px));display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:center;padding:10px;border-radius:14px;background:rgba(20,4,10,.86);border:1px solid #ff4d6d;box-shadow:0 0 22px rgba(255,60,90,.35);pointer-events:none;animation:ecIn .35s ease-out}
 @keyframes ecIn{from{opacity:0;transform:translateX(30px)}}
 @media (max-width:600px){#enemyComm{top:calc(env(safe-area-inset-top,0px) + 268px)}}
@@ -494,6 +509,19 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
   </div>
   <div class="hgBottom"><button class="btn actbtn" id="cyAct" hidden>Acción</button></div>
   <div id="cyShop" hidden><div class="shopPane"><div class="eyebrow" id="shopEye">Tienda</div><h2>Mercado de la ciudad</h2><p class="hgHint" style="text-shadow:none">Paga con los cristales que ganas en los juegos de la ciudad.</p><div id="shopItems" style="display:flex;flex-direction:column;gap:8px"></div><button class="btn ghost" id="shopClose">Cerrar</button></div></div>
+</div>
+
+<div id="atUI" hidden>
+  <canvas id="atNav" aria-hidden="true"></canvas>
+  <div class="hgTop">
+    <div class="eyebrow" id="atEye">Vuelo atmosférico</div>
+    <h2 id="atPlanet"></h2>
+    <div class="atStats"><span>Ciudades <b id="atCities">0/3</b></span><span>Descubrimientos <b id="atDisc">0/4</b></span><span>Retos <b id="atRetos">0/2</b></span><span>Altura <b id="atAlt"></b></span><span>Vel. <b id="atSpd"></b></span></div>
+    <div class="track atHullT"><i id="atHull"></i></div>
+    <div id="atTimer" hidden></div>
+  </div>
+  <div class="hgBottom"><button class="btn actbtn" id="atAct" hidden>Aterrizar</button></div>
+  <button class="btn ghost" id="atExit">Volver al espacio</button>
 </div>
 
 <div id="exUI" hidden>
@@ -1203,7 +1231,7 @@ function sayAttendant(text){if(attTimer)clearTimeout(attTimer);try{if(hasSpeech)
 /* ---------- INPUT ---------- */
 const keys={};const joy={x:0,y:0,id:null,ox:0,oy:0};let firing=false,thrIn=0;
 addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=true;
-  if(S.state==='explore'){exKey(k,e);return;}if(S.state==='city'){cityKey(k,e);return;}if(S.state==='mother'){msKey(k,e);return;}if(S.state==='hangar'){hgKey(k,e);return;}if(S.state==='arena'){arKey(k,e);return;}
+  if(S.state==='atmo'){atKey(k,e);return;}if(S.state==='explore'){exKey(k,e);return;}if(S.state==='city'){cityKey(k,e);return;}if(S.state==='mother'){msKey(k,e);return;}if(S.state==='hangar'){hgKey(k,e);return;}if(S.state==='arena'){arKey(k,e);return;}
   if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();
   if(k==='e'||k==='m')fireMissile();if(k==='q'||k==='b')dropBomb();if(k==='p'||k==='escape')togglePause();if(k==='l')landAction();if(k==='n')startDock();if(k==='v')toggleView();if(k==='c')startPod();});
 addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
@@ -1289,6 +1317,7 @@ function buildPort(r,accent,look){const port=new THREE.Group(),top=r+.35;
   for(const [x,z,k] of [[-6.5,-3,1],[-6.8,3.6,.8],[5.5,-6,.7]]){const dm=new THREE.Mesh(domeG,mat(0xaab0c0,{metalness:.7,roughness:.25}));dm.position.set(x,top,z);dm.scale.setScalar(k);port.add(dm);lamp(accent,1.2*k,x,top+2.5*k,z);}
   for(let i=0;i<20;i++){const a=i/20*Math.PI*2;lamp(0x6fb8ff,.8,Math.cos(a)*12.3,top+.15,Math.sin(a)*12.3);}
   const flaggers=[];if(look){const hu=look.type==='human';for(const [x,z] of [[-3.4,9.6],[3.4,9.6],[-3.2,2.5],[3.2,2.5]]){const w=buildWarrior(look,0xff8a30,hu);addFlags(w);w.g.position.set(x,top,z);w.g.rotation.y=x<0?.35:-.35;port.add(w.g);flaggers.push(w);}}
+  {const inner=new THREE.Group();inner.position.y=top;inner.scale.setScalar(.42);[...port.children].forEach(c=>{c.position.y-=top;inner.add(c);});port.add(inner);}
   port.userData={top,rabbit,beacon,red,flaggers};return port;}
 function animPort(u,T){const n=u.rabbit.length,act=n-1-Math.floor(((T*1.4)%1)*n);
   u.rabbit.forEach((sp,i)=>{const on=i===act||i===act+1;sp.material.opacity=on?1:.22;const sc=on?3.2:1.3;sp.scale.set(sc,sc,1);});
@@ -1440,6 +1469,39 @@ function spawnRival(){const mc=rivalMC();const b=buildMother(false,mc,true);cons
 function killRival(){const R0=S.rival;if(!R0)return;R0.alive=false;const p=R0.o.position;for(let k=0;k<8;k++)setTimeout(()=>{if(!R0.o.parent)return;explosion(p.x+R(-30,30),p.y+R(-15,15),p.z+R(-30,30),4,new THREE.Color(R0.mc.glow));sfx('boom');S.shake=1;},k*180);
   setTimeout(()=>{scene.remove(R0.o);disposeScene(R0.o);},1700);S.score+=6000*ptsMul();addCry(10);S.rival=null;S.rivalCool=110;$('bossbar').hidden=!(S.boss&&S.boss.alive);
   msg('¡Nave nodriza enemiga destruida! +10 cristales','var(--good)',3);enemyComm(R0.cmd,'¡Imposible! Retirada… esto no ha terminado.',4);say('Nave nodriza enemiga destruida. Gran victoria para tu facción.');}
+
+/* ---------- TERRITORIO DE CADA FACCIÓN ---------- */
+function planetOwner(l){return l%2===1?'umbra':'alianza';}
+let msOverride=null;
+/* hangares de los reptiles: cavernas de roca, huesos y cristales, pero bien ordenadas */
+function caveify(sc,b){sc.background=new THREE.Color(0x0d0709);sc.fog=new THREE.Fog(0x0d0709,40,180);
+  for(const o of sc.children){if(o.isMesh&&o.material&&o.material.isMeshStandardMaterial){o.material=o.material.clone();o.material.color.lerp(new THREE.Color(0x4a3028),.65);if(o.material.map)o.material.color.multiplyScalar(.8);}}
+  const rm=new THREE.MeshStandardMaterial({color:0x3a2a26,roughness:.95,flatShading:true}),N=Math.round((b.zMax-b.zMin)/2.2)*2+60;
+  const inst=new THREE.InstancedMesh(new THREE.DodecahedronGeometry(1,0),rm,N),mm=new THREE.Matrix4(),q=new THREE.Quaternion(),sv=new THREE.Vector3(),pv=new THREE.Vector3(),eu=new THREE.Euler();let n=0;
+  for(let z=b.zMin;z<=b.zMax&&n<N-60;z+=2.2)for(const sd of [-1,1]){const k=R(2.5,5.5);pv.set(sd*(b.w-.5+R(-1,1.5)),R(0,b.h*.9),z);eu.set(R(0,3),R(0,3),R(0,3));q.setFromEuler(eu);sv.set(k,k*R(.8,1.4),k);mm.compose(pv,q,sv);inst.setMatrixAt(n++,mm);}
+  for(let i=0;i<60&&n<N;i++){const k=R(3,7);pv.set(R(-b.w,b.w),b.h+R(-1,2),R(b.zMin,b.zMax));eu.set(R(0,3),R(0,3),R(0,3));q.setFromEuler(eu);sv.set(k,k*.6,k);mm.compose(pv,q,sv);inst.setMatrixAt(n++,mm);}
+  inst.count=n;sc.add(inst);
+  const stM=new THREE.MeshStandardMaterial({color:0x5a4238,roughness:.9,flatShading:true});for(let i=0;i<46;i++){const h=R(2,7),st=new THREE.Mesh(new THREE.ConeGeometry(R(.4,1),h,6),stM);st.rotation.x=Math.PI;st.position.set(R(-b.w+3,b.w-3),b.h-h/2+.5,R(b.zMin,b.zMax));sc.add(st);}
+  const boneM=new THREE.MeshStandardMaterial({color:0xd8ccb0,roughness:.6});for(let z=b.zMin+8;z<b.zMax;z+=18){const ar=new THREE.Mesh(new THREE.TorusGeometry(b.w-1.5,.9,6,24,Math.PI),boneM);ar.position.set(0,0,z);ar.scale.y=(b.h-1)/(b.w-1.5);sc.add(ar);
+    for(const sd of [-1,1]){const cl=new THREE.Mesh(new THREE.ConeGeometry(.6,3,6),boneM);cl.position.set(sd*(b.w-4),b.h*.55,z);cl.rotation.z=sd*1.2;sc.add(cl);}}
+  const crys=[0x8aff3a,0xff3ad0,0xa040ff];for(let i=0;i<26;i++){const c=pick(crys),sd=i%2?1:-1,z=R(b.zMin+4,b.zMax-4),h=R(1.5,4);const cm=new THREE.Mesh(new THREE.OctahedronGeometry(1,0),new THREE.MeshStandardMaterial({color:c,emissive:c,emissiveIntensity:.9,flatShading:true}));
+    cm.scale.set(h*.35,h,h*.35);cm.position.set(sd*(b.w-3.5),h*.5,z);cm.rotation.z=R(-.4,.4);sc.add(cm);if(i%3===0){const gl=glowSprite(c,6,.5);gl.position.copy(cm.position);sc.add(gl);}}
+  for(const sd of [-1,1]){const ch=new THREE.Mesh(new THREE.BoxGeometry(1.2,.12,b.zMax-b.zMin),basic(0x8aff3a,{transparent:true,opacity:.6,blending:THREE.AdditiveBlending}));ch.position.set(sd*(b.w-6.5),.08,(b.zMax+b.zMin)/2);sc.add(ch);}
+  for(let k=0;k<4;k++){const pl=new THREE.PointLight(k%2?0xff3ad0:0x8aff3a,1,45);pl.position.set((k%2?-1:1)*(b.w-6),4,b.zMin+(k+.5)*(b.zMax-b.zMin)/4);sc.add(pl);}}
+/* entrar al territorio enemigo: los guardias atacan enseguida */
+function intruderStart(G,b){const I={guards:[],t:0,b,warnT:0};G.intr=I;I.alarm=new THREE.PointLight(0xff2020,0,140);I.alarm.position.set(0,b.h-3,(b.zMin+b.zMax)/2);G.sc.add(I.alarm);
+  const list=enemyList();for(let i=0;i<5;i++){const W=list[(i*7+S.lvl*3)%list.length];const w=buildWarrior(W.look,0xff3030,W.look.type==='human');const z=b.zMin+12+i*((b.zMax-b.zMin-24)/4),x=(i%2?-1:1)*(b.w-6);
+    w.g.position.set(x,0,z);G.sc.add(w.g);const gl=glowSprite(0xff3030,1.6,1);gl.position.y=3.2;w.g.add(gl);I.guards.push({w,x,z,ph:R(0,6),delay:.8+i*.5});}
+  msg('¡Intruso! Estás en territorio '+(FACTION==='umbra'?'de la Alianza':'del Imperio Umbra')+': corre a tu nave','var(--danger)',3.2);say('Alerta. Intruso detectado. Guardias, ataquen.');
+  $('hgHint').textContent='¡Te descubrieron! Los guardias de la facción enemiga te atacan. Corre a tu nave y despega antes de que te atrapen.';}
+function intruderUpdate(G,dt){const I=G&&G.intr;if(!I||I.done)return;I.t+=dt;const pv=G.pilot;I.alarm.intensity=1.6+Math.sin(I.t*9)*1.6;const up=(pv.y||0)>1;let touching=0;
+  for(const g of I.guards){if(I.t<g.delay){animWalk(g.w,0,0);continue;}const tx=up&&typeof ELEV!=='undefined'?ELEV.x+2:pv.x,tz=up&&typeof ELEV!=='undefined'?ELEV.z-5:pv.z;const dx=tx-g.x,dz=tz-g.z,d=Math.hypot(dx,dz);const sp=6.6+S.lvl*.15;
+    if(d>1.5){g.x+=dx/d*sp*dt;g.z+=dz/d*sp*dt;g.ph+=dt*12;animWalk(g.w,g.ph,1);}else{animWalk(g.w,0,0);g.w.armR.rotation.x=-1.6+Math.sin(I.t*14+g.ph)*.9;if(!up)touching++;}
+    g.w.g.position.set(g.x,0,g.z);g.w.g.rotation.y=Math.atan2(dx,dz);}
+  if(touching){S.hull-=dt*(6+touching*4);S.shake=Math.max(S.shake||0,.3);I.warnT-=dt;if(I.warnT<=0){I.warnT=1.2;if(actx&&!S.muted)tone('square',180,80,.12,.06);msg('¡Te están golpeando! Casco '+Math.max(0,Math.ceil(S.hull)),'var(--danger)',.9);}}
+  if(S.hull<=S.hullMax*.12){I.done=true;S.hull=Math.max(S.hullMax*.12,1);msg('¡Te atraparon! Te expulsan de la base enemiga','var(--danger)',2.8);say('Intruso capturado. Expulsado de la base.');
+    if(MS===G){MS.launch={t:1};S.state='mlaunch';$('hangarUI').hidden=true;$('touch').hidden=true;}else if(HG===G){leaveHangar();fadeFlash();takeoff();}}}
+
 function rivalUpdate(dt,spd,playing){if(ecT>0){ecT-=dt;if(ecT<=0||S.state!=='play'&&S.state!=='intro')$('enemyComm').hidden=true;}if(S.state==='play'&&!S.rival&&!S.bh){S.rivalCool=(S.rivalCool==null?45:S.rivalCool)-dt;if(S.rivalCool<=0)spawnRival();}
   const rv=S.rival;if(!rv)return;const p=rv.o.position;rv.blink.forEach((b,i)=>{b.material.opacity=((S.time*1.3+i*.3)%1)<.5?1:.15;});if(rv.o.userData.ring)rv.o.userData.ring.rotation.z+=dt*.3;animEscorts(rv.o,S.time);
   if(playing){p.z+=spd*.7*dt;keepOut(rv.o,75);}rv.dist=p.length();
@@ -1524,7 +1586,7 @@ const FACTIONS={alianza:{name:'Alianza Estelar',short:'Alianza',col:'#6fb8ff',d:
   umbra:{name:'Imperio Umbra',short:'Umbra',col:'#ff3ad0',d:'Conquistan las galaxias con el Portanaves Hostil, el Dreadnought Serpiente, el Crucero del Vacío, el Enjambre Jade y el Segador Orbital.'}};
 let FACTION='alianza';try{if(localStorage.getItem('hde_fac')==='umbra')FACTION='umbra';}catch(_){}
 function facList(f){return f==='umbra'?UCLASSES:MCLASSES;}
-function curMC(){const l=facList(FACTION);return l[S.lvl%l.length];}
+function curMC(){if(msOverride&&(S.state==='mother'||S.state==='mlaunch'))return msOverride;const l=facList(FACTION);return l[S.lvl%l.length];}
 function rivalMC(){const f=FACTION==='umbra'?'alianza':'umbra',l=facList(f);return l[(S.lvl+2)%l.length];}
 function mcHex(c){return '#'+new THREE.Color(c).getHexString();}
 function buildMother(asPlayer,mc0,hostile){const mc=mc0||curMC();const b=mc.id==='estrella'&&!hostile?buildMotherEstrella(asPlayer):buildMotherStyled(asPlayer,mc,hostile);if(!asPlayer)addEscorts(b.g,mc);b.g.userData.mc=mc;return b;}
@@ -1726,8 +1788,9 @@ function buildMotherEstrella(asPlayer){const g=new THREE.Group();const T=motherT
 function spawnMother(near){const b=buildMother();const sd=S.land?-S.land.side:(Math.random()<.5?-1:1);if(near){b.g.position.set(-62,10,-55);}else{b.g.position.copy(farDir(sd,1080));b.g.rotation.y=sd>0?Math.PI:0;}scene.add(b.g);
   S.mother={o:b.g,blink:b.blink,beamT:b.beamT,side:sd,missed:false,leaving:false,cool:near?8:0};if(near)return;msg('Nave nodriza '+curMC().name+' a la vista: acóplate para cargar combustible','var(--shield)',2.6);say('Nave nodriza a la vista. Puedes acoplarte para cargar combustible.');}
 function removeMother(){if(!S.mother)return;disposeScene(S.mother.o);scene.remove(S.mother.o);S.mother=null;S.motherCool=18;setDockUI(false);}
-let dockShown=false;function setDockUI(v){if(v===dockShown)return;dockShown=v;const b=$('dockBtn');b.classList.toggle('mini',!!S.flyMother);b.innerHTML=S.flyMother?'Lanzar mi nave<kbd>N</kbd>':'Acoplar a la nave nodriza<kbd>N</kbd>';b.hidden=!v;}
-function startDock(){if(S.flyMother){if(!S.paused)motherToDeck();return;}const mo=S.mother;if(!mo||S.state!=='play'||mo.missed||mo.leaving||S.paused||mo.cool>0)return;S.state='dock';firing=false;beam.visible=false;setDockUI(false);setLandUI(null);
+let dockShown='';function setDockUI(v,kind){const key=v?(S.flyMother?'fm':kind||'mo'):'';if(key===dockShown)return;dockShown=key;const b=$('dockBtn');b.classList.toggle('mini',!!S.flyMother);b.classList.toggle('enemy',kind==='rival');
+  b.innerHTML=S.flyMother?'Lanzar mi nave<kbd>N</kbd>':kind==='rival'&&S.rival?'Infiltrarte en '+S.rival.mc.name+' (enemiga)<kbd>N</kbd>':'Acoplar a la nave nodriza<kbd>N</kbd>';b.hidden=!v;}
+function startDock(){if(S.flyMother){if(!S.paused)motherToDeck();return;}if(dockShown==='rival'&&S.rival&&S.state==='play'&&!S.paused){firing=false;beam.visible=false;setDockUI(false);setLandUI(null);ship.visible=false;$('hud').hidden=true;enterMother(S.fuel,S.rival.mc,true);return;}const mo=S.mother;if(!mo||S.state!=='play'||mo.missed||mo.leaving||S.paused||mo.cool>0)return;S.state='dock';firing=false;beam.visible=false;setDockUI(false);setLandUI(null);
   for(const e of enemies)e.alive=false;for(const r of rocks)r.alive=false;for(const m of mines)m.alive=false;for(const b of ebul)b.alive=false;
   mo.o.updateMatrixWorld();const W=(x,y,z)=>mo.o.localToWorld(new THREE.Vector3(x,y,z));const out=W(44,-1,6),mouth=W(21.5,-1,6),inside=W(12,-1,6);const dirIn=mouth.clone().sub(out).normalize();
   S.dock={p0:ship.position.clone(),c:out.clone().addScaledVector(dirIn,-28).add(new THREE.Vector3(0,6,0)),out,mouth,inside,dirIn,lane:new THREE.Vector3(0,1,0),camR:W(72,16,-22),t:0,f0:S.fuel};
@@ -1739,14 +1802,14 @@ function updateDock(dt){const D=S.dock;if(!D||!S.mother)return;D.t+=dt;const t=D
   else{S.dock=null;bm.opacity=0;enterMother(D.f0);return;}
   if(dir.lengthSq()<1e-6)dir.set(0,0,-1);dir.normalize();ship.position.copy(pos);ship.up.set(0,1,0);ship.lookAt(tmpV.copy(pos).sub(dir));if(t>3.3)$('flash').style.opacity=Math.min(1,(t-3.3)/.5);
   if(t>=3.2){camDes.copy(D.camR);lookDes.copy(D.mouth);}else{camDes.copy(pos).addScaledVector(dir,-11).add(tmpV.set(0,4.5,0));lookDes.copy(pos).addScaledVector(dir,6);}}
-$('dockBtn').addEventListener('click',startDock);$('podBtn').addEventListener('click',startPod);$('exAct').addEventListener('click',()=>exAction());$('exJump').addEventListener('pointerdown',e=>{e.preventDefault();exJump();});$('viewBtn').addEventListener('click',toggleView);$('viewBig').addEventListener('click',toggleView);$('tView').addEventListener('pointerdown',e=>{e.preventDefault();toggleView();});$('msHelm').addEventListener('click',takeHelm);
+$('dockBtn').addEventListener('click',startDock);$('atAct').addEventListener('click',()=>{if(AT&&AT.near)atLand(AT.near);});$('atExit').addEventListener('click',()=>{if(AT&&S.state==='atmo'&&!AT.landing)leaveAtmo(true);});$('podBtn').addEventListener('click',startPod);$('exAct').addEventListener('click',()=>exAction());$('exJump').addEventListener('pointerdown',e=>{e.preventDefault();exJump();});$('viewBtn').addEventListener('click',toggleView);$('viewBig').addEventListener('click',toggleView);$('tView').addEventListener('pointerdown',e=>{e.preventDefault();toggleView();});$('msHelm').addEventListener('click',takeHelm);
 
 /* ---------- ÓRBITA Y ATERRIZAJE ---------- */
 let landMode=null;
 function setLandUI(mode){if(mode===landMode)return;landMode=mode;const b=$('landBtn');if(!mode){b.hidden=true;return;}const pl=LEVELS[S.lvl].home.planet;
   b.classList.toggle('warn',mode==='slow');
-  b.innerHTML=mode==='slow'?`Frenar y orbitar ${pl}<kbd>L</kbd>`:mode==='braking'?`Frenando… entrando en órbita`:mode==='orbit'?`Entrar en órbita de ${pl}<kbd>L</kbd>`:`Aterrizar en el puerto<kbd>L</kbd>`;b.hidden=false;}
-function landAction(){if(S.paused)return;if(landMode==='orbit')startOrbit();else if(landMode==='slow'){S.autoBrake=true;msg('Frenando para entrar en órbita','var(--warn)',1.6);}else if(landMode==='land')startPortLanding();}
+  b.innerHTML=mode==='slow'?`Frenar y orbitar ${pl}<kbd>L</kbd>`:mode==='braking'?`Frenando… entrando en órbita`:mode==='orbit'?`Entrar en órbita de ${pl}<kbd>L</kbd>`:`Descender a ${pl}<kbd>L</kbd>`;b.hidden=false;}
+function landAction(){if(S.paused)return;if(landMode==='orbit')startOrbit();else if(landMode==='slow'){S.autoBrake=true;msg('Frenando para entrar en órbita','var(--warn)',1.6);}else if(landMode==='land')enterAtmo();}
 function orbitPos(O,a){return new THREE.Vector3(O.C.x+Math.cos(a)*O.R,O.C.y+O.R*.35,O.C.z+Math.sin(a)*O.R);}
 function startOrbit(){const lp=S.land;if(!lp||S.state!=='play')return;if(S.thr>.72){msg('Demasiado rápido para orbitar','var(--warn)',1.4);return;}
   S.state='orbit';firing=false;beam.visible=false;
@@ -1760,7 +1823,7 @@ function abortOrbit(){S.state='play';S.orbit=null;if(S.land){S.land.missed=true;
   P.x=0;P.y=1;P.vx=P.vy=0;S.camBlend=2;S.inv=1.2;msg('¡Demasiado rápido! Saliste de la órbita','var(--warn)',2);say('Demasiado rápido. Perdiste la órbita.');}
 function updateOrbit(dt){const O=S.orbit;if(!O)return;O.t+=dt;const tr=Math.min(1,O.t/2.4),e=tr*tr*(3-2*tr);
   if(tr>=1){if(!O.done){if(S.thr>1.45){abortOrbit();return;}O.warn=S.thr>.85;O.a+=O.w*dt*(O.warn?.12:1);O.prog=Math.min(1,(O.a-O.a0)/(Math.PI*2));
-      if(O.prog>=1){O.done=true;$('orbitHud').hidden=true;msg('Órbita completa: pista libre','var(--good)',2.2);say('Órbita completa. Torre de control: pista libre, puedes aterrizar.');}}
+      if(O.prog>=1){O.done=true;$('orbitHud').hidden=true;msg('Órbita completa: puedes descender al planeta','var(--good)',2.2);say('Órbita completa. Ya puedes descender al planeta.');}}
     else O.a+=O.w*dt*.7;}
   const op=orbitPos(O,O.a),T3=new THREE.Vector3(-Math.sin(O.a),0,Math.cos(O.a));
   const pos=tr<1?O.from.clone().lerp(op,e):op;let dir=T3;if(tr<1)dir=op.clone().sub(O.from).normalize().lerp(T3,e).normalize();
@@ -1788,7 +1851,7 @@ function updatePortLanding(dt){const LP=S.landPath;if(!LP)return;LP.t+=dt;const 
   if(t>6.6)$('flash').style.opacity=Math.min(1,(t-6.6)/.6);if(t>=7.2){S.landPath=null;openLanding();}}
 function openLanding(){S.landedHere=true;routeDone('land');const H=LEVELS[S.lvl].home;
   S.hull=S.hullMax;S.shield=S.shieldMax;S.mis=Math.max(S.mis,14);S.bombs=Math.min(5+(PILOT.b.bombs||0),S.bombs+1);S.fuel=S.fuelMax;S.fuelWarn=S.fuelOut=false;
-  removeLand();enterHangar('planet');fadeFlash();musicMuffle(true);say(H.greet,H.pitch,H.rate,null,H.race,'h'+S.lvl);}
+  removeLand();enterHangar('planet');fadeFlash();musicMuffle(true);if(HG&&HG.owner!==FACTION){HG.hostile=true;intruderStart(HG,{w:21,zMin:-95,zMax:95,h:18});}else say(H.greet,H.pitch,H.rate,null,H.race,'h'+S.lvl);}
 function takeoff(){try{if(hasSpeech)speechSynthesis.cancel();}catch(e){}
   $('hud').hidden=false;$('touch').hidden=!isTouch;removeLand();
   for(const b of ebul)b.alive=false;
@@ -1946,7 +2009,7 @@ function buildHangar(kind){const L=LEVELS[S.lvl],acc=kind==='home'?0x6fd4ff:new 
 function disposeScene(sc){const keep=new Set(Object.values(GEO));for(const k in SPM)keep.add(SPM[k]);sc.traverse(o=>{if(o.geometry&&!keep.has(o.geometry))o.geometry.dispose();for(const m of [].concat(o.material||[])){if(m&&!keep.has(m)){if(m.map&&m.map.isTexture&&m.map!==GLOW&&m.map!==FLARE&&m.map!==DISK&&m.map!==FLAGTEX)m.map.dispose();if(m.dispose)m.dispose();}}});}
 function leaveHangar(){if(!HG)return;disposeScene(HG.sc);HG=null;$('hangarUI').hidden=true;$('touch').classList.remove('walk');$('joyhint').textContent='Arrastra aquí para volar';}
 function enterHangar(kind){leaveHangar();S.state='hangar';firing=false;$('hud').hidden=true;$('card').classList.remove('on');setLandUI(null);setDockUI(false);
-  HG=buildHangar(kind);const L=LEVELS[S.lvl];
+  HG=buildHangar(kind);const L=LEVELS[S.lvl];const owner=kind==='home'?FACTION:planetOwner(S.lvl);HG.owner=owner;if(owner==='umbra')caveify(HG.sc,{w:21,zMin:-100,zMax:100,h:18});
   if(kind==='home'){$('hgEye').textContent='Base Orión · Vía Láctea';$('hgTitle').textContent=S.lvl>0?'Hangar principal · rumbo a '+L.name:'Hangar principal';$('hgMeet').hidden=true;HG.meetT=0;}
   else{const H=L.home;$('hgEye').textContent='Aeropuerto · Galaxia '+L.name;$('hgTitle').textContent='Hangar de '+H.planet;$('hgMeet').hidden=false;
     $('raceName').textContent=H.race;$('raceKind').textContent=H.kind;$('greet').textContent=H.greet;$('service').textContent='Casco, escudo y combustible al máximo · misiles recargados · +1 bomba';drawPortrait($('portrait'),H.look);}
@@ -2027,6 +2090,7 @@ function hgUpdate(dt){const G=HG;G.t+=dt;const t=G.t;
     else{hgTmp.set(s.position.x+3,s.position.y+3.2,s.position.z+13);G.camPos.lerp(hgTmp,Math.min(1,dt*(lt<3.2?2.5:5)));G.look.lerp(hgTmp.set(s.position.x,s.position.y,s.position.z-12),Math.min(1,dt*5));}
     if(lt>4.6)$('flash').style.opacity=Math.min(1,(lt-4.6)/.6);
     if(lt>=5.3){finishLaunch();return;}}
+  intruderUpdate(G,dt);if(HG!==G)return;
   G.sparks.update(dt);hgCam.position.copy(G.camPos);hgCam.lookAt(G.look);}
 
 /* ---------- INTERIOR DE LA NAVE NODRIZA ---------- */
@@ -2050,7 +2114,7 @@ function drawFuel(x,w,h){const f=S.fuel/S.fuelMax,full=f>=.999;x.fillStyle='#0a0
 function drawLaunch(x,w,h,t){const on=((t*1.5)|0)%2===0;x.fillStyle='#120404';x.fillRect(0,0,w,h);x.font='bold 40px monospace';x.fillStyle=on?'#5dffa8':'#2a6a4a';x.fillText('BAHÍA DE LANZAMIENTO',30,70);x.font='28px monospace';x.fillStyle='#ffe0c0';x.fillText('COMPUERTA ABIERTA · CAMPO DE FUERZA ACTIVO',30,130);}
 function msLabel(text,col,x,y,z,w=12){const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:labelTex(text,col),transparent:true,depthWrite:false}));sp.scale.set(w,w/8,1);sp.position.set(x,y,z);return sp;}
 const MSPAD={x:0,z:22},ELEV={x:-15,z:47};
-function buildMotherInterior(){const L=LEVELS[S.lvl],MC=curMC(),acc=MC.glow;const sc=new THREE.Scene();sc.background=new THREE.Color(0x03060c);sc.fog=new THREE.Fog(0x03060c,70,190);
+function buildMotherInterior(){const L=LEVELS[S.lvl],MC=msOverride||curMC(),acc=MC.glow;const sc=new THREE.Scene();sc.background=new THREE.Color(0x03060c);sc.fog=new THREE.Fog(0x03060c,70,190);
   sc.add(new THREE.HemisphereLight(0x9ab0d8,0x141820,.8));sc.add(new THREE.AmbientLight(0x3a4458,.55));
   for(const z of [40,10,-20,-48]){const pl=new THREE.PointLight(0xd8e8ff,1.15,60);pl.position.set(0,16,z);sc.add(pl);}
   const fuelLight=new THREE.PointLight(0xff9a2a,1.4,26);fuelLight.position.set(5,6,22);sc.add(fuelLight);
@@ -2153,12 +2217,14 @@ function buildMotherInterior(){const L=LEVELS[S.lvl],MC=curMC(),acc=MC.glow;cons
   return {sc,myShip,fluid,tl,pring,hose,pulses,fuelLight,screens,buttons,doors,plat,deckY,cap,holo,crew,mech,flaggers,drones,guides,field,sparks:sp,fleet,fleetNames,
     shuttles,pilot:{w:pw,x:-4,y:0,z:MSPAD.z+5,face:Math.PI,ph:0},deck:'low',ride:null,near:null,t:0,scrT:0,landT:0,f0:0,said50:false,saidFull:false,launch:null,
     camPos:new THREE.Vector3(14,12,MSPAD.z+20),look:new THREE.Vector3(0,3,MSPAD.z)};}
-function enterMother(f0){S.state='mother';firing=false;$('hud').hidden=true;setLandUI(null);setDockUI(false);$('orbitHud').hidden=true;
-  MS=buildMotherInterior();MS.f0=f0;MS.fleetNames.length&&MS.screens.forEach(s2=>{s2.draw(s2.x,s2.w,s2.h,0);s2.t.needsUpdate=true;});
+function enterMother(f0,mc,hostile){msOverride=mc||null;S.state='mother';firing=false;$('hud').hidden=true;setLandUI(null);setDockUI(false);$('orbitHud').hidden=true;
+  MS=buildMotherInterior();MS.f0=f0;MS.hostile=!!hostile;if(UCLASSES.includes(msOverride||curMC()))caveify(MS.sc,{w:22,zMin:-62,zMax:62,h:22});MS.fleetNames.length&&MS.screens.forEach(s2=>{s2.draw(s2.x,s2.w,s2.h,0);s2.t.needsUpdate=true;});
   $('hgEye').textContent='Nave nodriza '+curMC().cls+' · Galaxia '+LEVELS[S.lvl].name;$('hgTitle').textContent=curMC().name;$('hgMeet').hidden=true;$('hgArm').hidden=true;$('hgCard').hidden=true;$('hgAct').hidden=true;
   $('hgHint').textContent=(isTouch?'Tu nave está cargando combustible. Camina por la cubierta o toma el elevador al puente de mando.':'Tu nave está cargando. Camina con WASD y pulsa E para usar elevadores, puertas y tu nave.')+' En el puente está el timón: desde ahí pilotas la Estrella Madre, la única que cruza agujeros negros.';
   $('msFuel').hidden=false;$('msShip').textContent=SHIP.name;$('msHelm').hidden=false;msFuelUI();$('hangarUI').hidden=false;
   const tc=$('touch');tc.classList.add('walk');tc.hidden=!isTouch;$('joyhint').textContent='Arrastra para caminar';$('joyhint').hidden=false;
+  $('msHelm').textContent='Pilotar la '+(msOverride||curMC()).name;$('hgHint').textContent=$('hgHint').textContent.replace(/la Estrella Madre/g,'la '+(msOverride||curMC()).name);
+  if(hostile){$('msFuel').hidden=true;$('hgEye').textContent='⚠ Nave enemiga · '+(msOverride.cls||'');$('hgHint').textContent='Te infiltraste en una nave de la facción enemiga: aquí no te cargan combustible y los guardias te van a atacar. ¡Vuelve a tu nave!';}
   hgCam.position.copy(MS.camPos);hgCam.lookAt(MS.look);fadeFlash();if(actx)musicMuffle(true);}
 function msFuelUI(){const f=S.fuel/S.fuelMax,full=f>=.999;$('msPct').textContent=Math.floor(f*100)+'%';$('msBar').style.transform=`scaleX(${f})`;$('msBar').classList.toggle('full',full);
   const st=$('msSt');st.classList.toggle('full',full);st.textContent=full?'¡Tanque lleno! Tu nave está lista para despegar':MS&&MS.landT<2.2?'Acoplando nave…':'Cargando combustible…';}
@@ -2173,7 +2239,7 @@ function msNearUI(){const n=MS.near,card=$('hgCard'),act=$('hgAct');if(!n||MS.ri
   else if(n==='helm')set('Timón de la Estrella Madre','Puente de mando','Pilota la nave nodriza: es muy rápida, dispara cañones de plasma y salvas de 4 misiles, y es la única que cruza los agujeros negros.','Tomar el timón');
   else if(n==='cap')set('Capitana Orión','Comandante de la flota',S.route?`Rumbo fijado: ${S.route.name} (${LEVELS[S.route.l].name}).`:'Te muestra los planetas habitados y las zonas para bajar en cápsula de cada galaxia.','Mapa estelar · fijar rumbo');
   else if(n==='map')set('Mapa holográfico',LEVELS[S.lvl].cat,`Estás en la galaxia ${LEVELS[S.lvl].name}. Has cruzado ${S.lvl} de ${LEVELS.length} portales.`,'Abrir mapa estelar');}
-function msAction(){if(!MS||MS.ride||MS.launch||S.state!=='mother')return;const n=MS.near;if(!n)return;
+function msAction(){if(!MS||MS.ride||MS.launch||S.state!=='mother')return;const n=MS.near;if(!n)return;if(MS.hostile&&['cap','helm','map','city','med','ammo'].includes(n)){msg('¡Es una nave enemiga! Aquí nadie te ayuda: huye a tu nave','var(--danger)',1.8);return;}
   if(n==='ship')msLaunch();
   else if(n==='city')enterMotherCity();
   else if(n==='helm')takeHelm();
@@ -2185,17 +2251,17 @@ function msAction(){if(!MS||MS.ride||MS.launch||S.state!=='mother')return;const 
 function msKey(k,e){if(!MS||MS.launch)return;if(!$('starMap').hidden){if(k==='escape')$('smClose').click();return;}if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();if(k==='e'||k==='enter'||k===' ')msAction();}
 function msLaunch(){const pv=MS.pilot;pv.w.g.visible=false;for(let k=0;k<30;k++)MS.sparks.emit(pv.x,R(.5,2.5),pv.z,R(-3,3),R(0,4),R(-3,3),.6,C(PILOT.acc));
   MS.launch={t:0};S.state='mlaunch';$('hangarUI').hidden=true;$('touch').hidden=true;sfx('missile');sayAttendant('Compuerta de lanzamiento abierta. Buen viaje, piloto.');}
-function exitMother(){disposeScene(MS.sc);MS=null;$('hangarUI').hidden=true;$('touch').classList.remove('walk');$('joyhint').textContent='Arrastra aquí para volar';fadeFlash();musicMuffle(false);
-  S.state='play';S.fuelWarn=S.fuel<S.fuelMax*.3;S.fuelOut=S.fuel<=0;if(S.mother)S.mother.cool=8;else if(S.motherDeck)spawnMother(true);S.motherDeck=false;P.x=0;P.y=1;P.vx=P.vy=0;S.inv=1.5;
+function exitMother(){const wasHostile=MS&&MS.hostile;msOverride=null;disposeScene(MS.sc);MS=null;$('hangarUI').hidden=true;$('touch').classList.remove('walk');$('joyhint').textContent='Arrastra aquí para volar';fadeFlash();musicMuffle(false);
+  S.state='play';S.fuelWarn=S.fuel<S.fuelMax*.3;S.fuelOut=S.fuel<=0;if(wasHostile){if(S.rival)S.rival.o.position.multiplyScalar(2.2);}else if(S.mother)S.mother.cool=8;else if(S.motherDeck)spawnMother(true);S.motherDeck=false;P.x=0;P.y=1;P.vx=P.vy=0;S.inv=1.5;
   ship.visible=true;ship.up.set(0,1,0);ship.rotation.set(0,0,0);ship.scale.setScalar(.72);camBase.set(0,3.2,11);camLook.set(0,.6,-24);S.camBlend=60;$('hud').hidden=false;$('touch').hidden=!isTouch;
   msg(S.fuel>=S.fuelMax-.5?'Tanque lleno':'Combustible al '+Math.floor(S.fuel/S.fuelMax*100)+'%','var(--shield)',1.6);updHud();$('starMap').hidden=true;routeDepart();}
 const msTmp=new THREE.Vector3();
 function msUpdate(dt){const G=MS;G.t+=dt;const t=G.t,pv=G.pilot;
   /* llegada: la nave baja sobre la plataforma */
   if(G.landT<2.2){G.landT+=dt;const u=Math.min(1,G.landT/2),e=1-(1-u)**3;G.myShip.position.y=7-(7-1.7)*e;for(let i=0;i<3;i++)G.sparks.emit(MSPAD.x+R(-3,3),.4,MSPAD.z+R(-3,3),R(-6,6),R(0,2),R(-6,6),.5,COL.shield);
-    if(G.landT>=2.2){pv.w.g.visible=true;for(let k=0;k<30;k++)G.sparks.emit(pv.x,R(.5,2.5),pv.z,R(-3,3),R(0,4),R(-3,3),.6,C(PILOT.acc));sayAttendant('Bienvenido a bordo de la Estrella Madre. Carga de combustible iniciada.');G.auto=[[-8,33],[-14,40],[ELEV.x,ELEV.z]];G.autoStage='low';}}
+    if(G.landT>=2.2){pv.w.g.visible=true;for(let k=0;k<30;k++)G.sparks.emit(pv.x,R(.5,2.5),pv.z,R(-3,3),R(0,4),R(-3,3),.6,C(PILOT.acc));if(G.hostile){intruderStart(G,{w:22,zMin:-58,zMax:58,h:22});}else{sayAttendant('Bienvenido a bordo de la Estrella Madre. Carga de combustible iniciada.');G.auto=[[-8,33],[-14,40],[ELEV.x,ELEV.z]];G.autoStage='low';}}}
   /* recarga */
-  const charging=G.landT>=2.2&&S.fuel<S.fuelMax;
+  const charging=G.landT>=2.2&&S.fuel<S.fuelMax&&!G.hostile;
   if(charging){S.fuel=Math.min(S.fuelMax,S.fuel+S.fuelMax/14*dt);if(!G.said50&&S.fuel>=S.fuelMax*.5&&G.f0<S.fuelMax*.5){G.said50=true;sayAttendant('Carga de combustible al cincuenta por ciento.');}
     if(S.fuel>=S.fuelMax&&!G.saidFull){G.saidFull=true;S.fuelWarn=S.fuelOut=false;sayAttendant('Atención, piloto. Su nave tiene el tanque lleno y está lista para despegar.');for(let k=0;k<60;k++)G.sparks.emit(MSPAD.x+R(-4,4),R(1,5),MSPAD.z+R(-4,4),R(-3,3),R(2,6),R(-3,3),1,COL.green);if(G.near==='ship')msNearUI();}}
   if(S.fuel>=S.fuelMax&&!G.saidFull&&G.landT>=2.2){G.saidFull=true;}
@@ -2248,6 +2314,7 @@ function msUpdate(dt){const G=MS;G.t+=dt;const t=G.t,pv=G.pilot;
   else if(G.landT<2.2){msTmp.set(12,9,MSPAD.z+16);G.camPos.lerp(msTmp,Math.min(1,dt*2));G.look.lerp(msTmp.set(0,G.myShip.position.y,MSPAD.z),Math.min(1,dt*3));}
   else if(G.deck==='up'||(G.ride&&G.ride.up&&G.ride.t>1.3)){msTmp.set(pv.x*.5,pv.y+5.5,Math.max(36,pv.z-11));G.camPos.lerp(msTmp,Math.min(1,dt*3));G.look.lerp(msTmp.set(pv.x*.6,pv.y+2.6,pv.z+8),Math.min(1,dt*4));}
   else{msTmp.set(pv.x*.7,pv.y+7.4,Math.min(60.5,pv.z+12.5));G.camPos.lerp(msTmp,Math.min(1,dt*4));G.look.lerp(msTmp.set(pv.x,pv.y+1.8,pv.z-5),Math.min(1,dt*5));}
+  intruderUpdate(G,dt);if(MS!==G)return;
   G.sparks.update(dt);hgCam.position.copy(G.camPos);hgCam.lookAt(G.look);}
 
 /* ---------- CIUDADES EN LOS PLANETAS ---------- */
@@ -2258,7 +2325,7 @@ function windowTex(acc){const c=cv(128,256),x=c.getContext('2d');x.fillStyle='#1
   const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;return t;}
 function cityGround(p){const c=cv(512,512),x=c.getContext('2d');x.fillStyle=p[1];x.fillRect(0,0,512,512);for(let i=0;i<500;i++){x.fillStyle=`rgba(${Math.random()<.5?'0,0,0':'255,255,255'},${R(.02,.07)})`;x.beginPath();x.arc(R(0,512),R(0,512),R(2,14),0,7);x.fill();}
   const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(14,14);return t;}
-function buildCity(MC){const L=LEVELS[S.lvl],H=L.home,p=L.planets[0],acc=MC?MC.glow:new THREE.Color(L.accent).getHex(),style=MC?MC.style:S.lvl%4;const sc=new THREE.Scene();
+function buildCity(MC,CV){const L=LEVELS[S.lvl],H=L.home,p=L.planets[CV&&CV.idx===1&&L.planets[1]?1:0],acc=MC?MC.glow:new THREE.Color(CV&&CV.idx===2?(L.glow||L.accent):L.accent).getHex(),style=MC?MC.style:(CV?CV.style:S.lvl%4);const sc=new THREE.Scene();
   const fogc=MC?new THREE.Color(MC.glow).multiplyScalar(.05):new THREE.Color(p[1]).lerp(new THREE.Color(0x0a0a14),.45);sc.background=fogc;sc.fog=new THREE.Fog(fogc.getHex(),MC?90:70,MC?260:210);
   sc.add(new THREE.HemisphereLight(new THREE.Color(p[2]).getHex(),0x202018,1.0));sc.add(new THREE.AmbientLight(0x404050,.5));const sun=new THREE.DirectionalLight(L.sun,1.1);sun.position.set(-40,60,-30);sc.add(sun);
   const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.6,metalness:.3,flatShading:true},o));const add=(gm,m,x,y,z)=>{const ms=new THREE.Mesh(gm,m);ms.position.set(x,y,z);sc.add(ms);return ms;};
@@ -2288,7 +2355,7 @@ function buildCity(MC){const L=LEVELS[S.lvl],H=L.home,p=L.planets[0],acc=MC?MC.g
   statue.g.traverse(o=>{if(o.isMesh){o.material=geo('cyStatM',()=>new THREE.MeshStandardMaterial({color:0xd8c890,metalness:.85,roughness:.25}));}});statue.armR.rotation.x=-2.6;}
   const ring=add(new THREE.TorusGeometry(4.2,.1,6,48).rotateX(Math.PI/2),basic(acc,{transparent:true,opacity:.7,blending:THREE.AdditiveBlending}),0,3,0);
   for(let i=0;i<14;i++){const a=i/14*Math.PI*2;const j=glowSprite(acc,1,.8);j.position.set(Math.cos(a)*3.4,1.8,Math.sin(a)*3.4);sc.add(j);}
-  sc.add(msLabel(MC?'CIUDAD · '+MC.name.toUpperCase():'CIUDAD DE '+H.planet.toUpperCase(),MC?mcHex(MC.glow):L.accent,0,MC?17:10.5,0,16));
+  sc.add(msLabel(MC?'CIUDAD · '+MC.name.toUpperCase():CV?CV.name.toUpperCase():'CIUDAD DE '+H.planet.toUpperCase(),MC?mcHex(MC.glow):L.accent,0,MC?17:10.5,0,16));
   /* puerto espacial (de donde sales) */
   add(new THREE.BoxGeometry(46,16,10),M(0x3a4050),0,8,57);add(new THREE.BoxGeometry(48,1.4,12),M(0x2a2e38),0,16.7,57);
   for(const dx of [-3.4,3.4])add(new THREE.BoxGeometry(.8,9,.8),basic(0x5dffa8),dx,4.5,51.8);add(new THREE.BoxGeometry(7.6,.8,.8),basic(0x5dffa8),0,9,51.8);
@@ -2371,7 +2438,8 @@ function enterCity(){if(!HG)return;S.state='city';$('hangarUI').hidden=true;CT=b
   $('cyHint').textContent=(isTouch?'Camina con el joystick. Habla con los habitantes y prueba los juegos de la plaza.':'Camina con WASD y pulsa E para hablar, jugar o comprar.')+(S.lvl===0?' El autódromo de Turbo Circuito está al fondo de la avenida.':'');
   $('cyCard').hidden=true;$('cyAct').hidden=true;$('cyGame').hidden=true;$('cyShop').hidden=true;cryUI();$('cityUI').hidden=false;$('touch').hidden=!isTouch;
   hgCam.position.copy(CT.camPos);hgCam.lookAt(CT.look);fadeFlash();if(actx)musicMuffle(false);say(`Bienvenido a la ciudad de ${H.planet}.`);}
-function exitCity(){if(!CT)return;if(CT.fromMother){disposeScene(CT.sc);CT=null;$('cityUI').hidden=true;S.state='mother';$('hangarUI').hidden=false;$('touch').hidden=!isTouch;fadeFlash();if(actx)musicMuffle(true);
+function exitCity(){if(!CT)return;if(CT.fromAtmo){const o=CT.fromAtmo;disposeScene(CT.sc);CT=null;$('cityUI').hidden=true;backToAtmo(o);return;}
+  if(CT.fromMother){disposeScene(CT.sc);CT=null;$('cityUI').hidden=true;S.state='mother';$('hangarUI').hidden=false;$('touch').hidden=!isTouch;fadeFlash();if(actx)musicMuffle(true);
     if(MS){MS.pilot.x=15;MS.pilot.z=-46;MS.pilot.face=-Math.PI/2;MS.near=null;msNearUI();}return;}
   disposeScene(CT.sc);CT=null;$('cityUI').hidden=true;S.state='hangar';$('hangarUI').hidden=false;$('touch').hidden=!isTouch;fadeFlash();if(actx)musicMuffle(true);
   if(HG){HG.pilot.x=-14;HG.pilot.z=DOORZ;HG.pilot.face=Math.PI/2;HG.near=null;HG.mode='walk';hgNearUI();}}
@@ -2794,6 +2862,204 @@ function exNav(){const G=EX,W=exNavC.clientWidth||innerWidth,Hh=exNavC.clientHei
       x.save();x.translate(ex,ey);x.rotate(a);x.beginPath();x.moveTo(14,0);x.lineTo(-7,-9);x.lineTo(-2,0);x.lineTo(-7,9);x.closePath();x.fill();x.restore();if(i===0)exLabel(ex-Math.cos(a)*30,ey-Math.sin(a)*22,name+' · '+d+' m',c,W);}});x.globalAlpha=1;}
 function exLabel(lx,ly,t,c,W){const x=exNavX;x.font='600 12px system-ui,sans-serif';const w=x.measureText(t).width+12;lx=clamp(lx,w/2+4,W-w/2-4);x.fillStyle='rgba(2,6,16,.62)';x.fillRect(lx-w/2,ly-9,w,18);x.fillStyle=c;x.fillText(t,lx,ly+.5);}
 
+/* ---------- VUELO SOBRE EL PLANETA: CIUDADES, BATALLAS Y DESCUBRIMIENTOS ---------- */
+function rng32(a){return ()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const CITY_POOL=['Nova Aurora','Puerto Celeste','Altavista','Torres de Sal','Vega Alta','Bahía Cristal','Solaria','Luminar','Ciudad Ámbar','Nido de Halcones','Valle Eco','Brisa Roja','Kora','Ciudad Espejo','Mirador',
+ 'Faro Austral','Coral Alto','Rocaverde','Puerta Sur','Isla Prisma','Ciudad Niebla','Ventisca','Cumbre Real','Ciudad Jade','Bastión Norte','Arcoíris','Pueblo Lumen','Ónix','Ciudad Lirio','Delta Azul',
+ 'Rubí Alto','Ciudad Trueno','Monteluz','Valle Dorado','Ciudad Coral','Eterna','Nebulosa','Aldea Brasa','Puerto Hielo','Cristalia','Ciudad Marea','Selva Alta','Ciudad Polar','Ciudad Eclipse','Horizonte'];
+const CITY_KIND=[{t:'Metrópolis de rascacielos',style:0},{t:'Ciudad de cúpulas',style:1},{t:'Ciudad de agujas de cristal',style:2},{t:'Ciudad hongo flotante',style:3}];
+const RETOS={cazas:{n:'Batalla aérea',d:'Escuadrón enemigo patrullando. Derriba a todos los cazas.',col:'#ff4d6d'},torretas:{n:'Base de torretas',d:'Una base enemiga en el suelo. Destruye todas las torretas.',col:'#ff8a30'},
+  defensa:{n:'Defiende la ciudad',d:'Invasores atacan una ciudad. Derríbalos antes de que la destruyan.',col:'#ff3ad0'},anillos:{n:'Carrera del cañón',d:'Cruza todos los anillos entre las montañas antes de que se acabe el tiempo.',col:'#ffd23f'}};
+const RETO_ORDER=['cazas','torretas','defensa','anillos'];
+const DISCO={ruinas:{n:'Ruinas antiguas',d:'Columnas de una civilización perdida que todavía brillan.'},nave:{n:'Nave estrellada',d:'Una nave caída hace siglos. Su caja negra guarda un mapa.'},
+  cristal:{n:'Cristal gigante',d:'Un cristal más alto que un edificio, lleno de energía.'},criatura:{n:'Criatura gigante',d:'¡Un dragón salvaje del planeta vuela sobre el valle!'},
+  templo:{n:'Templo flotante',d:'Un templo que flota sobre las nubes sin motores.'},geiser:{n:'Géiser de energía',d:'Un chorro de energía brota del centro del planeta.'},
+  monolito:{n:'Monolito negro',d:'Una piedra perfecta que nadie sabe quién puso aquí.'},arco:{n:'Arco de piedra',d:'Un arco natural gigantesco. ¡Pasa volando por debajo!'}};
+const DISCO_ORDER=['ruinas','nave','cristal','criatura','templo','geiser','monolito','arco'];
+let AT=null;const atV=new THREE.Vector3(),atV2=new THREE.Vector3();
+function smooth01(a,b,x){const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t);}
+function buildAtmo(){const l=S.lvl,L=LEVELS[l],H=L.home,p=L.planets[0],acc=new THREE.Color(L.accent).getHex(),rnd=rng32(l*977+13),seed=l*2.3+.7;const sc=new THREE.Scene();
+  const skyC=new THREE.Color(p[2]).lerp(new THREE.Color(L.accent),.25),hz=skyC.clone().lerp(new THREE.Color(p[0]),.35);sc.background=hz;sc.fog=new THREE.Fog(hz.getHex(),260,1350);
+  sc.add(new THREE.HemisphereLight(skyC.getHex(),new THREE.Color(p[1]).getHex(),.55));const sun=new THREE.DirectionalLight(L.sun,1.15);sun.position.set(-300,500,-200);sc.add(sun);sc.add(new THREE.AmbientLight(0x404050,.35));
+  const sky=new THREE.Mesh(new THREE.SphereGeometry(2600,32,16),new THREE.MeshBasicMaterial({map:skyTex(p),side:THREE.BackSide,fog:false}));sc.add(sky);
+  const sg=glowSprite(L.sun,420,.85);sg.position.set(-900,1100,-1500);sg.material.fog=false;sc.add(sg);
+  for(const [x,y,z,r,c] of [[900,700,-1800,160,p[1]],[-1300,900,-1600,60,p[2]]]){const m=new THREE.Mesh(new THREE.SphereGeometry(r,28,16),new THREE.MeshBasicMaterial({map:planetTex([c,p[0],'#ffffff']),fog:false,transparent:true,opacity:.75}));m.position.set(x,y,z);sc.add(m);}
+  /* lugares del planeta */
+  const locs=[];const place=(kind,dmin,dmax,flat)=>{let x,z,t=0;do{const a=rnd()*Math.PI*2,d=dmin+rnd()*(dmax-dmin);x=Math.sin(a)*d;z=Math.cos(a)*d;t++;}while(t<60&&locs.some(o=>Math.hypot(o.x-x,o.z-z)<o.flat+flat+70));
+    const o={kind,x,z,flat,done:false};locs.push(o);return o;};
+  const port=place('port',140,260,40);const enemyPort=planetOwner(l)!==FACTION;port.name=enemyPort?'Puerto enemigo ('+(planetOwner(l)==='umbra'?'Umbra':'Alianza')+')':'Puerto espacial';port.col=enemyPort?'#ff4d6d':'#5dffa8';
+  const cities=[];for(let k=0;k<3;k++){const c=place('city',380,950,95);c.name=CITY_POOL[(l*3+k)%CITY_POOL.length];c.ck=CITY_KIND[(l+k)%4];c.col='#7fd4ff';c.idx=k;cities.push(c);}
+  const retos=[RETO_ORDER[l%4],RETO_ORDER[(l+1)%4]];const rlocs=retos.map(r=>{const o=r==='defensa'?cities[2]:place('reto',450,1050,r==='torretas'?90:60);if(r==='defensa'){o.defensa=true;}
+    const R0={kind:'reto',type:r,x:o.x,z:o.z,flat:0,done:false,name:RETOS[r].n,col:RETOS[r].col,city:r==='defensa'?o:null};if(r!=='defensa')Object.assign(o,R0);else locs.push(R0);return r==='defensa'?R0:o;});
+  const dl=[];for(let k=0;k<4;k++){const t=DISCO_ORDER[(l*3+k*2)%8];const o=place('disco',300,1150,t==='arco'?40:24);o.type=t;o.name=DISCO[t].n;o.col='#c58bff';dl.push(o);}
+  /* terreno */
+  const wet=l%3!==1,hill=16+(l%4)*5,W=-4;
+  const base=(x,z)=>exNoise(x*.21,z*.21,seed)*hill+Math.max(0,exNoise(x*.07,z*.07,seed+3)-.2)*hill*3.2+10;
+  for(const o of locs){if(o.flat)o.g=Math.max(wet?W+3:0,base(o.x,o.z)*.5+2);}
+  const Hf=(x,z)=>{let h=base(x,z);for(const o of locs){if(!o.flat)continue;const d=Math.hypot(x-o.x,z-o.z);if(d<o.flat*1.7){const k=smooth01(o.flat,o.flat*1.7,d);h=o.g+(h-o.g)*k;}}const d0=Math.hypot(x,z);if(d0>1300)h+=(d0-1300)*.6;return h;};
+  const SZ=3200,SEG=170,gg=new THREE.PlaneGeometry(SZ,SZ,SEG,SEG).rotateX(-Math.PI/2),pos=gg.attributes.position,cols=new Float32Array(pos.count*3);
+  const cLo=new THREE.Color(p[1]),cMid=new THREE.Color(p[0]),cHi=new THREE.Color(p[2]),sand=new THREE.Color(p[0]).lerp(new THREE.Color('#e8d8a8'),.5),cc=new THREE.Color();
+  for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i),h=Hf(x,z);pos.setY(i,h);const t=clamp((h+5)/(hill*3.4),0,1);
+    if(wet&&h<W+2.5)cc.copy(sand);else if(t<.72)cc.copy(cMid).lerp(cLo,.35*(1-t/.72));else cc.copy(cMid).lerp(cHi,.55*(t-.72)/.28);cc.offsetHSL(0,0,exNoise(x*1.3,z*1.3,seed+7)*.03);cols[i*3]=cc.r;cols[i*3+1]=cc.g;cols[i*3+2]=cc.b;}
+  gg.setAttribute('color',new THREE.BufferAttribute(cols,3));gg.computeVertexNormals();sc.add(new THREE.Mesh(gg,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.95,flatShading:true})));
+  if(wet){const wc=new THREE.Color(p[1]).lerp(new THREE.Color('#1a6ab0'),.55);const wm=new THREE.Mesh(new THREE.PlaneGeometry(SZ,SZ).rotateX(-Math.PI/2),new THREE.MeshStandardMaterial({color:wc,metalness:.6,roughness:.15,transparent:true,opacity:.82}));wm.position.y=W;sc.add(wm);}
+  /* árboles, cristales o rocas */
+  {const N=700,tg=l%4===2?new THREE.OctahedronGeometry(1,0):new THREE.ConeGeometry(1,3,6),tm=new THREE.MeshStandardMaterial({color:new THREE.Color(p[0]).lerp(new THREE.Color(l%4===2?L.accent:'#1a4a20'),.5),flatShading:true,roughness:.8,emissive:l%4===2?acc:0,emissiveIntensity:l%4===2?.25:0});
+    const inst=new THREE.InstancedMesh(tg,tm,N),mm=new THREE.Matrix4(),q=new THREE.Quaternion(),sv=new THREE.Vector3(),pv=new THREE.Vector3();let n=0;
+    for(let k=0;k<N*3&&n<N;k++){const x=(rnd()-.5)*2400,z=(rnd()-.5)*2400,h=Hf(x,z);if(wet&&h<W+3)continue;if(locs.some(o=>o.flat&&Math.hypot(o.x-x,o.z-z)<o.flat*1.3))continue;const s=2+rnd()*4;
+      pv.set(x,h+s*1.2,z);sv.set(s,s*(1+rnd()),s);mm.compose(pv,q,sv);inst.setMatrixAt(n++,mm);}inst.count=n;sc.add(inst);}
+  /* nubes */
+  for(let k=0;k<18;k++){const c=new THREE.Sprite(new THREE.SpriteMaterial({map:cloudTex(),color:0xffffff,transparent:true,opacity:.35,depthWrite:false,blending:THREE.NormalBlending}));const s=260+rnd()*260;c.scale.set(s,s*.4,1);c.position.set((rnd()-.5)*2600,300+rnd()*100,(rnd()-.5)*2600);sc.add(c);}
+  /* puerto espacial pequeño */
+  const wt=windowTex(L.accent),winM=new THREE.MeshStandardMaterial({map:wt,emissiveMap:wt,emissive:0xffffff,emissiveIntensity:.6,roughness:.5,metalness:.4});
+  const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.6,metalness:.35,flatShading:true},o));
+  const mkPad=(o,r,col)=>{const g=new THREE.Group();g.position.set(o.padX,o.g,o.padZ);sc.add(g);const pd=new THREE.Mesh(new THREE.CylinderGeometry(r,r+.6,1.2,32),M(0x3a3f4a));pd.position.y=.6;g.add(pd);
+    const rr=new THREE.Mesh(new THREE.TorusGeometry(r-.4,.3,6,40).rotateX(Math.PI/2),basic(new THREE.Color(col).getHex()));rr.position.y=1.25;g.add(rr);
+    for(let i=0;i<12;i++){const a=i/12*Math.PI*2,lg=glowSprite(new THREE.Color(col).getHex(),2,1);lg.position.set(Math.cos(a)*r,1.6,Math.sin(a)*r);g.add(lg);}
+    const bc=glowSprite(new THREE.Color(col).getHex(),14,.9);bc.position.y=4;g.add(bc);const beam=new THREE.Mesh(new THREE.CylinderGeometry(1.2,1.2,160,10,1,true),basic(new THREE.Color(col).getHex(),{transparent:true,opacity:.18,blending:THREE.AdditiveBlending,depthWrite:false}));beam.position.y=80;g.add(beam);return g;};
+  {port.padX=port.x;port.padZ=port.z;const g=mkPad(port,9,'#5dffa8');for(const z of [-14,-10,-6]){for(const sd of [-1,1]){const lp=glowSprite(0xfff0c0,1.4,1);lp.position.set(sd*2.5,1.5,z);g.add(lp);}}
+    const tw=new THREE.Mesh(new THREE.BoxGeometry(2.4,10,2.4),M(0xc8ccd6));tw.position.set(14,5,0);g.add(tw);const cab=new THREE.Mesh(new THREE.BoxGeometry(4,2,4),M(acc,{emissive:acc,emissiveIntensity:.6}));cab.position.set(14,11,0);g.add(cab);
+    const hg=new THREE.Mesh(new THREE.BoxGeometry(18,9,14),M(0x8a8e98));hg.position.set(-20,4.5,0);g.add(hg);g.add(msLabel(port.name.toUpperCase(),port.col,0,26,0,40));port.obj=g;}
+  /* ciudades */
+  for(const c of cities){const g=new THREE.Group();g.position.set(c.x,c.g,c.z);sc.add(g);const st=c.ck.style;
+    for(let k=0;k<46;k++){const a=rnd()*Math.PI*2,d=8+rnd()*62,x=Math.sin(a)*d,z=Math.cos(a)*d,w=4+rnd()*8,hh=(12+rnd()*55)*(1-d/110);let m;
+      if(st===0){m=new THREE.Mesh(new THREE.BoxGeometry(w,hh,w),winM);m.position.set(x,hh/2,z);}
+      else if(st===1){m=new THREE.Mesh(new THREE.SphereGeometry(w,16,10,0,Math.PI*2,0,Math.PI/2),winM);m.position.set(x,0,z);m.scale.y=hh/w*.5;}
+      else if(st===2){m=new THREE.Mesh(new THREE.ConeGeometry(w*.55,hh*1.4,6),winM);m.position.set(x,hh*.7,z);}
+      else{m=new THREE.Mesh(new THREE.CylinderGeometry(w*.25,w*.35,hh,8),M(0x7a7f8c));m.position.set(x,hh/2,z);const cap=new THREE.Mesh(new THREE.SphereGeometry(w*.9,14,8,0,Math.PI*2,0,Math.PI*.5),winM);cap.position.set(x,hh,z);cap.scale.y=.5;g.add(cap);}
+      g.add(m);if(rnd()<.25){const gl=glowSprite(acc,4,1);gl.position.set(x,hh*(st===2?1.4:1)+2,z);g.add(gl);}}
+    const pa=rnd()*Math.PI*2;c.padX=c.x+Math.sin(pa)*78;c.padZ=c.z+Math.cos(pa)*78;mkPad(c,8,'#7fd4ff');
+    const lb=msLabel(c.name.toUpperCase(),L.accent,c.x,c.g+75,c.z,60);sc.add(lb);c.obj=g;}
+  /* descubrimientos */
+  for(const o of dl){const g=new THREE.Group();g.position.set(o.x,Hf(o.x,o.z),o.z);sc.add(g);const t=o.type;
+    if(t==='ruinas'){for(let k=0;k<10;k++){const a=k/10*Math.PI*2,c=new THREE.Mesh(new THREE.CylinderGeometry(1.6,1.8,8+rnd()*14,8),M(0xd8ccb0));c.position.set(Math.cos(a)*18,5,Math.sin(a)*18);c.rotation.z=(rnd()-.5)*.3;g.add(c);}
+      const al=new THREE.Mesh(new THREE.BoxGeometry(6,3,6),M(0xd8ccb0));al.position.y=1.5;g.add(al);const gl=glowSprite(0x7df9ff,16,.8);gl.position.y=5;g.add(gl);}
+    else if(t==='nave'){const s=buildShip(SHIPS[(l*5)%SHIPS.length]);s.scale.setScalar(5);s.position.y=2;s.rotation.set(.35,rnd()*6,.5);g.add(s);for(let k=0;k<3;k++){const sm=glowSprite(0xff7030,14,.5);sm.position.set((rnd()-.5)*10,6+k*5,(rnd()-.5)*10);g.add(sm);}}
+    else if(t==='cristal'){const cm=new THREE.MeshStandardMaterial({color:acc,emissive:acc,emissiveIntensity:.8,flatShading:true,transparent:true,opacity:.85});for(let k=0;k<6;k++){const c=new THREE.Mesh(new THREE.OctahedronGeometry(5+rnd()*5,0),cm);c.scale.y=4;c.position.set((rnd()-.5)*14,16,(rnd()-.5)*14);c.rotation.set((rnd()-.5)*.6,rnd()*3,(rnd()-.5)*.6);g.add(c);}const gl=glowSprite(acc,60,.5);gl.position.y=24;g.add(gl);}
+    else if(t==='criatura'){const d=buildDragon(pick(['G','F','W']),1);d.g.scale.setScalar(9);g.add(d.g);o.cr=d;}
+    else if(t==='templo'){const tg=new THREE.Group();tg.position.y=70;g.add(tg);const bs=new THREE.Mesh(new THREE.ConeGeometry(18,26,6),M(0x8a7a6a));bs.rotation.x=Math.PI;bs.position.y=-13;tg.add(bs);
+      const tp=new THREE.Mesh(new THREE.CylinderGeometry(16,16,2,6),M(0xd8ccb0));tg.add(tp);for(let k=0;k<6;k++){const a=k/6*Math.PI*2,c=new THREE.Mesh(new THREE.CylinderGeometry(.8,.8,10,8),M(0xf0e8d8));c.position.set(Math.cos(a)*12,6,Math.sin(a)*12);tg.add(c);}
+      const rf=new THREE.Mesh(new THREE.ConeGeometry(15,8,6),M(0xd8a840,{metalness:.8}));rf.position.y=15;tg.add(rf);const gl=glowSprite(0xffd060,30,.6);gl.position.y=5;tg.add(gl);o.tg=tg;}
+    else if(t==='geiser'){const bs=new THREE.Mesh(new THREE.CylinderGeometry(8,12,4,16),M(0x5a4a40));bs.position.y=2;g.add(bs);const col=new THREE.Mesh(new THREE.CylinderGeometry(2,5,120,12,1,true),basic(acc,{transparent:true,opacity:.35,blending:THREE.AdditiveBlending,depthWrite:false}));col.position.y=60;g.add(col);o.col2=col;}
+    else if(t==='monolito'){const m=new THREE.Mesh(new THREE.BoxGeometry(6,40,2),M(0x050505,{metalness:.9,roughness:.1}));m.position.y=20;g.add(m);const gl=glowSprite(0xffffff,10,.4);gl.position.y=42;g.add(gl);}
+    else{const arc=new THREE.Mesh(new THREE.TorusGeometry(32,7,10,30,Math.PI),M(new THREE.Color(p[0]).multiplyScalar(.8).getHex()));arc.rotation.y=rnd()*3;g.add(arc);o.arcY=g.position.y+28;}
+    const lb=msLabel('?',' #c58bff'.trim(),0,t==='templo'?100:t==='criatura'?60:50,0,10);g.add(lb);o.lb=lb;o.obj=g;o.y=g.position.y;}
+  /* retos */
+  for(const R0 of rlocs){R0.enemies=[];R0.turrets=[];R0.rings=[];R0.y=Hf(R0.x,R0.z);
+    if(R0.type==='torretas'){for(let k=0;k<6;k++){const a=k/6*Math.PI*2+rnd(),d=20+rnd()*50,x=R0.x+Math.sin(a)*d,z=R0.z+Math.cos(a)*d,y=Hf(x,z);const g=new THREE.Group();g.position.set(x,y,z);sc.add(g);
+        const b=new THREE.Mesh(new THREE.CylinderGeometry(4,5,4,10),M(0x3a3a42));b.position.y=2;g.add(b);const dm=new THREE.Mesh(new THREE.SphereGeometry(3.4,14,8,0,Math.PI*2,0,Math.PI/2),M(0x6a2020,{emissive:0x400000}));dm.position.y=4;g.add(dm);
+        const br=new THREE.Mesh(new THREE.CylinderGeometry(.5,.5,7,8),M(0x222222));br.position.y=6;br.rotation.x=.6;g.add(br);const gl=glowSprite(0xff3030,5,1);gl.position.y=8;g.add(gl);R0.turrets.push({g,br,gl,hp:4,cd:1+rnd()*2,alive:true,x,y:y+5,z});}
+      const fl=new THREE.Mesh(new THREE.CylinderGeometry(.4,.4,24,6),M(0x222222));fl.position.set(R0.x,R0.y+12,R0.z);sc.add(fl);const fg=new THREE.Mesh(new THREE.PlaneGeometry(10,6),basic(0xff3030,{side:THREE.DoubleSide}));fg.position.set(R0.x+5,R0.y+21,R0.z);sc.add(fg);}
+    else if(R0.type==='anillos'){let a=rnd()*6;for(let k=0;k<9;k++){a+=.35+rnd()*.3;const d=90+k*28,x=R0.x+Math.sin(a)*d*.8,z=R0.z+Math.cos(a)*d*.8,y=Math.max(Hf(x,z),wet?W:0)+14+rnd()*30;
+        const r=new THREE.Mesh(new THREE.TorusGeometry(10,.8,8,32),basic(0xffd23f,{transparent:true,opacity:.85}));r.position.set(x,y,z);r.lookAt(R0.x,y,R0.z);sc.add(r);R0.rings.push({m:r,x,y,z});}R0.ri=0;R0.time=0;}
+    const lb=msLabel(RETOS[R0.type].n.toUpperCase(),RETOS[R0.type].col,R0.x,R0.y+(R0.type==='defensa'?95:45),R0.z,50);sc.add(lb);}
+  /* tu nave */
+  const so=buildShip(SHIP);so.scale.setScalar(1.9);sc.add(so);
+  const sp=new Sparks(1200,1.2,sc);
+  return {sc,l,Hf,wet,W,locs,port,cities,retos:rlocs,discos:dl,ship:{o:so,pos:new THREE.Vector3(port.x*.2,240,port.z*.2+500),yaw:Math.atan2(-(port.x-port.x*.2),-(port.z-port.z*.2-500))*-1,pitch:-.25,spd:60,thr:1,roll:0},
+    shots:[],eb:[],sparks:sp,t:0,fireT:0,cam:new THREE.Vector3(0,300,800),look:new THREE.Vector3(),near:null,landing:null,hitT:0,uiT:0};}
+function enterAtmo(){const lp=S.land;S.orbit=null;S.landedHere=true;routeDone('land');removeLand();S.state='atmo';firing=false;beam.visible=false;
+  $('hud').hidden=true;$('orbitHud').hidden=true;setLandUI(null);setDockUI(false);setPodUI&&setPodUI(false);
+  if(!AT||AT.l!==S.lvl){if(AT)disposeScene(AT.sc);AT=buildAtmo();}
+  const s=AT.ship;s.pos.set(AT.port.x*.3,260,AT.port.z*.3+420);atAim(s,AT.port.x,AT.port.z);s.pitch=-.3;s.spd=60;AT.landing=null;AT.cam.set(s.pos.x,s.pos.y+40,s.pos.z+90);
+  hgCam.far=6000;hgCam.near=.5;hgCam.updateProjectionMatrix();
+  $('atUI').hidden=false;$('touch').hidden=!isTouch;$('touch').classList.add('atmo');$('touch').classList.remove('walk');$('atPlanet').textContent=LEVELS[S.lvl].home.planet;$('atEye').textContent='Vuelo atmosférico · '+LEVELS[S.lvl].name;
+  fadeFlash();musicMuffle(false);msg('Entrando a la atmósfera de '+LEVELS[S.lvl].home.planet,'var(--good)',2.4);say('Entrando a la atmósfera. Explora el planeta: hay ciudades, batallas y descubrimientos.');atUI();}
+function atAim(s,x,z){s.yaw=Math.atan2(-(x-s.pos.x),-(z-s.pos.z));}
+function leaveAtmo(toSpace){$('atUI').hidden=true;$('touch').classList.remove('atmo');$('atAct').hidden=true;hgCam.far=1500;hgCam.near=.1;hgCam.updateProjectionMatrix();
+  for(const b of AT.eb)AT.sc.remove(b.m);AT.eb=[];for(const s of AT.shots)AT.sc.remove(s.m);AT.shots=[];
+  if(toSpace){S.state='play';takeoff();msg('De vuelta en el espacio','var(--accent)',1.6);}}
+function atDamage(d){if(AT.hitT>0)return;AT.hitT=.35;S.hull-=d*(1-(PILOT.b.hull||0)*.5);S.shake=Math.max(S.shake,.6);if(actx&&!S.muted)tone('square',140,60,.15,.06);
+  if(S.hull<=0){S.hull=1;msg('¡Nave muy dañada! Aterrizaje de emergencia en el puerto','var(--danger)',2.6);say('Nave muy dañada. Aterrizaje de emergencia.');atLand(AT.port);}}
+function atLand(o){if(AT.landing)return;const s=AT.ship;AT.landing={o,t:0,from:s.pos.clone(),yaw0:s.yaw};$('atAct').hidden=true;firing=false;msg('Aterrizando en '+o.name,'var(--good)',1.8);if(actx&&!S.muted)sfx('land');}
+function atReward(cry,pts,txt){addCry(cry);S.score+=pts;msg(txt+(cry?` · +${cry} cristales`:''),'var(--good)',2.8);if(actx&&!S.muted){tone('sine',600,1200,.25,.1);setTimeout(()=>tone('sine',900,1800,.3,.1),180);}}
+function atSpawnEnemies(R0,n,around){const L=LEVELS[S.lvl];const types=Object.keys(L.enemies).filter(t=>t!=='kamikaze');for(let k=0;k<n;k++){const ty=pick(types.length?types:['fighter']);const b=buildEnemy(ty,L);b.g.scale.setScalar(ty.startsWith('dragon')||ty==='octo'?3:3.4);
+  const a=k/n*Math.PI*2,c=around||R0;b.g.position.set(c.x+Math.sin(a)*90,(c.y||c.g||0)+70+Math.random()*40,c.z+Math.cos(a)*90);AT.sc.add(b.g);R0.enemies.push({o:b.g,hp:3+Math.floor(S.lvl/4),alive:true,a,cd:1+Math.random()*2,v:new THREE.Vector3(),cr:b.g.userData.cr?b:null});}}
+function atShoot(from,to,spd,col){const m=new THREE.Mesh(geo('atEb',()=>new THREE.SphereGeometry(1,8,6)),basic(col||0xff4040));m.position.copy(from);AT.sc.add(m);const v=to.clone().sub(from).normalize().multiplyScalar(spd);AT.eb.push({m,v,life:4});}
+function atUpdate(dt){const A=AT;A.t+=dt;const t=A.t,s=A.ship,Hf=A.Hf;if(A.hitT>0)A.hitT-=dt;
+  /* aterrizaje automático */
+  if(A.landing){const LD=A.landing;LD.t+=dt;const o=LD.o,u=Math.min(1,LD.t/3),e=u*u*(3-2*u);const tgt=atV.set(o.padX,o.g+3,o.padZ);s.pos.copy(LD.from).lerp(tgt,e);s.pos.y+=Math.sin(u*Math.PI)*20*(1-u);
+    s.pitch=-.25*(1-u);s.roll*=.9;if(u<1){s.yaw+=angD(Math.atan2(-(tgt.x-s.pos.x),-(tgt.z-s.pos.z)),s.yaw)*Math.min(1,dt*2);}if(u>.7&&Math.random()<.8)A.sparks.emit(s.pos.x,s.pos.y-1,s.pos.z,(Math.random()-.5)*8,1,(Math.random()-.5)*8,.8,C(0xd8d8d8));
+    if(LD.t>3.5){A.landing=null;s.spd=0;if(o.kind==='port'){leaveAtmo(false);openLanding();return;}else{enterAtmoCity(o);return;}}}
+  else{let ix=(keys.a||keys.arrowleft?-1:0)+(keys.d||keys.arrowright?1:0)+joy.x,iy=(keys.w||keys.arrowup?1:0)+(keys.s||keys.arrowdown?-1:0)-joy.y;ix=clamp(ix,-1,1);iy=clamp(iy,-1,1);
+    const ti=thrIn+(keys.x?1:0)-(keys.z?1:0);if(ti)s.thr=clamp(s.thr+ti*dt*.8,.35,1.9);
+    s.yaw-=ix*1.25*dt;s.pitch+=(iy*.75-s.pitch)*Math.min(1,dt*2.2);s.roll+=(-ix*.7-s.roll)*Math.min(1,dt*4);s.spd+=(62*s.thr-s.spd)*Math.min(1,dt*1.5);
+    const f=atV.set(-Math.sin(s.yaw)*Math.cos(s.pitch),Math.sin(s.pitch),-Math.cos(s.yaw)*Math.cos(s.pitch));s.pos.addScaledVector(f,s.spd*dt);
+    const gy=Math.max(Hf(s.pos.x,s.pos.z),A.wet?A.W:-999)+3;if(s.pos.y<gy){s.pos.y=gy;if(s.pitch<-.2&&s.spd>40){atDamage(8);for(let k=0;k<16;k++)A.sparks.emit(s.pos.x,s.pos.y,s.pos.z,(Math.random()-.5)*20,Math.random()*10,(Math.random()-.5)*20,1,C(0xffb070));}s.pitch=Math.max(s.pitch,.2);}
+    const d0=Math.hypot(s.pos.x,s.pos.z);if(d0>1250){s.yaw+=angD(Math.atan2(s.pos.x,s.pos.z),s.yaw)*Math.min(1,dt*1.5);if(!A.edgeT||t-A.edgeT>4){A.edgeT=t;msg('Límite de la zona: da la vuelta','var(--warn)',1.4);}}
+    if(s.pos.y>430){leaveAtmo(true);return;}
+    /* disparos */
+    A.fireT-=dt;if((firing||keys[' '])&&A.fireT<=0){A.fireT=.13;for(const sd of [-1,1]){const m=new THREE.Mesh(geo('atSh',()=>new THREE.BoxGeometry(.5,.5,6)),basic(new THREE.Color(SHIP.glow).getHex()));
+        atV2.set(sd*2.2,-.3,-2).applyEuler(s.o.rotation).add(s.pos);m.position.copy(atV2);m.quaternion.copy(s.o.quaternion);A.sc.add(m);A.shots.push({m,v:f.clone().multiplyScalar(s.spd+300),life:1.3});}if(actx&&!S.muted&&Math.random()<.4)tone('square',900,500,.05,.02);}
+    /* cerca de qué estás */
+    let near=null;for(const o of [A.port,...A.cities]){const d=Math.hypot(s.pos.x-o.padX,s.pos.z-o.padZ);if(d<110&&s.pos.y-o.g<150){near=o;break;}}
+    if(near!==A.near){A.near=near;const b=$('atAct');if(near){b.hidden=false;b.innerHTML=(near.kind==='port'?(planetOwner(S.lvl)!==FACTION?'Aterrizar en el puerto enemigo ⚠':'Aterrizar en el puerto espacial'):'Aterrizar en '+near.name)+(isTouch?'':'<kbd>L</kbd>');}else b.hidden=true;}}
+  s.o.position.copy(s.pos);s.o.rotation.set(s.pitch,s.yaw,s.roll,'YXZ');
+  for(const c of s.o.children)if(c.userData&&c.userData.engine){const k=1.6+s.thr*.8+Math.sin(t*40)*.15;c.scale.set(k,k,1);}
+  /* disparos propios */
+  const allE=[];for(const R0 of A.retos){for(const e of R0.enemies)if(e.alive)allE.push(e);for(const tu of R0.turrets)if(tu.alive)allE.push(tu);}
+  for(const sh of A.shots){sh.life-=dt;sh.m.position.addScaledVector(sh.v,dt);for(const e of allE){if(!e.alive)continue;const p=e.o?e.o.position:atV2.set(e.x,e.y,e.z);if(sh.m.position.distanceToSquared(p)<(e.o?64:49)){e.hp-=1+(PILOT.b.dmg||0);sh.life=0;
+        A.sparks.emit(p.x,p.y,p.z,(Math.random()-.5)*10,(Math.random()-.5)*10,(Math.random()-.5)*10,.5,C(0xffd080));if(e.hp<=0){e.alive=false;const g=e.o||e.g;for(let k=0;k<40;k++)A.sparks.emit(p.x,p.y,p.z,(Math.random()-.5)*40,(Math.random()-.5)*40,(Math.random()-.5)*40,1.2,C(k%2?0xff7020:0xffd080));A.sc.remove(g);S.score+=150;sfx('boom');S.shake=Math.max(S.shake,.3);}break;}}}
+  A.shots=A.shots.filter(sh=>{if(sh.life<=0){A.sc.remove(sh.m);return false;}return true;});
+  for(const b of A.eb){b.life-=dt;b.m.position.addScaledVector(b.v,dt);if(!A.landing&&b.m.position.distanceToSquared(s.pos)<16){b.life=0;atDamage(5+S.lvl*.4);}}
+  A.eb=A.eb.filter(b=>{if(b.life<=0){A.sc.remove(b.m);return false;}return true;});
+  /* retos */
+  for(const R0 of A.retos){if(R0.done)continue;const dR=Math.hypot(s.pos.x-R0.x,s.pos.z-R0.z);
+    if(R0.type==='cazas'||R0.type==='defensa'){if(!R0.on&&dR<320){R0.on=true;atSpawnEnemies(R0,R0.type==='defensa'?7:6,R0.type==='defensa'?R0.city:null);msg(RETOS[R0.type].n+': '+RETOS[R0.type].d,RETOS[R0.type].col,3);say(R0.type==='defensa'?'¡Invasores atacando la ciudad! Defiéndela.':'¡Escuadrón enemigo a la vista! Derríbalos.');}
+      if(R0.on){let alive=0;for(const e of R0.enemies){if(!e.alive)continue;alive++;const p=e.o.position;e.a+=dt*.5;
+          const atk=p.distanceTo(s.pos)<260||R0.type==='cazas';const tgt=atk?atV2.copy(s.pos).add(atV.set(Math.sin(e.a*2)*40,10+Math.sin(e.a)*10,Math.cos(e.a*2)*40)):atV2.set(R0.x+Math.sin(e.a)*60,(R0.city?R0.city.g:R0.y)+55,R0.z+Math.cos(e.a)*60);
+          const dv=tgt.clone().sub(p);const want=dv.clampLength(0,58+S.lvl*2);e.v.lerp(want,Math.min(1,dt*1.2));p.addScaledVector(e.v,dt);e.o.lookAt(p.clone().add(e.v));if(e.cr&&typeof animateCreature==='function')animateCreature(e.o,t+e.a);
+          e.cd-=dt;if(e.cd<=0&&p.distanceTo(s.pos)<220){e.cd=Math.max(.9,2.2-S.lvl*.08);atShoot(p,s.pos,110,0xff4060);}
+          if(R0.type==='defensa'&&!atk&&Math.random()<.05){const cy=R0.city;A.sparks.emit(cy.x+(Math.random()-.5)*80,cy.g+Math.random()*30,cy.z+(Math.random()-.5)*80,0,6,0,1.5,C(0xff7020));}}
+        if(alive===0){R0.done=true;S.hull=Math.min(S.hullMax,S.hull+S.hullMax*.3);atReward(5,2500,R0.type==='defensa'?'¡Ciudad salvada!':'¡Escuadrón derrotado!');say(R0.type==='defensa'?'Ciudad salvada. Los habitantes te lo agradecen.':'Escuadrón derrotado. Buen vuelo, piloto.');}}}
+    else if(R0.type==='torretas'){let alive=0;for(const tu of R0.turrets){if(!tu.alive)continue;alive++;const d=atV.set(tu.x,tu.y,tu.z).distanceTo(s.pos);tu.gl.material.opacity=(t*3%1)<.5?1:.3;
+        if(d<300){tu.cd-=dt;tu.g.rotation.y=Math.atan2(s.pos.x-tu.x,s.pos.z-tu.z);if(tu.cd<=0){tu.cd=Math.max(.8,2-S.lvl*.07);atShoot(atV.clone(),s.pos.clone().add(atV2.set(0,0,0)),130,0xff8a30);}}}
+      if(!R0.told&&dR<340){R0.told=true;msg(RETOS.torretas.n+': '+RETOS.torretas.d,RETOS.torretas.col,3);say('Base de torretas enemiga. Destrúyelas todas.');}
+      if(alive===0){R0.done=true;atReward(5,2500,'¡Base enemiga destruida!');say('Base enemiga destruida.');}}
+    else if(R0.type==='anillos'){R0.rings.forEach((r,i)=>{const on=i===R0.ri;r.m.material.color.set(i<R0.ri?0x5dffa8:on?0xffd23f:0x8a8a9a);r.m.material.opacity=i<R0.ri?.25:on?.95:.45;r.m.rotation.z+=dt*(on?1.5:.2);});
+      const r=R0.rings[R0.ri];if(r&&atV.set(r.x,r.y,r.z).distanceTo(s.pos)<12){if(R0.ri===0){R0.time=60;msg('¡Carrera iniciada! 60 segundos','#ffd23f',1.6);}R0.ri++;if(actx&&!S.muted)tone('sine',700+R0.ri*80,1400+R0.ri*80,.15,.08);
+        for(let k=0;k<30;k++)A.sparks.emit(r.x,r.y,r.z,(Math.random()-.5)*20,(Math.random()-.5)*20,(Math.random()-.5)*20,.7,C(0xffd23f));if(R0.ri>=R0.rings.length){R0.done=true;atReward(5,2500,'¡Carrera ganada en '+Math.round(60-R0.time)+' s!');}}
+      if(R0.ri>0&&!R0.done){R0.time-=dt;if(R0.time<=0){R0.ri=0;msg('Se acabó el tiempo: vuelve al primer anillo','var(--warn)',2);}}
+      if(!R0.told&&dR<380){R0.told=true;msg(RETOS.anillos.n+': '+RETOS.anillos.d,'#ffd23f',3);}}}
+  /* descubrimientos */
+  for(const o of A.discos){if(o.cr){o.ang=(o.ang||0)+dt*.25;o.cr.g.position.set(Math.sin(o.ang)*90,50+Math.sin(t*.5)*10,Math.cos(o.ang)*90);o.cr.g.rotation.y=o.ang+Math.PI/2;if(typeof animateCreature==='function')animateCreature(o.cr.g,t);}
+    if(o.tg){o.tg.rotation.y+=dt*.1;o.tg.position.y=70+Math.sin(t*.6)*4;}if(o.col2){o.col2.material.opacity=.25+Math.abs(Math.sin(t*2))*.3;if(Math.random()<.6)A.sparks.emit(o.x,o.y+Math.random()*100,o.z,(Math.random()-.5)*6,10,(Math.random()-.5)*6,1.2,new THREE.Color(LEVELS[S.lvl].accent));}
+    if(o.done)continue;const cp=o.cr?o.cr.g.getWorldPosition(atV2):atV2.set(o.x,o.y+(o.tg?70:20),o.z);if(cp.distanceTo(s.pos)<(o.type==='templo'?60:48)){o.done=true;o.lb.material.map=labelTex(o.name.toUpperCase(),'#c58bff');o.lb.scale.set(40,5,1);
+      atReward(2,800,'Descubrimiento: '+o.name);setTimeout(()=>{if(S.state==='atmo')msg(DISCO[o.type].d,'#c58bff',3.2);},2900);say('¡Descubrimiento! '+o.name+'.');}}
+  /* cámara */
+  const f2=atV.set(-Math.sin(s.yaw),0,-Math.cos(s.yaw));const port=hgCam.aspect<1;const back=port?19:15,up=port?6.5:5;
+  atV2.copy(s.pos).addScaledVector(f2,-back);atV2.y=Math.max(s.pos.y+up,Math.max(Hf(atV2.x,atV2.z),A.wet?A.W:-999)+4);A.cam.lerp(atV2,Math.min(1,dt*9));const fx=f2.x,fz=f2.z;A.look.lerp(atV2.set(s.pos.x+fx*24,s.pos.y+3.5,s.pos.z+fz*24),Math.min(1,dt*6));
+  hgCam.position.copy(A.cam);if(S.shake>0){hgCam.position.x+=(Math.random()-.5)*S.shake;hgCam.position.y+=(Math.random()-.5)*S.shake;S.shake=Math.max(0,S.shake-dt*2);}hgCam.lookAt(A.look);hgCam.rotateZ(-s.roll*.15);
+  A.sparks.update(dt);A.uiT-=dt;if(A.uiT<=0){A.uiT=.2;atUI();}atNav();}
+function atUI(){const A=AT;if(!A)return;const cv2=A.cities.filter(c=>c.done).length,dv=A.discos.filter(d=>d.done).length,rv=A.retos.filter(r=>r.done).length;
+  $('atCities').textContent=`${cv2}/3`;$('atDisc').textContent=`${dv}/4`;$('atRetos').textContent=`${rv}/2`;const s=A.ship;$('atAlt').textContent=Math.max(0,Math.round(s.pos.y-Math.max(A.Hf(s.pos.x,s.pos.z),A.wet?A.W:-999)))+' m';
+  $('atSpd').textContent=(s.thr).toFixed(1)+'x';$('atHull').style.transform=`scaleX(${clamp(S.hull/S.hullMax,0,1)})`;
+  const r=A.retos.find(x=>x.type==='anillos'&&x.ri>0&&!x.done);$('atTimer').hidden=!r;if(r)$('atTimer').textContent=`Anillo ${r.ri}/${r.rings.length} · ${Math.ceil(r.time)} s`;}
+const atNavC=$('atNav'),atNavX=atNavC.getContext('2d');
+function atNav(){const A=AT,Wd=atNavC.clientWidth||innerWidth,Hd=atNavC.clientHeight||innerHeight,dpr=Math.min(2,devicePixelRatio||1);if(atNavC.width!==Math.round(Wd*dpr)||atNavC.height!==Math.round(Hd*dpr)){atNavC.width=Math.round(Wd*dpr);atNavC.height=Math.round(Hd*dpr);}
+  const x=atNavX;x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,Wd,Hd);if(A.landing)return;const s=A.ship;const list=[];
+  list.push([A.port.padX,A.port.g+10,A.port.padZ,A.port.col,A.port.name,false]);for(const c of A.cities)list.push([c.padX,c.g+10,c.padZ,'#7fd4ff',c.name,c.done]);
+  for(const r of A.retos)if(!r.done){const rr=r.type==='anillos'&&r.rings[r.ri];list.push(rr?[rr.x,rr.y,rr.z,'#ffd23f','Anillo '+(r.ri+1),false]:[r.x,(r.city?r.city.g:r.y)+30,r.z,RETOS[r.type].col,RETOS[r.type].n,false]);}
+  for(const d of A.discos)if(!d.done){const p=d.cr?d.cr.g.getWorldPosition(new THREE.Vector3()):new THREE.Vector3(d.x,d.y+20,d.z);list.push([p.x,p.y,p.z,'#c58bff','Descubrimiento ?',false]);}
+  const m=34,top=isTouch?140:120,bot=isTouch?230:110;x.textAlign='center';x.textBaseline='middle';x.font='600 11px system-ui,sans-serif';
+  list.sort((a,b)=>Math.hypot(a[0]-s.pos.x,a[2]-s.pos.z)-Math.hypot(b[0]-s.pos.x,b[2]-s.pos.z));
+  list.forEach(([ox,oy,oz,c,name,done],i)=>{atV.set(ox,oy,oz).project(hgCam);const behind=atV.z>1;let dx=atV.x*Wd/2,dy=-atV.y*Hd/2;if(behind){dx=-dx;dy=Math.abs(dy)+Hd*.3;}
+    const sx=Wd/2+dx,sy=Hd/2+dy,vis=!behind&&sx>m&&sx<Wd-m&&sy>top&&sy<Hd-bot;const d=Math.round(Math.hypot(ox-s.pos.x,oz-s.pos.z));x.fillStyle=c;x.strokeStyle=c;x.lineWidth=2;x.globalAlpha=done?.45:1;
+    const lab=(lx,ly)=>{const t2=name+' · '+d+' m';const w=x.measureText(t2).width+10;lx=clamp(lx,w/2+4,Wd-w/2-4);x.fillStyle='rgba(2,6,16,.6)';x.fillRect(lx-w/2,ly-8,w,16);x.fillStyle=c;x.fillText(t2,lx,ly+.5);};
+    if(vis){x.beginPath();x.moveTo(sx,sy-9);x.lineTo(sx+7,sy);x.lineTo(sx,sy+9);x.lineTo(sx-7,sy);x.closePath();x.stroke();if(i<5||d<500)lab(sx,sy-20);}
+    else if(i<4&&!done){const k=Math.min((Wd/2-m)/Math.max(Math.abs(dx),1e-3),(dy<0?Hd/2-top:Hd/2-bot)/Math.max(Math.abs(dy),1e-3));const ex=Wd/2+dx*k,ey=Hd/2+dy*k,a=Math.atan2(dy,dx);
+      x.save();x.translate(ex,ey);x.rotate(a);x.beginPath();x.moveTo(13,0);x.lineTo(-7,-8);x.lineTo(-2,0);x.lineTo(-7,8);x.closePath();x.fill();x.restore();if(i<2)lab(ex-Math.cos(a)*30,ey-Math.sin(a)*20);}});x.globalAlpha=1;}
+function atKey(k,e){if(!AT)return;if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();if((k==='l'||k==='e')&&AT.near)atLand(AT.near);}
+/* ciudades del planeta */
+function enterAtmoCity(o){leaveAtmo(false);S.state='city';const CV={name:o.name,style:o.ck.style,kind:o.ck.t,idx:o.idx};CT=buildCity(null,CV);CT.fromAtmo=o;
+  if(!o.done){o.done=true;addCry(1);}
+  $('cyEye').textContent=o.ck.t+' · '+LEVELS[S.lvl].home.planet;$('cyTitle').textContent=o.name;
+  $('cyHint').textContent=(isTouch?'Camina con el joystick. Habla con los habitantes y prueba los juegos.':'Camina con WASD y pulsa E para hablar, jugar o comprar.')+' Vuelve al puerto de la ciudad para despegar.';
+  $('cyCard').hidden=true;$('cyAct').hidden=true;$('cyGame').hidden=true;$('cyShop').hidden=true;cryUI();$('cityUI').hidden=false;$('touch').hidden=!isTouch;$('touch').classList.add('walk');
+  hgCam.position.copy(CT.camPos);hgCam.lookAt(CT.look);fadeFlash();say('Bienvenido a '+o.name+'.');}
+function backToAtmo(o){S.state='atmo';$('atUI').hidden=false;$('touch').classList.remove('walk');$('touch').classList.add('atmo');$('touch').hidden=!isTouch;hgCam.far=6000;hgCam.near=.5;hgCam.updateProjectionMatrix();
+  const s=AT.ship;s.pos.set(o.padX,o.g+30,o.padZ);s.pitch=.35;s.spd=40;s.thr=1;AT.near=o;AT.cam.set(s.pos.x+30,s.pos.y+20,s.pos.z+30);fadeFlash();msg('Despegue desde '+o.name,'var(--accent)',1.6);atUI();}
+
 /* ---------- TURBO CIRCUITO DENTRO DEL JUEGO ---------- */
 let raceTimer=null;
 function startRaceGame(){if(!CT)return;S.state='carrera';$('cityUI').hidden=true;$('touch').hidden=true;stopVox();try{if(hasSpeech)speechSynthesis.cancel();}catch(e){}stopMusic();
@@ -2818,7 +3084,7 @@ let smBtns=[];function openStarMap(){const box=$('smList');box.innerHTML='';smBt
     const mk=(kind,name,sub,col)=>{const b=document.createElement('button');b.className='smBtn'+(S.route&&S.route.l===l&&S.route.kind===kind?' sel':'');b.disabled=locked;b.dataset.l=l;b.dataset.k=kind;
       smBtns.push(b);b.innerHTML=`<span class="ico" style="background:radial-gradient(circle at 35% 35%,#fff8,transparent 45%),${col}"></span><b>${name}</b><small>${sub}</small>`;row.appendChild(b);};
     const pc=L.planets&&L.planets[0]?L.planets[0][0]||L.accent:L.accent;
-    mk('land',L.home.planet.charAt(0).toUpperCase()+L.home.planet.slice(1),'Planeta habitado · aeropuerto, ciudad y hangar',typeof pc==='string'?pc:'#5dffa8');
+    mk('land',L.home.planet.charAt(0).toUpperCase()+L.home.planet.slice(1),(planetOwner(l)===FACTION?'Aliado':'⚠ Territorio enemigo')+' · '+(planetOwner(l)==='umbra'?'Imperio Umbra':'Alianza Estelar')+' · aeropuerto y ciudades',typeof pc==='string'?pc:'#5dffa8');
     mk('site',E.n,E.k+' · bajar en cápsula · '+MIS_CORTO[siteMission(l)],E.gr);
     d.appendChild(row);box.appendChild(d);});
   smRouteUI();$('starMap').hidden=false;}
@@ -3296,7 +3562,8 @@ function update(dt){const L=LEVELS[S.lvl];S.time+=dt;const T=S.time;const playin
   siteUpdate(dt,spd,playing);rivalUpdate(dt,spd,playing);if(S.state==='poddrop')podDropUpdate(dt);
   if(S.mother){const mo=S.mother,p=mo.o.position;if(mo.o.userData.ring)mo.o.userData.ring.rotation.z+=dt*.25;animEscorts(mo.o,S.time);if(mo.cool>0)mo.cool-=dt;mo.blink.forEach((b,i)=>{b.material.opacity=((T*1.3+i*.3)%1)<.5?1:.15;});
     if(playing){p.z+=spd*.8*dt;keepOut(mo.o,70);mo.dist=p.length();if(mo.dist>2900)removeMother();}else mo.dist=p.length();}
-  setDockUI(S.flyMother?S.state==='play':!!(S.mother&&!S.mother.missed&&!S.mother.leaving&&!(S.mother.cool>0)&&S.state==='play'&&S.mother.dist<420));
+  {const moOK=!!(S.mother&&!S.mother.missed&&!S.mother.leaving&&!(S.mother.cool>0)&&S.state==='play'&&S.mother.dist<420);const rvOK=!S.flyMother&&!moOK&&!!(S.rival&&S.rival.alive&&S.state==='play'&&S.rival.dist<300);
+  setDockUI(S.flyMother?S.state==='play':moOK||rvOK,rvOK?'rival':'mo');}
   if(S.state==='dock')updateDock(dt);
   if(S.state==='orbit')updateOrbit(dt);
   if(S.state==='landing')updatePortLanding(dt);
@@ -3433,6 +3700,7 @@ function frame(now){requestAnimationFrame(frame);let dt=(now-last)/1000;last=now
   const st=S.state;
   if(st==='carrera')return;
   badgeT-=dt;if(badgeT<=0){badgeT=.3;pilotBadgeUI();}
+  if(AT&&st==='atmo'){atUpdate(dt);if(S.state==='atmo')renderer.render(AT.sc,hgCam);else if(S.state==='city'&&CT)renderer.render(CT.sc,hgCam);else if(S.state==='hangar'&&HG)renderer.render(HG.sc,hgCam);else renderer.render(scene,camera);return;}
   if(EX&&st==='explore'){exUpdate(dt);if(EX)renderer.render(EX.sc,hgCam);else renderer.render(scene,camera);return;}
   if(CT&&st==='city'){cityUpdate(dt);if(CT)renderer.render(CT.sc,hgCam);else if(HG)renderer.render(HG.sc,hgCam);return;}
   if(MS&&(st==='mother'||st==='mlaunch')){msUpdate(dt);if(MS)renderer.render(MS.sc,hgCam);else renderer.render(scene,camera);return;}
