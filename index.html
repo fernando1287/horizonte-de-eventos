@@ -3423,7 +3423,10 @@ function backToAtmo(o){S.state='atmo';$('atUI').hidden=false;$('touch').classLis
 /* ---------- TURBO CIRCUITO DENTRO DEL JUEGO ---------- */
 let raceTimer=null;
 const SUBGAMES={race:{src:'turbo-circuito.html',re:/Turbo/i,name:'Turbo Circuito',url:'https://claude.ai/artifact/7ZjAW8pEYbUQMbpnUHDCpP'},valle:{src:'valle-royo.html',re:/Valle Royo/i,name:'Valle Royo',url:'https://claude.ai/code/artifact/e5e52903-04c1-4feb-929d-0efa88aa2214'}};let SUBG=SUBGAMES.race;
-function startRaceGame(kind){if(!CT)return;SUBG=SUBGAMES[kind]||SUBGAMES.race;$('raceFrame').title=SUBG.name;$('raceFbName').textContent=SUBG.name;const fl=$('raceFbLink');fl.href=SUBG.url;fl.textContent='Abrir '+SUBG.name;S.state='carrera';$('cityUI').hidden=true;$('touch').hidden=true;stopVox();try{if(hasSpeech)speechSynthesis.cancel();}catch(e){}stopMusic();
+function hdePilotInfo(){const p=PILOT,v=pilotViews(p);let front=v?v.front:pilotBody(p);
+  if(!front&&PW_ME&&PW_ME.D&&PW_ME.D.ctx){try{const D=PW_ME.D,P=D.pose;Object.assign(P,{legL:0,legR:0,armL:0,armR:0,back:false,jump:false,crouch:false,view:'front',act:null});drawDoll(D);front=D.ctx.canvas.toDataURL('image/png');D.key='';}catch(_){}}
+  return {name:p.name,from:p.from||'',faction:FACTIONS[FACTION].name,color:'#'+new THREE.Color(p.acc).getHexString(),portrait:p.img,front,views:v||null};}
+function startRaceGame(kind){if(!CT)return;try{window.HDE_PILOT=hdePilotInfo();}catch(_){window.HDE_PILOT=null;}SUBG=SUBGAMES[kind]||SUBGAMES.race;$('raceFrame').title=SUBG.name;$('raceFbName').textContent=SUBG.name;const fl=$('raceFbLink');fl.href=SUBG.url;fl.textContent='Abrir '+SUBG.name;S.state='carrera';$('cityUI').hidden=true;$('touch').hidden=true;stopVox();try{if(hasSpeech)speechSynthesis.cancel();}catch(e){}stopMusic();
   const fr=$('raceFrame');$('raceFallback').hidden=true;$('raceBox').hidden=false;fr.src=SUBG.src;
   if(raceTimer)clearTimeout(raceTimer);raceTimer=setTimeout(()=>{if(!raceLoaded())$('raceFallback').hidden=false;},9000);}
 function raceLoaded(){try{const d=$('raceFrame').contentDocument;return !!(d&&SUBG.re.test(d.title||''));}catch(e){return false;}}

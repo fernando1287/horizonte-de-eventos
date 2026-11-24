@@ -349,6 +349,11 @@ const rivals=RSTY.map((st,j)=>{const car=makeCar(st,RCOL[j]);scene.add(car.g);re
 rivals.forEach(r=>{const cs=new Float32Array(N);for(let i=0;i<N;i++)cs[i]=Math.min(r.top,Math.sqrt(r.capA/Math.max(Math.abs(K[i]),1e-5)));
  for(let p=0;p<3;p++)for(let i=N-1;i>=0;i--){const j=(i+1)%N;cs[i]=Math.min(cs[i],Math.sqrt(cs[j]*cs[j]+2*17*ds))}r.vt=cs});
 const PERS=makePerson(0x2563eb,0x1e293b,0xef4444);scene.add(PERS.g);
+let HDE=null;try{HDE=window.parent&&window.parent!==window&&window.parent.HDE_PILOT||null}catch(e){HDE=null}
+if(HDE&&HDE.front){const tl=new THREE.TextureLoader();tl.load(HDE.front,tx=>{const im=tx.image,ar=(im.width||1)/(im.height||1);const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,alphaTest:.05}));sp.center.set(.5,0);const hh=2.05;sp.scale.set(hh*ar,hh,1);
+    PERS.g.children.forEach(c=>c.visible=false);PERS.g.add(sp);PERS.spr=sp});
+  const bd=document.createElement('div');bd.id='hdeBadge';bd.style.cssText='position:fixed;right:10px;top:calc(env(safe-area-inset-top,0px) + 40px);z-index:30;display:flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;border-radius:999px;background:rgba(10,14,24,.78);color:#fff;font:700 13px system-ui,sans-serif;border:2px solid '+(HDE.color||'#ffd23f')+';pointer-events:none';
+  const bi=document.createElement('img');bi.src=HDE.portrait||'';bi.alt='';bi.style.cssText='width:36px;height:36px;border-radius:50%;object-fit:cover';const bt=document.createElement('span');bt.textContent=HDE.name;bd.appendChild(bi);bd.appendChild(bt);document.body.appendChild(bd)}
 
 /* ================= Estado ================= */
 let mode='paddock',T=0,P=null,camYaw=.9,camPitch=.5,camDist=11,t0=0;
@@ -507,7 +512,7 @@ function updateRace(dt){
   if(P.dist>=LAPS*L){mode='finish';fin={t:0,rank:rank(),time:raceT};if(!bestT||raceT<bestT){bestT=raceT;try{localStorage.setItem('tc3d_best',bestT)}catch(e){}}say('¡META!',2)}}
  else if(mode==='pitin'||mode==='pitstop'||mode==='pitout')updPit(dt);
  else if(mode==='finish'){fin.t+=dt;autoDrive(P,dt,0,0,0,9);P.car.tail.emissiveIntensity=2;advance(P,dt);
-  if(fin.t>2.2&&!$('res').classList.contains('on')){const r=fin.rank;$('rmed').textContent=r===1?'🥇':r===2?'🥈':r===3?'🥉':'🏁';$('rpos').textContent='Posición '+r+' de 8';$('rtime').textContent='Tu tiempo: '+fmt(fin.time);$('rbest').textContent='Mejor tiempo: '+fmt(bestT);show('res',true)}}
+  if(fin.t>2.2&&!$('res').classList.contains('on')){const r=fin.rank;$('rmed').textContent=r===1?'🥇':r===2?'🥈':r===3?'🥉':'🏁';$('rpos').textContent='Posición '+r+' de 8';$('rtime').textContent=(HDE?HDE.name+' · ':'')+'Tu tiempo: '+fmt(fin.time);$('rbest').textContent='Mejor tiempo: '+fmt(bestT);show('res',true)}}
  updRivals(dt);
  placeCar(P,dt);spinWheels(P.car,P.v,P.steer||0,dt);rivals.forEach(r=>{placeCar(r,dt);spinWheels(r.car,r.v,r.dd*.05,dt)});
  if(mode==='count')P.car.tail.emissiveIntensity=.8;
