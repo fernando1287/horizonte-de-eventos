@@ -241,6 +241,14 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
 .actbtn{pointer-events:auto;border-radius:999px;padding:18px 26px;font-size:16px;box-shadow:0 0 0 6px color-mix(in srgb,var(--accent) 22%,transparent);animation:beacon 1.2s ease-in-out infinite}
 .actbtn:disabled{opacity:.45;animation:none;cursor:not-allowed}
 #touch.walk .tbtns{display:none}
+#rearWarn{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 120px);transform:translateX(-50%);z-index:6;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 16px;border-radius:12px;border:1px solid #ff4d6d;background:rgba(40,4,12,.78);color:#ffd0d8;pointer-events:none;animation:rearBlink .6s steps(2) infinite;text-align:center}
+#rearWarn b{font:700 15px var(--f-disp);letter-spacing:.1em;color:#ff4d6d}#rearWarn span{font-size:11px}
+@keyframes rearBlink{50%{border-color:transparent}}
+#galMap .galList{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;max-height:52vh;overflow:auto;margin:10px 0}
+#galMap .gl{text-align:left;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;display:flex;flex-direction:column;gap:2px}
+#galMap .gl b{font:700 15px var(--f-disp)}#galMap .gl span{font-size:11px;color:var(--dim)}#galMap .gl.here{border-color:var(--good);cursor:default}#galMap .gl.prev{border-color:#ffd23f}
+#galMap .gl em{font-style:normal;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#ffd23f}#galMap .gl.here em{color:var(--good)}
+#galBack{margin-top:6px}
 #tCrouch{display:none;position:absolute;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 112px);width:84px;height:56px;pointer-events:auto;font-size:11px}
 #touch.walk #tCrouch{display:block}
 .bubble{position:relative}
@@ -406,6 +414,7 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
         <button class="iconbtn" id="voiceBtn" aria-label="Voz del narrador">VOZ</button>
         <button class="iconbtn" id="langBtn" aria-label="Idioma de las voces: español o inglés">ES</button>
         <button class="iconbtn" id="viewBtn" aria-label="Cambiar vista de la nave nodriza" hidden>VISTA</button>
+        <button class="iconbtn" id="galBtn" aria-label="Viajar a otra galaxia">GAL</button>
         <button class="iconbtn" id="pauseBtn" aria-label="Pausa">II</button>
       </div>
       <div class="score"><span class="lbl">Puntos</span><b id="score">0</b></div>
@@ -439,13 +448,14 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
   <button class="tb" id="tCrouch" aria-label="Agacharse">AGACHAR</button>
   <button class="tb sm vw" id="tView" aria-label="Cambiar vista" hidden>Ver nave completa</button>
   <div class="tbtns">
-    <div class="thr"><button class="tb sm" id="tSlow" aria-label="Frenar">FRENO</button><button class="tb sm" id="tFast" aria-label="Acelerar">ACEL</button></div>
+    <div class="thr"><button class="tb sm" id="tTurn" aria-label="Dar la vuelta">GIRO 180°</button><button class="tb sm" id="tSlow" aria-label="Frenar">FRENO</button><button class="tb sm" id="tFast" aria-label="Acelerar">ACEL</button></div>
     <button class="tb" id="tMis" aria-label="Misil"><span id="tMisT">DARDO</span><span class="num" id="tMisN">10</span></button>
     <button class="tb" id="tFire" aria-label="Disparar">FUEGO</button>
     <button class="tb" id="tBomb" aria-label="Bomba">BOMBA<span class="num" id="tBombN">3</span></button>
   </div>
 </div>
 
+<div id="rearWarn" hidden role="status"><b>⚠ ENEMIGO ATRÁS</b><span>Pulsa R o GIRO 180° para dar la vuelta</span></div>
 <div id="pilotBadge" hidden><img id="pbImg" alt=""><div><span class="lbl">Piloto</span><b id="pbName"></b><span id="pbFac"></span></div></div>
 
 <div id="enemyComm" hidden><img id="ecImg" alt=""><div><span class="lbl" id="ecFac">Transmisión enemiga</span><b id="ecName"></b><p id="ecTxt"></p></div></div>
@@ -574,6 +584,17 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
     <div id="smRoute" class="smRoute" hidden></div>
     <div id="smList" class="smList"></div>
     <div class="btns"><button class="btn" id="smClose">Listo</button><button class="btn ghost" id="smClear" hidden>Quitar rumbo</button></div>
+  </div>
+</div>
+
+<div class="over" id="galMap" hidden style="z-index:20;background:rgba(3,4,10,.93)">
+  <div class="pane wide">
+    <div class="eyebrow">Motor de salto · Mapa galáctico</div>
+    <h2>¿A qué galaxia quieres volver?</h2>
+    <p>Puedes regresar a cualquier galaxia que ya visitaste. El salto al hiperespacio gasta 25 de combustible.</p>
+    <button class="btn" id="galBack" hidden></button>
+    <div class="galList" id="galList"></div>
+    <div class="btns"><button class="btn ghost" id="galClose">Cerrar</button></div>
   </div>
 </div>
 
@@ -1306,7 +1327,7 @@ const keys={};const joy={x:0,y:0,id:null,ox:0,oy:0};let firing=false,thrIn=0;
 addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=true;
   if(S.state==='globe'){gbKey(k,e);return;}if(S.state==='atmo'){atKey(k,e);return;}if(S.state==='explore'){exKey(k,e);return;}if(S.state==='city'){cityKey(k,e);return;}if(S.state==='mother'){msKey(k,e);return;}if(S.state==='hangar'){hgKey(k,e);return;}if(S.state==='arena'){arKey(k,e);return;}
   if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();
-  if(k==='e'||k==='m')fireMissile();if(k==='q'||k==='b')dropBomb();if(k==='p'||k==='escape')togglePause();if(k==='l')landAction();if(k==='n')startDock();if(k==='v')toggleView();if(k==='c')startPod();});
+  if(k==='e'||k==='m')fireMissile();if(k==='q'||k==='b')dropBomb();if(k==='p'||k==='escape')togglePause();if(k==='l')landAction();if(k==='n')startDock();if(k==='r')startUturn();if(k==='g')openGalMap();if(k==='v')toggleView();if(k==='c')startPod();});
 addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
 const jz=$('joyzone'),joyEl=$('joy'),knob=$('knob');
 jz.addEventListener('pointerdown',e=>{if(joy.id!==null)return;joy.id=e.pointerId;jz.setPointerCapture(e.pointerId);joy.ox=e.clientX;joy.oy=e.clientY;joyEl.style.left=e.clientX+'px';joyEl.style.top=e.clientY+'px';joyEl.style.display='block';$('joyhint').hidden=true;});
@@ -1342,7 +1363,7 @@ function clearList(list){for(const o of list)rm(o);return [];}
 function removeLand(){if(!S.land)return;scene.remove(S.land.o);if(S.land.m.material.map)S.land.m.material.map.dispose();S.land.m.material.dispose();S.land.label.material.map.dispose();S.land=null;S.landCool=14;S.autoBrake=false;setLandUI(null);$('orbitHud').hidden=true;}
 function clearWorld(){if(S.rival){scene.remove(S.rival.o);disposeScene(S.rival.o);S.rival=null;}S.rivalCool=45;if(S.site){disposeScene(S.site.o);scene.remove(S.site.o);S.site=null;}S.siteCool=14;setPodUI(false);shots=clearList(shots);missiles=clearList(missiles);bombs=clearList(bombs);ebul=clearList(ebul);enemies=clearList(enemies);rocks=clearList(rocks);mines=clearList(mines);pickups=clearList(pickups);flashes=clearList(flashes);shocks=clearList(shocks);bolts=clearList(bolts);
   if(S.boss){scene.remove(S.boss.o);S.boss=null;}if(S.bh){scene.remove(S.bh.o);S.bh=null;}removeLand();removeMother();vortices=[];S.dock=null;S.chill=S.poison=S.ink=0;S.orbit=null;S.landPath=null;beam.visible=false;sparks.clear();puffs.clear();}
-function setupLevel(i){const L=LEVELS[i];S.lvl=i;clearWorld();
+function setupLevel(i){const L=LEVELS[i];if(S.lvl!=null&&S.lvl!==i&&S.state!=='menu')S.prevLvl=S.lvl;S.lvl=i;clearWorld();
   planets=clearList(planets);for(const b of bigstars){scene.remove(b.core);b.core.material.dispose();}bigstars=clearList(bigstars);
   if(nebula){scene.remove(nebula);nebula.material.map.dispose();nebula.material.dispose();}
   nebula=new THREE.Mesh(geo('neb',()=>new THREE.SphereGeometry(1600,32,16)),new THREE.MeshBasicMaterial({map:nebulaTex(L),side:THREE.BackSide,depthWrite:false,fog:false}));nebula.rotation.y=R(0,6);scene.add(nebula);
@@ -1899,7 +1920,9 @@ function updateDock(dt){const D=S.dock;if(!D||!S.mother)return;D.t+=dt;const t=D
   else{S.dock=null;bm.opacity=0;enterMother(D.f0);return;}
   if(dir.lengthSq()<1e-6)dir.set(0,0,-1);dir.normalize();ship.position.copy(pos);ship.up.set(0,1,0);ship.lookAt(tmpV.copy(pos).sub(dir));if(t>3.3)$('flash').style.opacity=Math.min(1,(t-3.3)/.5);
   if(t>=3.2){camDes.copy(D.camR);lookDes.copy(D.mouth);}else{camDes.copy(pos).addScaledVector(dir,-11).add(tmpV.set(0,4.5,0));lookDes.copy(pos).addScaledVector(dir,6);}}
-$('dockBtn').addEventListener('click',startDock);$('atAct').addEventListener('click',()=>{if(AT&&AT.near)atLand(AT.near);});$('atExit').addEventListener('click',()=>{if(AT&&S.state==='atmo'&&!AT.landing)atToSpace();});$('podBtn').addEventListener('click',startPod);$('gbLand').addEventListener('click',gbDescend);{const tc=$('tCrouch');tc.addEventListener('pointerdown',e=>{e.preventDefault();touchCrouch=true;});for(const ev of ['pointerup','pointercancel','pointerleave'])tc.addEventListener(ev,()=>{touchCrouch=false;});}$('gbExit').addEventListener('click',()=>{if(S.state==='globe')leaveGlobe(true);});
+$('dockBtn').addEventListener('click',startDock);$('atAct').addEventListener('click',()=>{if(AT&&AT.near)atLand(AT.near);});$('atExit').addEventListener('click',()=>{if(AT&&S.state==='atmo'&&!AT.landing)atToSpace();});$('podBtn').addEventListener('click',startPod);$('gbLand').addEventListener('click',gbDescend);$('galBtn').addEventListener('click',()=>{if(S.galOpen)closeGalMap();else openGalMap();});$('galClose').addEventListener('click',closeGalMap);
+$('galList').addEventListener('click',e=>{const b=e.target.closest('.gl');if(b)galJump(b.dataset.l);});$('galBack').addEventListener('click',e=>galJump($('galBack').dataset.l));
+$('tTurn').addEventListener('pointerdown',e=>{e.preventDefault();startUturn();});{const tc=$('tCrouch');tc.addEventListener('pointerdown',e=>{e.preventDefault();touchCrouch=true;});for(const ev of ['pointerup','pointercancel','pointerleave'])tc.addEventListener(ev,()=>{touchCrouch=false;});}$('gbExit').addEventListener('click',()=>{if(S.state==='globe')leaveGlobe(true);});
 $('gbList').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!GB)return;GB.autoTo=+b.dataset.c;msg('Rumbo a '+CONTS[GB.autoTo].n,'#7fd4ff',1.6);});$('exAct').addEventListener('click',()=>exAction());$('exJump').addEventListener('pointerdown',e=>{e.preventDefault();exJump();});$('viewBtn').addEventListener('click',toggleView);$('viewBig').addEventListener('click',toggleView);$('tView').addEventListener('pointerdown',e=>{e.preventDefault();toggleView();});$('msHelm').addEventListener('click',takeHelm);
 
 /* ---------- ÓRBITA Y ATERRIZAJE ---------- */
@@ -3704,7 +3727,17 @@ function retryLevel(){initAudio();if(EX){disposeScene(EX.sc);EX=null;$('exUI').h
 function toMenu(){stopVox();restoreSmallShip();if(S.state==='carrera'){$('raceFrame').src='about:blank';$('raceBox').hidden=true;}if(CT){disposeScene(CT.sc);CT=null;$('cityUI').hidden=true;}if(MS){disposeScene(MS.sc);MS=null;$('hangarUI').hidden=true;}if(AR){disposeScene(AR.sc);AR=null;$('fightUI').hidden=true;}$('pilotSel').hidden=true;S.state='menu';S.paused=false;leaveHangar();clearWorld();stopMusic();try{if(hasSpeech)speechSynthesis.cancel();}catch(e){}
   $('over').hidden=true;$('hud').hidden=true;$('touch').hidden=true;$('card').classList.remove('on');$('flash').style.opacity=0;
   ship.visible=true;ship.scale.setScalar(.72);ship.rotation.set(0,0,0);P.x=P.y=0;renderMenu();$('menu').hidden=false;}
-function togglePause(){if(S.state!=='play'&&S.state!=='intro')return;S.paused=!S.paused;
+function openGalMap(){if(S.state!=='play'||S.uturn>0)return;S.paused=true;S.galOpen=true;const box=$('galList');box.innerHTML='';
+  for(let l=0;l<=Math.min(maxReached,LEVELS.length-1);l++){const L=LEVELS[l],here=l===S.lvl,prev=l===S.prevLvl&&!here;const b=document.createElement('button');b.className='gl'+(here?' here':prev?' prev':'');b.dataset.l=l;
+    b.innerHTML='<em>'+(here?'Aquí estás':prev?'De aquí vienes':'Galaxia '+(l+1))+'</em><b>'+L.name+'</b><span>Planeta: '+L.home.planet+'</span>';box.appendChild(b);}
+  const gb=$('galBack');const pv=S.prevLvl;gb.hidden=!(pv!=null&&pv!==S.lvl&&pv<=maxReached);if(!gb.hidden){gb.textContent='Regresar a '+LEVELS[pv].name;gb.dataset.l=pv;}
+  $('galMap').hidden=false;if(actx&&!S.muted)tone('sine',500,900,.12,.05);}
+function closeGalMap(){$('galMap').hidden=true;if(S.galOpen){S.galOpen=false;S.paused=false;}}
+function galJump(l){l=+l;if(isNaN(l)||l===S.lvl||l>maxReached){closeGalMap();return;}if(S.fuel<25){msg('Te falta combustible para el salto','var(--danger)',2);say('No hay combustible suficiente para el salto.');return;}
+  closeGalMap();S.fuel-=25;S.route=null;msg('Rumbo a '+LEVELS[l].name,'#ffd23f',2);hyperJump(l);}
+function startUturn(){if(S.state!=='play'||S.paused||S.uturn>0)return;S.uturn=Math.PI;S.uturnDir=(S.rearX||FLY.yr||1)>=0?1:-1;$('rearWarn').hidden=true;S.rearN=0;
+  if(actx&&!S.muted){tone('sawtooth',220,520,.5,.05);noise(.5,.05,900);}msg('Giro de 180°','#7fd4ff',1.2);}
+function togglePause(){if(S.galOpen){closeGalMap();return;}if(S.state!=='play'&&S.state!=='intro')return;S.paused=!S.paused;
   if(S.paused){$('overEye').textContent='Pausa';$('overTitle').textContent=LEVELS[S.lvl].name;$('overText').textContent=`Galaxia ${S.lvl+1} de ${LEVELS.length} · Piloto ${PILOT.name} · Nave ${SHIP.name} · ${Math.floor(S.score).toLocaleString('es')} puntos`;$('overA').textContent='Reanudar';$('overA').onclick=togglePause;$('overB').onclick=toMenu;$('over').hidden=false;}
   else $('over').hidden=true;firing=false;}
 function playerDead(){S.state='dead';S.deadT=1.6;ship.visible=false;beam.visible=false;explosion(P.x,P.y,0,3.5,shipCol);sfx('bomb');S.shake=2;firing=false;$('touch').hidden=true;setLandUI(null);}
@@ -3789,7 +3822,12 @@ function update(dt){const L=LEVELS[S.lvl];S.time+=dt;const T=S.time;const playin
     if(L.hazards.includes('pull')){S.pull=Math.sin(T*.42)*11;yaw+=S.pull*.02*dt;}else S.pull=0;
     const rt=(Math.abs(ix)+Math.abs(iy)<.1)?routeTarget():null;const tgt=S.bh&&S.flyMother?S.bh.o.position:(S.autoBrake&&S.land?S.land.o.position:rt);
     if(tgt){const d=tgt.length(),f=tgt===rt?.9:S.bh?Math.max(0,1-d/380)*1.7:1.3;if(f>0){yaw+=clamp(Math.atan2(tgt.x,-tgt.z),-1,1)*f*dt;pitch-=clamp(Math.atan2(tgt.y-1.5,Math.hypot(tgt.x,tgt.z)),-1,1)*f*dt;}}
+    if(S.uturn>0){const d=Math.min(S.uturn,dt*3.4);yaw+=d*S.uturnDir;S.uturn-=d;}
     if(S.state==='play')worldTurn(yaw,pitch);
+    S.rearT=(S.rearT||0)-dt;if(S.rearT<=0){S.rearT=.3;let th=null,bd=1e9;for(const e of enemies){if(!e.alive)continue;const p=e.o.position;if(p.z>6&&p.z<120){const d=p.lengthSq();if(d<bd){bd=d;th=p;}}}
+      if(!th&&S.rival&&S.rival.alive&&S.rival.o.position.z>10&&S.rival.dist<500)th=S.rival.o.position;
+      S.rearX=th?th.x:0;S.rearN=th?(S.rearN||0)+1:0;const show=S.rearN>=3&&!(S.uturn>0);$('rearWarn').hidden=!show;
+      if(show&&S.time-(S.rearSayT||-99)>15){S.rearSayT=S.time;say('Enemigo detrás de ti. Da la vuelta.');}}
     P.x+=(ix*3.2-P.x)*Math.min(1,dt*2.5);P.y+=(1+iy*1.6-P.y)*Math.min(1,dt*2.5);
     S.inv=Math.max(0,S.inv-dt);S.fireCd-=dt;S.misCd-=dt;
     if(S.shieldMax&&T-S.lastHit>2.5)S.shield=Math.min(S.shieldMax,S.shield+dt*S.shieldMax*.12*(1+(PILOT.b.regen||0)));
@@ -3807,7 +3845,7 @@ function update(dt){const L=LEVELS[S.lvl];S.time+=dt;const T=S.time;const playin
   if(S.state==='warp'){P.x+=(0-P.x)*Math.min(1,dt*3);P.y+=(1.5-P.y)*Math.min(1,dt*3);P.vx*=.9;}
   if(!freeFly){ship.position.set(P.x,P.y,0);
     if(S.state==='warp'){ship.rotation.z+=dt*(2+S.warpT*6);const s=S.warpT<1.6?SHIPSC*(1-S.warpT/1.6*.7):SHIPSC*Math.min(1,.3+(S.warpT-1.6)*.6);ship.scale.setScalar(s);}
-    else{ship.up.set(0,1,0);ship.rotation.set(P.vy*.018,0,-P.vx*.026);}}
+    else{ship.up.set(0,1,0);ship.rotation.set(P.vy*.018,0,-P.vx*.026-(S.uturn>0?S.uturnDir*Math.sin(Math.min(1,(Math.PI-S.uturn)/Math.PI)*Math.PI)*1.2:0));}}
   const inCk=S.flyMother&&S.cockpit&&camBase.z<5;ship.visible=!inCk&&S.state!=='dead'&&S.state!=='deadshown'&&S.state!=='win'&&!(S.inv>0&&((T*20)|0)%2===0);
   ship.updateMatrixWorld();tmpB.set(0,0,1).applyQuaternion(ship.quaternion);
   if(S.state!=='dead'){const pulse=(1+Math.sin(T*40)*.15)*(.8+S.thr*.25)*(S.fuel<=0&&Math.random()<.5?.3:1);for(const c of ship.children)if(c.userData.engine)c.scale.set(2.2*pulse,2.2*pulse,1);
