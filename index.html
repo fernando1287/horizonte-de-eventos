@@ -263,6 +263,7 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
 .smBtn.sel{border-color:#ffd23f;box-shadow:0 0 0 1px #ffd23f inset;background:rgba(255,210,63,.1)}
 .smBtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .smRoute{width:100%;box-sizing:border-box;padding:10px 14px;border-radius:12px;border:1px solid #ffd23f;background:rgba(255,210,63,.1);color:#ffd23f;font-weight:700;letter-spacing:.04em}
+.outf{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}.outf .oc{font-size:10px;letter-spacing:.04em;padding:5px 7px;border-radius:999px;border:1px solid var(--line);color:var(--dim);line-height:1.1}.outf .oc.on{background:var(--accent);color:#04060f;border-color:var(--accent);font-weight:700}
 .pcard{text-align:left;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:4px;cursor:pointer;min-width:0}
 .pcard canvas,.pcard img{width:100%;aspect-ratio:1;border-radius:8px;display:block;object-fit:cover;background:#0a0e1a}
 .pcard.sel{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
@@ -759,7 +760,17 @@ const PILOTS=[
  {name:'Mirex Sai',img:'pilots/mirex-sai.jpg',from:'Iris',bonus:'+15% daño del arma',b:{dmg:.15},look:{type:'alien',skin:'#b02a7a',eye:'#300818',head:'tall',eyes:2,bg:'#3a0828',mark:'#ff8ad5'},acc:0xff5ab0},
  {name:'Rhaz Kor',img:'pilots/rhaz-kor.jpg',from:'Brasa Real',bonus:'+15% blindaje',b:{hull:.15},look:{type:'alien',skin:'#b0905a',eye:'#40e0ff',head:'wide',eyes:2,bg:'#2a2010',mark:'#ffe0a0'},acc:0x40e0ff},
  {name:'Soraya IX',img:'pilots/soraya-ix.jpg',from:'Verdania',bonus:'+12% agilidad',b:{agil:.12},look:{type:'alien',skin:'#5a9a4a',eye:'#ffb020',head:'round',eyes:2,bg:'#0a2a10',mark:'#e0ffd0'},acc:0xffb020},
- {name:'Nem Vor',img:'pilots/nem-vor.jpg',from:'Glaciar Blanco',bonus:'+2 bombas extra',b:{bombs:2},look:{type:'alien',skin:'#7a8aa8',eye:'#e0e8ff',head:'wide',eyes:2,bg:'#141c2a',mark:'#e0e8ff',tentacles:true},acc:0xa0c0ff}];
+ {name:'Nem Vor',img:'pilots/nem-vor.jpg',from:'Glaciar Blanco',bonus:'+2 bombas extra',b:{bombs:2},look:{type:'alien',skin:'#7a8aa8',eye:'#e0e8ff',head:'wide',eyes:2,bg:'#141c2a',mark:'#e0e8ff',tentacles:true},acc:0xa0c0ff},
+ {name:'Yareli Sol',img:'pilots/yareli-sol.jpg',from:'Tenochtitlan · Tierra',bonus:'+15% blindaje',b:{hull:.15},look:{type:'human',skin:'#9a6a48',hair:'#14100c',suit:'#1e5a4a',bg:'#101820'},acc:0x20d0a0,outfits:['guerrero','armadura','tradicional']},
+ {name:'Inti Kallpa',img:'pilots/inti-kallpa.jpg',from:'Cusco · Tierra',bonus:'+15% daño del arma',b:{dmg:.15},look:{type:'human',skin:'#9a6a48',hair:'#14100c',suit:'#5a1a10',bg:'#101820'},acc:0xffb020,outfits:['guerrero','armadura','tradicional']},
+ {name:'Nahui Tepal',img:'pilots/nahui-tepal.jpg',from:'Teotihuacan · Tierra',bonus:'+18% agilidad',b:{agil:.18},look:{type:'human',skin:'#9a6a48',hair:'#14100c',suit:'#1a2a5a',bg:'#101820'},acc:0x3a8aff,outfits:['guerrero','armadura','tradicional']},
+ {name:'Amaru Qori',img:'pilots/amaru-qori.jpg',from:'Machu Picchu · Tierra',bonus:'Escudo 40% más rápido',b:{regen:.4},look:{type:'human',skin:'#9a6a48',hair:'#14100c',suit:'#1a4a28',bg:'#101820'},acc:0x30c060,outfits:['guerrero','armadura','tradicional']},
+ {name:'Ixchel Vera',img:'pilots/ixchel-vera.jpg',from:'Chichén Itzá · Tierra',bonus:'+25% daño de misiles',b:{mis:.25},look:{type:'human',skin:'#9a6a48',hair:'#14100c',suit:'#3a2a5a',bg:'#101820'},acc:0xa070ff,outfits:['guerrero','armadura','tradicional']},
+ {name:'Tupaq Rayen',img:'pilots/tupaq-rayen.jpg',from:'Tiwanaku · Tierra',bonus:'+30% fuerza en la arena',b:{fight:.3,dmg:.06},look:{type:'human',skin:'#9a6a48',hair:'#14100c',suit:'#4a1010',bg:'#101820'},acc:0xff3030,outfits:['guerrero','armadura','tradicional']},
+ {name:'Citlali Yana',img:'pilots/citlali-yana.jpg',from:'Monte Albán · Tierra',bonus:'35% menos combustible',b:{fuel:.35},look:{type:'human',skin:'#9a6a48',hair:'#14100c',suit:'#1a1e4a',bg:'#101820'},acc:0x5a70ff,outfits:['guerrero','armadura','tradicional']},
+ {name:'Killa Montes',img:'pilots/killa-montes.jpg',from:'Nazca · Tierra',bonus:'+2 bombas extra',b:{bombs:2},look:{type:'human',skin:'#9a6a48',hair:'#14100c',suit:'#183a24',bg:'#101820'},acc:0x40d080,outfits:['guerrero','armadura','tradicional']},
+ {name:'Sayri Luz',img:'pilots/sayri-luz.jpg',from:'Palenque · Tierra',bonus:'+25% blindaje',b:{hull:.25},look:{type:'human',skin:'#9a6a48',hair:'#14100c',suit:'#4a1a12',bg:'#101820'},acc:0xff6030,outfits:['guerrero','armadura','tradicional']},
+ {name:'Atzin Puma',img:'pilots/atzin-puma.jpg',from:'Tula · Tierra',bonus:'+12% agilidad',b:{agil:.12},look:{type:'human',skin:'#9a6a48',hair:'#14100c',suit:'#14244a',bg:'#101820'},acc:0x40a0ff,outfits:['guerrero','armadura','tradicional']}];
 /* guerreros dragón de la Dimensión Draco */
 const UPILOTS=[
  {name:'Varkul',img:'pilots/u-varkul.jpg',from:'Trono Draco · Dimensión Draco',bonus:'+30% fuerza en la arena',b:{fight:.3,dmg:.06},look:{type:'alien',skin:'#a02a24',eye:'#ffc040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffc040'},acc:0xffc040},
@@ -2114,7 +2125,11 @@ function buildPilotDoll(lk,acc,img,draco,body){const g=new THREE.Group(),dm=()=>
     const q=a=>Math.round(a*8);const k=[q(P.legL),q(P.legR),q(P.armL),q(P.armR),P.back,P.jump,P.crouch,D.suit,!!D.img+!!D.bodyImg,D.draco&&!D.bodyImg?Math.round(D.t*6):0].join();
     if(k!==D.key){D.key=k;try{if(D.bodyImg)drawBody(D);else drawDoll(D);tex.needsUpdate=true;}catch(_){}}};
   return w;}
-function pilotBody(p){return p&&p.img&&/\/u-/.test(p.img)?p.img.replace('/u-','/b-').replace(/\.jpg$/,'.webp'):null;}
+const BODY_OK=new Set(['lira-voss','kairo-ren','nyx-tal','orun-vek','mira-sol','zeth-ark','dax-mero','elara-kyn','sena-tor','voran-ix','tali-venn','rhem-solar','amaya-kest','jorin-vale','nira-dael','kess-ardan','ren-tavik','elian-mora','tomas-ryde','zara-kai']);
+const OUTFIT_N={guerrero:'Guerrero emplumado',armadura:'Armadura estelar',tradicional:'Traje tradicional'};
+function pilotSlug(p){return (p&&p.img||'').replace(/^pilots\//,'').replace(/\.jpg$/,'');}
+function pilotOutfit(p){let o=null;try{o=localStorage.getItem('hde_outfit_'+pilotSlug(p));}catch(_){}return p.outfits.includes(o)?o:p.outfits[0];}
+function pilotBody(p){if(!p||!p.img)return null;const sl=pilotSlug(p);if(p.outfits)return 'pilots/b-'+sl+'-'+pilotOutfit(p)+'.webp';if(/^u-/.test(sl))return 'pilots/b-'+sl.slice(2)+'.webp';return BODY_OK.has(sl)?'pilots/b-'+sl+'.webp':null;}
 function pilotWalker(){const w=buildPilotDoll(PILOT.look,PILOT.acc,PILOT.img,isDraco()||/\/u-/.test(PILOT.img||''),pilotBody(PILOT));w.me=true;return w;}
 function animWalk(w,ph,amt){const a=Math.sin(ph)*.7*amt;w.legL.rotation.x=a;w.legR.rotation.x=-a;w.armL.rotation.x=-a*.8;w.armR.rotation.x=a*.8;w.armL.rotation.z=w.armR.rotation.z=0;}
 function addFlags(w){FLAGTEX=FLAGTEX||flagTex();const fm=geo('flagM',()=>new THREE.MeshBasicMaterial({map:FLAGTEX,side:THREE.DoubleSide})),sm=geo('flagSM',()=>basic(0xdddddd));
@@ -3393,12 +3408,14 @@ function openPilotSel(lvl){pendingLvl=lvl;initAudio();$('menu').hidden=true;cons
 function pilotCards(){const box=$('pilots');box.innerHTML='';
   pilotList().forEach((pl,i)=>{const b=document.createElement('button');b.className='pcard'+(i===selIdx()?' sel':'');b.dataset.i=i;const im=document.createElement('img');im.src=pl.img;im.alt='';im.loading='lazy';b.appendChild(im);
     const pr=readProf(FACTION,i);const prog=pr&&(pr.max>0||pr.cry>0)?`Galaxia ${(pr.max|0)+1} · ${pr.cry|0} cristales`:'Nuevo · empieza de cero';
-    b.insertAdjacentHTML('beforeend',`<span class="pn">${pl.name}</span><span class="pp${pr&&pr.max>0?' on':''}">${prog}</span>`);b.insertAdjacentHTML('beforeend',`<span class="lbl">${pl.from}</span><span class="pb">${pl.bonus}</span>`);box.appendChild(b);});
+    b.insertAdjacentHTML('beforeend',`<span class="pn">${pl.name}</span><span class="pp${pr&&pr.max>0?' on':''}">${prog}</span>`);b.insertAdjacentHTML('beforeend',`<span class="lbl">${pl.from}</span><span class="pb">${pl.bonus}</span>`);
+    if(pl.outfits){const cur=pilotOutfit(pl);b.insertAdjacentHTML('beforeend','<span class="outf">'+pl.outfits.map(o=>`<span role="button" tabindex="0" class="oc${o===cur?' on':''}" data-o="${o}" data-s="${pilotSlug(pl)}">${OUTFIT_N[o]}</span>`).join('')+'</span>');}
+    box.appendChild(b);});
 }
 function facUI(){for(const b of $('facPick').children){if(b.dataset&&b.dataset.f)b.classList.toggle('on',b.dataset.f===FACTION);}$('facTxt').textContent=FACTIONS[FACTION].d;}
 $('facPick').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;FACTION=b.dataset.f;try{localStorage.setItem('hde_fac',FACTION);}catch(_){}applyFacShips();if(ship)setPlayerShip(S.shipIdx||0);facUI();pilotCards();if(actx&&!S.muted)tone('sine',400,700,.1,.05);
   say(FACTION==='umbra'?'Te uniste a la Dimensión Draco. La Alianza Estelar es tu enemiga.':'Te uniste a la Alianza Estelar. La Dimensión Draco es tu enemiga.');});
-$('pilots').addEventListener('click',e=>{const b=e.target.closest('.pcard');if(!b)return;const i=+b.dataset.i;if(FACTION==='umbra'){savedPilotU=i;try{localStorage.setItem('hde_pilot_u',String(i));}catch(_){}}else{savedPilot=i;try{localStorage.setItem('hde_pilot',String(i));}catch(_){}}
+$('pilots').addEventListener('click',e=>{const b=e.target.closest('.pcard');if(!b)return;const oc=e.target.closest&&e.target.closest('[data-o]');if(oc&&oc.dataset&&oc.dataset.o&&b.querySelectorAll){try{localStorage.setItem('hde_outfit_'+oc.dataset.s,oc.dataset.o);}catch(_){}for(const z of b.querySelectorAll('[data-o]'))z.classList.toggle('on',z===oc);}const i=+b.dataset.i;if(FACTION==='umbra'){savedPilotU=i;try{localStorage.setItem('hde_pilot_u',String(i));}catch(_){}}else{savedPilot=i;try{localStorage.setItem('hde_pilot',String(i));}catch(_){}}
   for(const c of $('pilots').children)c.classList.toggle('sel',+c.dataset.i===i);if(actx&&!S.muted)tone('sine',500,800,.08,.05);});
 $('pilotGo').onclick=()=>{$('pilotSel').hidden=true;loadProf(FACTION,selIdx());cryUI&&cryUI();renderMenu();startGame(pendingLvl==='cont'?maxReached:0);};$('pilotBack').onclick=()=>{$('pilotSel').hidden=true;$('menu').hidden=false;};
 
