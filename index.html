@@ -2147,7 +2147,7 @@ function drawBody(D){const x=D.ctx,P=D.pose,S2=512;x.clearRect(0,0,S2,S2);const 
   x.save();x.translate(S2/2+tx,S2-4-bob*.5+ty);x.rotate(tilt+(P.jump?-.08:0));x.scale(sx,sy*(1+Math.abs(walk)*.03));
   x.shadowColor='rgba(0,0,0,.55)';x.shadowBlur=14;x.shadowOffsetY=4;
   if(P.back&&!V)x.filter='brightness(.72)';x.drawImage(b,-w/2,-h,w,h);x.restore();x.filter='none';
-  if(A){const d=dir||1;if(A.type==='punch')dollFx(x,Math.max(40,Math.min(S2-40,S2/2+tx+(dir?d*(w*.5+44):0))),S2-4-h*(dir?.6:.5),D.acc,u,'punch');else dollFx(x,S2/2+(dir?d*(w*.3+20):0),S2-44,D.acc,u,'kick');}}
+  if(A){const d=dir||1;if(A.type==='punch')dollFx(x,Math.max(30,Math.min(S2-30,S2/2+tx+(dir?d*(w*.55+86):0))),S2-4-h*(dir?.6:.5),D.acc,u,'punch');else dollFx(x,S2/2+(dir?d*(w*.3+20):0),S2-44,D.acc,u,'kick');}}
 let PW_ME=null;
 function buildPilotDoll(lk,acc,img,draco,body,views){const g=new THREE.Group(),dm=()=>new THREE.Object3D();
   const w={g,armL:dm(),armR:dm(),legL:dm(),legR:dm(),head:dm(),doll:true};let c=null,ctx=null;try{c=body?cv(512,512):cv(256,512);ctx=c.getContext('2d');}catch(_){}
@@ -2175,8 +2175,8 @@ const OUTFIT_N={guerrero:'Guerrero emplumado',armadura:'Armadura estelar',tradic
 function pilotSlug(p){return (p&&p.img||'').replace(/^pilots\//,'').replace(/\.jpg$/,'');}
 function pilotOutfit(p){let o=null;try{o=localStorage.getItem('hde_outfit_'+pilotSlug(p));}catch(_){}return p.outfits.includes(o)?o:p.outfits[0];}
 function pilotBody(p){if(!p||!p.img)return null;const sl=pilotSlug(p);if(p.outfits)return 'pilots/b-'+sl+'-'+pilotOutfit(p)+'.webp';if(/^u-/.test(sl))return 'pilots/b-'+sl.slice(2)+'.webp';return BODY_OK.has(sl)?'pilots/b-'+sl+'.webp':null;}
-const VIEWS_OK=new Set(['inti-kallpa','yareli-sol','tupaq-rayen','sayri-luz','citlali-yana','atzin-puma','ixchel-vera','killa-montes','amaru-qori','nahui-tepal']);
-function pilotViews(p){if(!p||!p.outfits)return null;const sl=pilotSlug(p);if(!VIEWS_OK.has(sl)||pilotOutfit(p)!=='guerrero')return null;const o={};for(const v of ['front','left','right','back'])o[v]='pilots/v-'+sl+'-'+v+'.webp';return o;}
+const VIEWS_OK=new Set(['inti-kallpa','yareli-sol','tupaq-rayen','sayri-luz','citlali-yana','atzin-puma','ixchel-vera','killa-montes','amaru-qori','nahui-tepal','tali-venn','amaya-kest','jorin-vale','rhem-solar','nira-dael','zara-kai']);
+function pilotViews(p){if(!p)return null;const sl=pilotSlug(p);if(!VIEWS_OK.has(sl)||(p.outfits&&pilotOutfit(p)!=='guerrero'))return null;const o={};for(const v of ['front','left','right','back'])o[v]='pilots/v-'+sl+'-'+v+'.webp';return o;}
 function pilotWalker(){const w=buildPilotDoll(PILOT.look,PILOT.acc,PILOT.img,isDraco()||/\/u-/.test(PILOT.img||''),pilotBody(PILOT),pilotViews(PILOT));w.me=true;PW_ME=w;return w;}
 const WALK_ST=['hangar','mother','city','explore'];
 function dollAction(type){const w=PW_ME;if(!w||!w.g.visible||!WALK_ST.includes(S.state))return;const D=w.D,now=performance.now()/1000;
