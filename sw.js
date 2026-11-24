@@ -1,5 +1,5 @@
 /* Horizonte de Eventos: guarda el juego en el teléfono para jugar sin internet */
-const VERSION = 'horizonte-v38';
+const VERSION = 'horizonte-v39';
 const ARCHIVOS = [
   './', 'index.html', 'three.min.js', 'turbo-circuito.html', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png', 'icons/apple-touch-icon.png'
