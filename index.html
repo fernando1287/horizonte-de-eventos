@@ -144,7 +144,7 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
 #knob{position:absolute;left:50%;top:50%;width:50px;height:50px;margin:-25px 0 0 -25px;border-radius:50%;background:color-mix(in srgb,var(--accent) 35%,transparent);border:1px solid var(--accent)}
 #joyhint{position:absolute;left:max(24px,env(safe-area-inset-left,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 40px);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
 .tbtns{position:absolute;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 18px);display:grid;grid-template-columns:auto auto;gap:12px;align-items:end;justify-items:center;pointer-events:auto}
-.thr{grid-column:1/-1;display:flex;gap:8px;justify-self:end}
+.thr{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;justify-self:end;justify-content:flex-end;max-width:calc(100vw - 32px)}
 .tb{border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--ink);display:grid;place-items:center;align-content:center;font:700 11px var(--f-disp);letter-spacing:.12em;backdrop-filter:blur(6px);touch-action:none;padding:0}
 .tb.sm{border-radius:999px;height:38px;padding:0 14px;color:var(--warn)}
 #tView{position:absolute;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 250px);pointer-events:auto;color:var(--shield);border-color:var(--shield);height:42px;padding:0 18px;text-transform:uppercase;background:color-mix(in srgb,var(--shield) 16%,var(--panel))}
@@ -451,14 +451,14 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
   <button class="tb" id="tCrouch" aria-label="Agacharse">AGACHAR</button><button class="tb wact" id="tPunch" aria-label="Golpe">GOLPE</button><button class="tb wact" id="tKick" aria-label="Patada">PATADA</button><button class="tb wact" id="tHop" aria-label="Brincar">BRINCAR</button>
   <button class="tb sm vw" id="tView" aria-label="Cambiar vista" hidden>Ver nave completa</button>
   <div class="tbtns">
-    <div class="thr"><button class="tb sm" id="tTurn" aria-label="Dar la vuelta">GIRO 180°</button><button class="tb sm" id="tSlow" aria-label="Frenar">FRENO</button><button class="tb sm" id="tFast" aria-label="Acelerar">ACEL</button></div>
+    <div class="thr"><button class="tb sm" id="tTurnL" aria-label="Girar 90 grados a la izquierda">◀ 90°</button><button class="tb sm" id="tTurn" aria-label="Pirueta de 180 grados">180°</button><button class="tb sm" id="tTurnR" aria-label="Girar 90 grados a la derecha">90° ▶</button><button class="tb sm" id="tSlow" aria-label="Frenar">FRENO</button><button class="tb sm" id="tFast" aria-label="Acelerar">ACEL</button></div>
     <button class="tb" id="tMis" aria-label="Misil"><span id="tMisT">DARDO</span><span class="num" id="tMisN">10</span></button>
     <button class="tb" id="tFire" aria-label="Disparar">FUEGO</button>
     <button class="tb" id="tBomb" aria-label="Bomba">BOMBA<span class="num" id="tBombN">3</span></button>
   </div>
 </div>
 
-<div id="rearWarn" hidden role="status"><b>⚠ ENEMIGO ATRÁS</b><span>Pulsa R o GIRO 180° para dar la vuelta</span></div>
+<div id="rearWarn" hidden role="status"><b>⚠ ENEMIGO ATRÁS</b><span>Pulsa R, el botón 180° o dos veces abajo para la pirueta</span></div>
 <div id="pilotBadge" hidden><img id="pbImg" alt=""><div><span class="lbl">Piloto</span><b id="pbName"></b><span id="pbFac"></span></div></div>
 
 <div id="enemyComm" hidden><img id="ecImg" alt=""><div><span class="lbl" id="ecFac">Transmisión enemiga</span><b id="ecName"></b><p id="ecTxt"></p></div></div>
@@ -482,6 +482,7 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
       <b>Espacio</b><span>Disparar el arma de tu nave (mantener)</span>
       <b>E · Q</b><span>Lanzar el misil montado · Bomba de área (en el hangar eliges qué misiles montar)</span>
       <b>Z · X</b><span>Frenar · Acelerar (más rápido da más puntos)</span>
+      <b>Doble A / D · R</b><span>Doble toque a un lado: giro rápido de 90° con pirueta · Doble S o R: pirueta de 180° para ver a quien te ataca por detrás · G: mapa para regresar a otra galaxia · F K J: golpe, patada y brinco al caminar</span>
       <b>L</b><span>Junto a un planeta habitado: frena, entra en órbita, da la vuelta completa y aterriza en su puerto</span>
       <b>N · V</b><span>Acoplarte a la nave nodriza · Cambiar la vista cuando pilotas la nave nodriza. Solo la nave nodriza cruza los agujeros negros: en su puente está el timón.</span>
       <b>C</b><span>Junto a una zona de exploración (morada): bajar en la cápsula. En el suelo: WASD caminar, Espacio saltar, E subir al rover o volver a la cápsula</span>
@@ -492,6 +493,7 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
       <b>FUEGO</b><span>Mantén para disparar</span>
       <b>MISIL · BOMBA</b><span>Toca para lanzar</span>
       <b>FRENO · ACEL</b><span>Mantén para cambiar la velocidad</span>
+      <b>◀ 90° · 180° · 90° ▶</b><span>Giros rápidos con pirueta. También: mueve el control 2 veces rápido a un lado (90°) o 2 veces abajo (180°)</span>
       <b>CÁPSULA</b><span>Junto a una zona morada de exploración: baja a caminar, sube al rover y cumple el reto del lugar</span>
       <b>ATERRIZAR</b><span>Frena junto a un planeta habitado, da una vuelta en órbita y aterriza siguiendo las luces de la pista</span>
     </div>
@@ -1327,7 +1329,10 @@ function sayAttendant(text){if(attTimer)clearTimeout(attTimer);try{if(hasSpeech)
 
 /* ---------- INPUT ---------- */
 const keys={};const joy={x:0,y:0,id:null,ox:0,oy:0};let firing=false,thrIn=0;
-addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=true;
+addEventListener('keydown',e=>{const k=e.key.toLowerCase();const wasDown=keys[k];keys[k]=true;
+  if(S.state==='play'&&!wasDown&&!e.repeat){const dd={a:-1,arrowleft:-1,d:1,arrowright:1}[k],dn=k==='s'||k==='arrowdown',now=performance.now()/1000;
+    if(dd){if(S.kLast&&S.kLast.d===dd&&now-S.kLast.t<.32){startTurn(Math.PI/2,dd,'roll');S.kLast=null;}else S.kLast={d:dd,t:now};}
+    if(dn){if(S.kDn&&now-S.kDn<.32){startUturn();S.kDn=0;}else S.kDn=now;}}
   if(WALK_ST.includes(S.state)&&PW_ME&&(k==='f'||k==='k'||k==='j')){const t={f:'punch',k:'kick',j:'jump'}[k];if(!(k==='j'&&S.state==='explore'))dollAction(t);}
   if(S.state==='globe'){gbKey(k,e);return;}if(S.state==='atmo'){atKey(k,e);return;}if(S.state==='explore'){exKey(k,e);return;}if(S.state==='city'){cityKey(k,e);return;}if(S.state==='mother'){msKey(k,e);return;}if(S.state==='hangar'){hgKey(k,e);return;}if(S.state==='arena'){arKey(k,e);return;}
   if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();
@@ -1926,7 +1931,7 @@ function updateDock(dt){const D=S.dock;if(!D||!S.mother)return;D.t+=dt;const t=D
   if(t>=3.2){camDes.copy(D.camR);lookDes.copy(D.mouth);}else{camDes.copy(pos).addScaledVector(dir,-11).add(tmpV.set(0,4.5,0));lookDes.copy(pos).addScaledVector(dir,6);}}
 $('dockBtn').addEventListener('click',startDock);$('atAct').addEventListener('click',()=>{if(AT&&AT.near)atLand(AT.near);});$('atExit').addEventListener('click',()=>{if(AT&&S.state==='atmo'&&!AT.landing)atToSpace();});$('podBtn').addEventListener('click',startPod);$('gbLand').addEventListener('click',gbDescend);$('galBtn').addEventListener('click',()=>{if(S.galOpen)closeGalMap();else openGalMap();});$('galClose').addEventListener('click',closeGalMap);
 $('galList').addEventListener('click',e=>{const b=e.target.closest('.gl');if(b)galJump(b.dataset.l);});$('galBack').addEventListener('click',e=>galJump($('galBack').dataset.l));
-$('tTurn').addEventListener('pointerdown',e=>{e.preventDefault();startUturn();});for(const [id,t] of [['tPunch','punch'],['tKick','kick'],['tHop','jump']])$(id).addEventListener('pointerdown',e=>{e.preventDefault();dollAction(t);});
+$('tTurn').addEventListener('pointerdown',e=>{e.preventDefault();startUturn();});$('tTurnL').addEventListener('pointerdown',e=>{e.preventDefault();startTurn(Math.PI/2,-1,'roll');});$('tTurnR').addEventListener('pointerdown',e=>{e.preventDefault();startTurn(Math.PI/2,1,'roll');});for(const [id,t] of [['tPunch','punch'],['tKick','kick'],['tHop','jump']])$(id).addEventListener('pointerdown',e=>{e.preventDefault();dollAction(t);});
 {const tc=$('tCrouch');tc.addEventListener('pointerdown',e=>{e.preventDefault();touchCrouch=true;});for(const ev of ['pointerup','pointercancel','pointerleave'])tc.addEventListener(ev,()=>{touchCrouch=false;});}$('gbExit').addEventListener('click',()=>{if(S.state==='globe')leaveGlobe(true);});
 $('gbList').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!GB)return;GB.autoTo=+b.dataset.c;msg('Rumbo a '+CONTS[GB.autoTo].n,'#7fd4ff',1.6);});$('exAct').addEventListener('click',()=>exAction());$('exJump').addEventListener('pointerdown',e=>{e.preventDefault();exJump();});$('viewBtn').addEventListener('click',toggleView);$('viewBig').addEventListener('click',toggleView);$('tView').addEventListener('pointerdown',e=>{e.preventDefault();toggleView();});$('msHelm').addEventListener('click',takeHelm);
 
@@ -3759,7 +3764,9 @@ function openGalMap(){if(S.state!=='play'||S.uturn>0)return;S.paused=true;S.galO
 function closeGalMap(){$('galMap').hidden=true;if(S.galOpen){S.galOpen=false;S.paused=false;}}
 function galJump(l){l=+l;if(isNaN(l)||l===S.lvl||l>maxReached){closeGalMap();return;}if(S.fuel<25){msg('Te falta combustible para el salto','var(--danger)',2);say('No hay combustible suficiente para el salto.');return;}
   closeGalMap();S.fuel-=25;S.route=null;msg('Rumbo a '+LEVELS[l].name,'#ffd23f',2);hyperJump(l);}
-function startUturn(){if(S.state!=='play'||S.paused||S.uturn>0)return;S.uturn=Math.PI;S.uturnDir=(S.rearX||FLY.yr||1)>=0?1:-1;$('rearWarn').hidden=true;S.rearN=0;
+function startTurn(ang,dir,kind){if(S.state!=='play'||S.paused||S.uturn>0)return;S.uturn=S.uturnTot=ang;S.uturnDir=dir;S.uturnKind=kind;
+  if(actx&&!S.muted){tone('sawtooth',260,620,.35,.05);noise(.35,.05,1200);}msg(ang>2?'Pirueta de 180°':'Giro de 90° '+(dir>0?'a la derecha':'a la izquierda'),'#7fd4ff',1);if(ang>2){$('rearWarn').hidden=true;S.rearN=0;}}
+function startUturn(){if(S.state!=='play'||S.paused||S.uturn>0)return;S.uturn=S.uturnTot=Math.PI;S.uturnKind='loop';S.uturnDir=(S.rearX||FLY.yr||1)>=0?1:-1;$('rearWarn').hidden=true;S.rearN=0;
   if(actx&&!S.muted){tone('sawtooth',220,520,.5,.05);noise(.5,.05,900);}msg('Giro de 180°','#7fd4ff',1.2);}
 function togglePause(){if(S.galOpen){closeGalMap();return;}if(S.state!=='play'&&S.state!=='intro')return;S.paused=!S.paused;
   if(S.paused){$('overEye').textContent='Pausa';$('overTitle').textContent=LEVELS[S.lvl].name;$('overText').textContent=`Galaxia ${S.lvl+1} de ${LEVELS.length} · Piloto ${PILOT.name} · Nave ${SHIP.name} · ${Math.floor(S.score).toLocaleString('es')} puntos`;$('overA').textContent='Reanudar';$('overA').onclick=togglePause;$('overB').onclick=toMenu;$('over').hidden=false;}
@@ -3846,9 +3853,12 @@ function update(dt){const L=LEVELS[S.lvl];S.time+=dt;const T=S.time;const playin
     if(L.hazards.includes('pull')){S.pull=Math.sin(T*.42)*11;yaw+=S.pull*.02*dt;}else S.pull=0;
     const rt=(Math.abs(ix)+Math.abs(iy)<.1)?routeTarget():null;const tgt=S.bh&&S.flyMother?S.bh.o.position:(S.autoBrake&&S.land?S.land.o.position:rt);
     if(tgt){const d=tgt.length(),f=tgt===rt?.9:S.bh?Math.max(0,1-d/380)*1.7:1.3;if(f>0){yaw+=clamp(Math.atan2(tgt.x,-tgt.z),-1,1)*f*dt;pitch-=clamp(Math.atan2(tgt.y-1.5,Math.hypot(tgt.x,tgt.z)),-1,1)*f*dt;}}
-    if(S.uturn>0){const d=Math.min(S.uturn,dt*3.4);yaw+=d*S.uturnDir;S.uturn-=d;}
+    {const jx=joy.x,jy=joy.y,now=S.time;
+      if(Math.abs(jx)>.9&&!S.jxOut){S.jxOut=Math.sign(jx);if(S.jxLast&&S.jxLast.d===S.jxOut&&now-S.jxLast.t<.38){startTurn(Math.PI/2,S.jxOut,'roll');S.jxLast=null;}else S.jxLast={d:S.jxOut,t:now};}else if(Math.abs(jx)<.45)S.jxOut=0;
+      if(jy>.9&&!S.jyOut){S.jyOut=1;if(S.jyLast&&now-S.jyLast<.38){startUturn();S.jyLast=0;}else S.jyLast=now;}else if(jy<.45)S.jyOut=0;}
+    if(S.uturn>0){const d=Math.min(S.uturn,dt*(S.uturnKind==='loop'?4.6:5.2));yaw+=d*S.uturnDir;S.uturn-=d;}
     if(S.state==='play')worldTurn(yaw,pitch);
-    S.rearT=(S.rearT||0)-dt;if(S.rearT<=0){S.rearT=.3;let th=null,bd=1e9;for(const e of enemies){if(!e.alive)continue;const p=e.o.position;if(p.z>6&&p.z<120){const d=p.lengthSq();if(d<bd){bd=d;th=p;}}}
+    S.rearT=(S.rearT||0)-dt;if(S.rearT<=0){S.rearT=.3;if(!S.turnHint&&S.time>8){S.turnHint=1;msg(isTouch?'Mueve el control 2 veces a un lado: giro de 90° · 2 veces abajo: pirueta de 180°':'Doble toque ◀ ▶ (A/D): giro de 90° · doble ▼ (S) o R: pirueta de 180°','#7fd4ff',4.5);}let th=null,bd=1e9;for(const e of enemies){if(!e.alive)continue;const p=e.o.position;if(p.z>6&&p.z<120){const d=p.lengthSq();if(d<bd){bd=d;th=p;}}}
       if(!th&&S.rival&&S.rival.alive&&S.rival.o.position.z>10&&S.rival.dist<500)th=S.rival.o.position;
       S.rearX=th?th.x:0;S.rearN=th?(S.rearN||0)+1:0;const show=S.rearN>=3&&!(S.uturn>0);$('rearWarn').hidden=!show;
       if(show&&S.time-(S.rearSayT||-99)>15){S.rearSayT=S.time;say('Enemigo detrás de ti. Da la vuelta.');}}
@@ -3869,7 +3879,7 @@ function update(dt){const L=LEVELS[S.lvl];S.time+=dt;const T=S.time;const playin
   if(S.state==='warp'){P.x+=(0-P.x)*Math.min(1,dt*3);P.y+=(1.5-P.y)*Math.min(1,dt*3);P.vx*=.9;}
   if(!freeFly){ship.position.set(P.x,P.y,0);
     if(S.state==='warp'){ship.rotation.z+=dt*(2+S.warpT*6);const s=S.warpT<1.6?SHIPSC*(1-S.warpT/1.6*.7):SHIPSC*Math.min(1,.3+(S.warpT-1.6)*.6);ship.scale.setScalar(s);}
-    else{ship.up.set(0,1,0);ship.rotation.set(P.vy*.018,0,-P.vx*.026-(S.uturn>0?S.uturnDir*Math.sin(Math.min(1,(Math.PI-S.uturn)/Math.PI)*Math.PI)*1.2:0));}}
+    else{ship.up.set(0,1,0);if(S.uturn>0){const pr=1-S.uturn/S.uturnTot;ship.rotation.set(P.vy*.018+(S.uturnKind==='loop'?-Math.sin(pr*Math.PI)*1.15:0),0,-S.uturnDir*pr*Math.PI*2);}else ship.rotation.set(P.vy*.018,0,-P.vx*.026);}}
   const inCk=S.flyMother&&S.cockpit&&camBase.z<5;ship.visible=!inCk&&S.state!=='dead'&&S.state!=='deadshown'&&S.state!=='win'&&!(S.inv>0&&((T*20)|0)%2===0);
   ship.updateMatrixWorld();tmpB.set(0,0,1).applyQuaternion(ship.quaternion);
   if(S.state!=='dead'){const pulse=(1+Math.sin(T*40)*.15)*(.8+S.thr*.25)*(S.fuel<=0&&Math.random()<.5?.3:1);for(const c of ship.children)if(c.userData.engine)c.scale.set(2.2*pulse,2.2*pulse,1);
