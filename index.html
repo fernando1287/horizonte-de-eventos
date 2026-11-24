@@ -2090,24 +2090,32 @@ function drawDoll(D){const x=D.ctx,lk=D.lk,W=256,cx=128;x.clearRect(0,0,W,512);x
   const lf=P.legL,lb=P.legR,af=P.armR,ab=P.armL;
   if(!back){sword();tail();cape(false);pack();arm(ab,-50,true);pauldron(-54,true);leg(lb,-18,true);leg(lf,18,false);torso();arm(af,50,false);pauldron(54,false);head();}
   else{tail();arm(ab,-50,true);leg(lb,-18,true);leg(lf,18,false);torso();arm(af,50,false);pauldron(-54,true);pauldron(54,false);cape(true);sword();pack();head();}}
-function buildPilotDoll(lk,acc,img,draco){const g=new THREE.Group(),dm=()=>new THREE.Object3D();
-  const w={g,armL:dm(),armR:dm(),legL:dm(),legR:dm(),head:dm(),doll:true};let c=null,ctx=null;try{c=cv(256,512);ctx=c.getContext('2d');}catch(_){}
+function drawBody(D){const x=D.ctx,b=D.bodyImg,P=D.pose,S2=512;x.clearRect(0,0,S2,S2);
+  const sc=Math.min(470/b.height,500/b.width),w=b.width*sc,h=b.height*sc;const walk=P.legL||0,bob=Math.abs(walk)*14,tilt=walk*.07;
+  let sx=1,sy=1,lift=0;if(P.crouch){sx=1.1;sy=.76;}if(P.jump){sx=.94;sy=1.07;lift=0;}
+  x.save();x.translate(S2/2,S2-4-bob*.5+lift);x.rotate(tilt+(P.jump?-.08:0));x.scale(sx,sy*(1+Math.abs(walk)*.03));
+  x.shadowColor='rgba(0,0,0,.55)';x.shadowBlur=14;x.shadowOffsetY=4;
+  if(P.back)x.filter='brightness(.72)';x.drawImage(b,-w/2,-h,w,h);x.restore();x.filter='none';}
+function buildPilotDoll(lk,acc,img,draco,body){const g=new THREE.Group(),dm=()=>new THREE.Object3D();
+  const w={g,armL:dm(),armR:dm(),legL:dm(),legR:dm(),head:dm(),doll:true};let c=null,ctx=null;try{c=body?cv(512,512):cv(256,512);ctx=c.getContext('2d');}catch(_){}
   const tex=c?new THREE.CanvasTexture(c):null;const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false,alphaTest:.05}));
-  if(sp.center)sp.center.set(.5,0);sp.scale.set(1.4,2.8,1);g.add(sp);
-  const sh=new THREE.Mesh(geo('dollSh',()=>new THREE.CircleGeometry(.55,20).rotateX(-Math.PI/2)),basic(0x000000,{transparent:true,opacity:.32,depthWrite:false}));sh.position.y=.03;g.add(sh);
+  const SW=body?3.3:1.4;if(sp.center)sp.center.set(.5,0);sp.scale.set(SW,body?3.3:2.8,1);g.add(sp);
+  const sh=new THREE.Mesh(geo('dollSh',()=>new THREE.CircleGeometry(.55,20).rotateX(-Math.PI/2)),basic(0x000000,{transparent:true,opacity:.32,depthWrite:false}));sh.position.y=.03;if(body)sh.scale.set(1.7,1,1.1);g.add(sh);
   const D={ctx,lk,acc:'#'+new THREE.Color(acc).getHexString(),img:null,draco,suit:false,t:0,pose:{legL:0,legR:0,armL:0,armR:0,crouch:false,jump:false,back:false},key:'',y0:null,vy:0,last:0};w.D=D;
   if(img&&typeof Image!=='undefined'){const im=new Image();im.onload=()=>{D.img=im;D.key='';};im.src=img;}
+  if(body&&typeof Image!=='undefined'){const im=new Image();im.onload=()=>{D.bodyImg=im;D.key='';};im.src=body;}
   const v=new THREE.Vector3(),cr=new THREE.Vector3(),cf=new THREE.Vector3();
   sp.onBeforeRender=(r,s,cam)=>{if(!ctx)return;const now=performance.now()/1000,dt=Math.min(.1,now-(D.last||now));D.last=now;D.t=now;
     g.getWorldPosition(v);if(D.y0!=null&&dt>0)D.vy=D.vy*.6+((v.y-D.y0)/dt)*.4;D.y0=v.y;
     const ry=g.rotation.y,fx=Math.sin(ry),fz=Math.cos(ry);const e=cam.matrixWorld.elements;cr.set(e[0],e[1],e[2]);cf.set(-e[8],-e[9],-e[10]);
     const side=fx*cr.x+fz*cr.z,away=fx*cf.x+fz*cf.z;const P=D.pose;P.legL=w.legL.rotation.x;P.legR=w.legR.rotation.x;P.armL=w.armL.rotation.x;P.armR=w.armR.rotation.x;
     P.back=away>.6;P.jump=Math.abs(D.vy)>3.2;P.crouch=!!(w.me&&(keys.shift||keys.c||touchCrouch));
-    const flip=side<-.05?-1:1;sp.scale.x=1.4*flip;
-    const q=a=>Math.round(a*8);const k=[q(P.legL),q(P.legR),q(P.armL),q(P.armR),P.back,P.jump,P.crouch,D.suit,!!D.img,D.draco?Math.round(D.t*6):0].join();
-    if(k!==D.key){D.key=k;try{drawDoll(D);tex.needsUpdate=true;}catch(_){}}};
+    const flip=side<-.05?-1:1;sp.scale.x=SW*flip;
+    const q=a=>Math.round(a*8);const k=[q(P.legL),q(P.legR),q(P.armL),q(P.armR),P.back,P.jump,P.crouch,D.suit,!!D.img+!!D.bodyImg,D.draco&&!D.bodyImg?Math.round(D.t*6):0].join();
+    if(k!==D.key){D.key=k;try{if(D.bodyImg)drawBody(D);else drawDoll(D);tex.needsUpdate=true;}catch(_){}}};
   return w;}
-function pilotWalker(){const w=buildPilotDoll(PILOT.look,PILOT.acc,PILOT.img,isDraco()||/\/u-/.test(PILOT.img||''));w.me=true;return w;}
+function pilotBody(p){return p&&p.img&&/\/u-/.test(p.img)?p.img.replace('/u-','/b-').replace(/\.jpg$/,'.webp'):null;}
+function pilotWalker(){const w=buildPilotDoll(PILOT.look,PILOT.acc,PILOT.img,isDraco()||/\/u-/.test(PILOT.img||''),pilotBody(PILOT));w.me=true;return w;}
 function animWalk(w,ph,amt){const a=Math.sin(ph)*.7*amt;w.legL.rotation.x=a;w.legR.rotation.x=-a;w.armL.rotation.x=-a*.8;w.armR.rotation.x=a*.8;w.armL.rotation.z=w.armR.rotation.z=0;}
 function addFlags(w){FLAGTEX=FLAGTEX||flagTex();const fm=geo('flagM',()=>new THREE.MeshBasicMaterial({map:FLAGTEX,side:THREE.DoubleSide})),sm=geo('flagSM',()=>basic(0xdddddd));
   for(const a of [w.armL,w.armR]){const st=new THREE.Mesh(geo('flagS',()=>new THREE.CylinderGeometry(.025,.025,.8,5)),sm);st.position.y=-1.15;a.add(st);const f=new THREE.Mesh(geo('flagG',()=>new THREE.PlaneGeometry(.55,.42)),fm);f.position.set(0,-1.42,.28);f.rotation.y=Math.PI/2;a.add(f);}}
