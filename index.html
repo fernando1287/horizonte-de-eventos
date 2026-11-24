@@ -669,7 +669,7 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
 
 <div id="raceBox" hidden>
   <iframe id="raceFrame" title="Turbo Circuito" allow="fullscreen"></iframe>
-  <div id="raceFallback" hidden><div class="shopPane"><div class="eyebrow">Autódromo</div><h2>No se pudo abrir aquí</h2><p class="hgHint" style="text-shadow:none">Este visor no dejó cargar las carreras dentro del juego. Puedes jugar Turbo Circuito en su propia página y volver después.</p><p><a href="https://claude.ai/artifact/7ZjAW8pEYbUQMbpnUHDCpP" target="_blank" rel="noopener">Abrir Turbo Circuito</a></p></div></div>
+  <div id="raceFallback" hidden><div class="shopPane"><div class="eyebrow">Juego</div><h2>No se pudo abrir aquí</h2><p class="hgHint" style="text-shadow:none">Este visor no dejó cargar las carreras dentro del juego. Puedes jugar <span id="raceFbName">Turbo Circuito</span> en su propia página y volver después.</p><p><a id="raceFbLink" href="https://claude.ai/artifact/7ZjAW8pEYbUQMbpnUHDCpP" target="_blank" rel="noopener">Abrir Turbo Circuito</a></p></div></div>
   <button id="raceExit">← Volver a la Tierra</button>
 </div>
 <div id="ink"></div>
@@ -2680,7 +2680,16 @@ function buildCity(MC,CV){const L=LEVELS[S.lvl],H=L.home,p=L.planets[CV&&CV.idx=
     const wing=new THREE.Mesh(new THREE.BoxGeometry(2.6,.12,.7),M(0x111111));wing.position.set(0,1.5,2.3);car.add(wing);
     for(const [wx,wz] of [[-1.3,-1.6],[1.3,-1.6],[-1.3,1.6],[1.3,1.6]]){const w=new THREE.Mesh(geo('tcW',()=>new THREE.CylinderGeometry(.5,.5,.45,14).rotateZ(Math.PI/2)),geo('tcWM',()=>M(0x141414)));w.position.set(wx,.5,wz);car.add(w);}
     for(const sd of [-1,1])for(let k=0;k<3;k++){const ts=new THREE.Mesh(geo('tcT',()=>new THREE.CylinderGeometry(.8,.8,.5,14)),geo('tcTM',()=>M(0x1a1a1a)));ts.position.set(sd*12,.25+k*.5,2);g.add(ts);}
-    st.race={x:0,z:-44,car};blocks.push({x:-9,z:-44,r:1.2},{x:9,z:-44,r:1.2},{x:0,z:-39,r:2.2},{x:-12,z:-42,r:1},{x:12,z:-42,r:1});}
+    st.race={x:0,z:-44,car};blocks.push({x:-9,z:-44,r:1.2},{x:9,z:-44,r:1.2},{x:0,z:-39,r:2.2},{x:-12,z:-42,r:1},{x:12,z:-42,r:1});
+    /* portal a Valle Royo */
+    {const vg=new THREE.Group();vg.position.set(-46,0,0);vg.rotation.y=Math.PI/2;sc.add(vg);const stone=M(0x8a7a62,{roughness:.9}),moss=M(0x4f7a3a,{roughness:1});
+      for(const sd of [-1,1]){const p=new THREE.Mesh(new THREE.BoxGeometry(2.2,11,2.2),stone);p.position.set(sd*6,5.5,0);vg.add(p);const cap=new THREE.Mesh(new THREE.BoxGeometry(3,1,3),moss);cap.position.set(sd*6,11.3,0);vg.add(cap);}
+      const arch=new THREE.Mesh(new THREE.TorusGeometry(6,1.1,8,24,Math.PI),stone);arch.position.y=11;vg.add(arch);
+      const crown=new THREE.Mesh(new THREE.ConeGeometry(1.4,2.6,5),M(0xffd05b,{metalness:.7,roughness:.3}));crown.position.y=18.6;vg.add(crown);
+      const disc=new THREE.Mesh(new THREE.CircleGeometry(5.4,40),new THREE.MeshBasicMaterial({color:0x70f1ed,transparent:true,opacity:.55,side:THREE.DoubleSide}));disc.position.y=7;vg.add(disc);
+      const orb=glowSprite(0x70f1ed,16,.85);orb.position.y=7.5;vg.add(orb);const orb2=glowSprite(0xba7cff,9,.7);orb2.position.y=7.5;vg.add(orb2);
+      for(let q=0;q<6;q++){const fl=new THREE.Mesh(geo('vrF',()=>new THREE.SphereGeometry(.5,8,6)),basic([0xffd05b,0xff796f,0xba7cff][q%3]));fl.position.set(-8+q*3.2,.5,3.5);vg.add(fl);}
+      vg.add(msLabel('PORTAL · VALLE ROYO','#ffd05b',0,21,0,18));st.valle={x:-46,z:0,disc,orb};blocks.push({x:-46,z:-6,r:1.6},{x:-46,z:6,r:1.6});}}
   return {sc,blocks,st,people,cars,ring,sparks:sp,pilot:{w:pw,x:0,z:48,face:Math.PI,ph:0},near:null,mode:'walk',t:0,hunt:null,gal:null,
     camPos:new THREE.Vector3(0,9,62),look:new THREE.Vector3(0,2,30)};}
 function cryUI(){$('cyCry').textContent=savedCry;}
@@ -2706,10 +2715,11 @@ function cyNearUI(){const n=CT.near,card=$('cyCard'),act=$('cyAct');if(!n||CT.mo
   else if(n==='shop')set('Tienda','Mercado','Compra reparaciones, combustible, misiles y potencia con tus cristales.','Abrir la tienda');
   else if(n==='hunt')set('Caza de cristales','Juego · 60 segundos','Aparecen 12 cristales por la ciudad. Recoge todos los que puedas antes de que se acabe el tiempo.','Jugar');
   else if(n==='race')set('Turbo Circuito','Autódromo · Carreras','Elige tu carro en el paddock y corre 3 vueltas contra 7 rivales. Cuando salgas, regresas aquí.','Ir a las carreras');
+  else if(n==='valle')set('Valle Royo','Portal · La Esfera de los Portales','Cruza siete mundos, reúne esferas y enfrenta guardianes con tu héroe. Cuando salgas, regresas aquí.','Cruzar el portal');
   else if(n==='gal')set('Galería de tiro','Juego · 30 segundos','Toca los blancos que aparecen en el tablero. Cada 2 aciertos ganas 1 cristal.','Jugar');
   else if(n[0]==='p'){const pp=CT.people[+n.slice(1)];set(pp.w.g.scale.x>1.1?'Habitante gigante':'Habitante','Ciudadano de '+H.planet,'Habla con él para escuchar lo que tiene que decir.','Hablar');}}
 function cityAction(){if(!CT||CT.mode!=='walk')return;const n=CT.near;if(!n)return;const H=LEVELS[S.lvl].home;
-  if(n==='race'){startRaceGame();return;}
+  if(n==='race'){startRaceGame();return;}if(n==='valle'){startRaceGame('valle');return;}
   if(n==='port')exitCity();else if(n==='shop')openShop();else if(n==='hunt')startHunt();else if(n==='gal')startGal();
   else if(n[0]==='p'){const pp=CT.people[+n.slice(1)];pp.stop=4;say(CITY_LINES[pp.line],H.pitch,H.rate,null,H.race,'h'+S.lvl);}}
 function cityKey(k,e){if(!CT)return;if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();
@@ -2773,7 +2783,7 @@ function cityUpdate(dt){const G=CT;G.t+=dt;const t=G.t,pv=G.pilot;
     const d0=Math.hypot(pv.x,pv.z);if(d0>62){pv.x*=62/d0;pv.z*=62/d0;}pv.z=Math.min(pv.z,50);
     for(const b of G.blocks){if(!b.r)continue;const dx=pv.x-b.x,dz=pv.z-b.z,dd=Math.hypot(dx,dz);if(dd<b.r+.6&&dd>.001){pv.x=b.x+dx/dd*(b.r+.6);pv.z=b.z+dz/dd*(b.r+.6);}}
     const w=pv.w;w.g.position.set(pv.x,0,pv.z);w.g.rotation.y+=angD(pv.face,w.g.rotation.y)*Math.min(1,dt*10);animWalk(w,pv.ph,moving?1:0);
-    if(G.mode==='walk'&&G.near!=='__res'){let near=null;if(pv.z>45&&Math.abs(pv.x)<5)near='port';else if(Math.hypot(pv.x-G.st.shop.x,pv.z-G.st.shop.z)<6.5)near='shop';else if(Math.hypot(pv.x-G.st.hunt.x,pv.z-G.st.hunt.z)<7)near='hunt';else if(Math.hypot(pv.x-G.st.gal.x,pv.z-G.st.gal.z)<8.6)near='gal';else if(G.st.race&&Math.hypot(pv.x-G.st.race.x,pv.z-G.st.race.z)<9)near='race';
+    if(G.mode==='walk'&&G.near!=='__res'){let near=null;if(pv.z>45&&Math.abs(pv.x)<5)near='port';else if(Math.hypot(pv.x-G.st.shop.x,pv.z-G.st.shop.z)<6.5)near='shop';else if(Math.hypot(pv.x-G.st.hunt.x,pv.z-G.st.hunt.z)<7)near='hunt';else if(Math.hypot(pv.x-G.st.gal.x,pv.z-G.st.gal.z)<8.6)near='gal';else if(G.st.race&&Math.hypot(pv.x-G.st.race.x,pv.z-G.st.race.z)<9)near='race';else if(G.st.valle&&Math.hypot(pv.x-G.st.valle.x,pv.z-G.st.valle.z)<9)near='valle';
       else{let bd=3.6;G.people.forEach((pp,i)=>{const d=Math.hypot(pp.x-pv.x,pp.z-pv.z);if(d<bd){bd=d;near='p'+i;}});}
       if(near!==G.near){G.near=near;cyNearUI();}}}
   /* cámara */
@@ -3412,14 +3422,15 @@ function backToAtmo(o){S.state='atmo';$('atUI').hidden=false;$('touch').classLis
 
 /* ---------- TURBO CIRCUITO DENTRO DEL JUEGO ---------- */
 let raceTimer=null;
-function startRaceGame(){if(!CT)return;S.state='carrera';$('cityUI').hidden=true;$('touch').hidden=true;stopVox();try{if(hasSpeech)speechSynthesis.cancel();}catch(e){}stopMusic();
-  const fr=$('raceFrame');$('raceFallback').hidden=true;$('raceBox').hidden=false;fr.src='turbo-circuito.html';
+const SUBGAMES={race:{src:'turbo-circuito.html',re:/Turbo/i,name:'Turbo Circuito',url:'https://claude.ai/artifact/7ZjAW8pEYbUQMbpnUHDCpP'},valle:{src:'valle-royo.html',re:/Valle Royo/i,name:'Valle Royo',url:'https://claude.ai/code/artifact/e5e52903-04c1-4feb-929d-0efa88aa2214'}};let SUBG=SUBGAMES.race;
+function startRaceGame(kind){if(!CT)return;SUBG=SUBGAMES[kind]||SUBGAMES.race;$('raceFrame').title=SUBG.name;$('raceFbName').textContent=SUBG.name;const fl=$('raceFbLink');fl.href=SUBG.url;fl.textContent='Abrir '+SUBG.name;S.state='carrera';$('cityUI').hidden=true;$('touch').hidden=true;stopVox();try{if(hasSpeech)speechSynthesis.cancel();}catch(e){}stopMusic();
+  const fr=$('raceFrame');$('raceFallback').hidden=true;$('raceBox').hidden=false;fr.src=SUBG.src;
   if(raceTimer)clearTimeout(raceTimer);raceTimer=setTimeout(()=>{if(!raceLoaded())$('raceFallback').hidden=false;},9000);}
-function raceLoaded(){try{const d=$('raceFrame').contentDocument;return !!(d&&/Turbo/i.test(d.title||''));}catch(e){return false;}}
+function raceLoaded(){try{const d=$('raceFrame').contentDocument;return !!(d&&SUBG.re.test(d.title||''));}catch(e){return false;}}
 $('raceFrame').addEventListener('load',()=>{if(S.state!=='carrera')return;if(raceLoaded()){$('raceFallback').hidden=true;try{$('raceFrame').contentWindow.focus();}catch(e){}}});
 function exitRaceGame(){if(S.state!=='carrera')return;if(raceTimer){clearTimeout(raceTimer);raceTimer=null;}const fr=$('raceFrame');fr.src='about:blank';$('raceBox').hidden=true;
   S.state='city';$('cityUI').hidden=false;$('touch').hidden=!isTouch;last=performance.now();if(actx){startMusic(S.lvl);musicMuffle(false);}
-  if(CT){CT.pilot.x=0;CT.pilot.z=-33;CT.pilot.face=0;CT.near=null;cyNearUI();}fadeFlash();say('¡Bienvenido de vuelta a la Tierra!');}
+  if(CT){if(SUBG===SUBGAMES.valle){CT.pilot.x=-36;CT.pilot.z=0;CT.pilot.face=-Math.PI/2;}else{CT.pilot.x=0;CT.pilot.z=-33;CT.pilot.face=0;}CT.near=null;cyNearUI();}fadeFlash();say('¡Bienvenido de vuelta a la Tierra!');}
 $('raceExit').onclick=exitRaceGame;
 addEventListener('message',e=>{const d=e.data;if(d&&typeof d==='object'&&d.tipo==='tc-salir')exitRaceGame();});
 
