@@ -241,6 +241,8 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
 .actbtn{pointer-events:auto;border-radius:999px;padding:18px 26px;font-size:16px;box-shadow:0 0 0 6px color-mix(in srgb,var(--accent) 22%,transparent);animation:beacon 1.2s ease-in-out infinite}
 .actbtn:disabled{opacity:.45;animation:none;cursor:not-allowed}
 #touch.walk .tbtns{display:none}
+#tCrouch{display:none;position:absolute;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 112px);width:84px;height:56px;pointer-events:auto;font-size:11px}
+#touch.walk #tCrouch{display:block}
 .bubble{position:relative}
 .bubble .x{position:absolute;top:4px;right:8px;background:none;border:0;color:var(--dim);font-size:20px;cursor:pointer;pointer-events:auto;line-height:1}
 .pilots{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;width:100%}
@@ -433,6 +435,7 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
 <div id="touch" hidden>
   <div id="joyzone"><div id="joy"><div id="knob"></div></div></div>
   <div id="joyhint">Arrastra aquí para volar</div>
+  <button class="tb" id="tCrouch" aria-label="Agacharse">AGACHAR</button>
   <button class="tb sm vw" id="tView" aria-label="Cambiar vista" hidden>Ver nave completa</button>
   <div class="tbtns">
     <div class="thr"><button class="tb sm" id="tSlow" aria-label="Frenar">FRENO</button><button class="tb sm" id="tFast" aria-label="Acelerar">ACEL</button></div>
@@ -1885,7 +1888,7 @@ function updateDock(dt){const D=S.dock;if(!D||!S.mother)return;D.t+=dt;const t=D
   else{S.dock=null;bm.opacity=0;enterMother(D.f0);return;}
   if(dir.lengthSq()<1e-6)dir.set(0,0,-1);dir.normalize();ship.position.copy(pos);ship.up.set(0,1,0);ship.lookAt(tmpV.copy(pos).sub(dir));if(t>3.3)$('flash').style.opacity=Math.min(1,(t-3.3)/.5);
   if(t>=3.2){camDes.copy(D.camR);lookDes.copy(D.mouth);}else{camDes.copy(pos).addScaledVector(dir,-11).add(tmpV.set(0,4.5,0));lookDes.copy(pos).addScaledVector(dir,6);}}
-$('dockBtn').addEventListener('click',startDock);$('atAct').addEventListener('click',()=>{if(AT&&AT.near)atLand(AT.near);});$('atExit').addEventListener('click',()=>{if(AT&&S.state==='atmo'&&!AT.landing)atToSpace();});$('podBtn').addEventListener('click',startPod);$('gbLand').addEventListener('click',gbDescend);$('gbExit').addEventListener('click',()=>{if(S.state==='globe')leaveGlobe(true);});
+$('dockBtn').addEventListener('click',startDock);$('atAct').addEventListener('click',()=>{if(AT&&AT.near)atLand(AT.near);});$('atExit').addEventListener('click',()=>{if(AT&&S.state==='atmo'&&!AT.landing)atToSpace();});$('podBtn').addEventListener('click',startPod);$('gbLand').addEventListener('click',gbDescend);{const tc=$('tCrouch');tc.addEventListener('pointerdown',e=>{e.preventDefault();touchCrouch=true;});for(const ev of ['pointerup','pointercancel','pointerleave'])tc.addEventListener(ev,()=>{touchCrouch=false;});}$('gbExit').addEventListener('click',()=>{if(S.state==='globe')leaveGlobe(true);});
 $('gbList').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!GB)return;GB.autoTo=+b.dataset.c;msg('Rumbo a '+CONTS[GB.autoTo].n,'#7fd4ff',1.6);});$('exAct').addEventListener('click',()=>exAction());$('exJump').addEventListener('pointerdown',e=>{e.preventDefault();exJump();});$('viewBtn').addEventListener('click',toggleView);$('viewBig').addEventListener('click',toggleView);$('tView').addEventListener('pointerdown',e=>{e.preventDefault();toggleView();});$('msHelm').addEventListener('click',takeHelm);
 
 /* ---------- ÓRBITA Y ATERRIZAJE ---------- */
@@ -2017,6 +2020,54 @@ function buildWarrior(lk,acc,human){const g=new THREE.Group();const M=(c,o={})=>
     if(lk.antenna)for(const sd of [-1,1]){const a=new THREE.Mesh(geo('wAa',()=>new THREE.CylinderGeometry(.02,.02,.5,4)),skin);a.position.set(sd*.15,hs+.18,0);a.rotation.z=sd*.3;head.add(a);}
     if(lk.tentacles)for(let i=-2;i<=2;i++){const t=new THREE.Mesh(geo('wAt',()=>new THREE.CylinderGeometry(.04,.02,.4,5)),skin);t.position.set(i*.09,-.33,hs*.6);head.add(t);}}
   return {g,armL,armR,legL,legR,head};}
+/* ---------- PILOTO DE PAPEL: la foto del personaje que elegiste, dibujada en 2D ----------
+   Siempre mira a la cámara, camina moviendo piernas y brazos, se voltea según hacia dónde va,
+   se ve de espaldas cuando se aleja, brinca y se agacha. */
+let touchCrouch=false;
+function rrect(x,cx,cy,w,hh,r){x.beginPath();x.moveTo(cx+r,cy);x.lineTo(cx+w-r,cy);x.quadraticCurveTo(cx+w,cy,cx+w,cy+r);x.lineTo(cx+w,cy+hh-r);x.quadraticCurveTo(cx+w,cy+hh,cx+w-r,cy+hh);x.lineTo(cx+r,cy+hh);x.quadraticCurveTo(cx,cy+hh,cx,cy+hh-r);x.lineTo(cx,cy+r);x.quadraticCurveTo(cx,cy,cx+r,cy);x.closePath();}
+function dollLimb(x,px,py,ang,len,wd,col){x.save();x.translate(px,py);x.rotate(ang);x.fillStyle=col;rrect(x,-wd/2,-wd/2,wd,len+wd/2,wd/2);x.fill();x.restore();return [px+Math.sin(-ang)*len,py+Math.cos(ang)*len];}
+function drawDoll(D){const x=D.ctx,lk=D.lk,W=128,Hh=256;x.clearRect(0,0,W,Hh);
+  const dr=D.draco,skin=lk.skin||'#c99a7a',suit=lk.type==='human'?(lk.suit||'#2a3a5a'):(dr?skin:(lk.suit||lk.skin||'#4a5a6a')),acc=D.acc,dark='#1a1c22',
+    crouch=D.pose.crouch,jump=D.pose.jump,back=D.pose.back,dy=crouch?34:0;
+  const hipY=150+dy,shY=92+dy,cx=64;
+  const lf=D.pose.legL,lb=D.pose.legR,af=D.pose.armR,ab=D.pose.armL;
+  const leg=(th,col,ox)=>{let t1=th,k=Math.max(0,-th)*.9+.12;if(crouch){t1=th*.4-1.05;k=1.9;}if(jump){t1=-.9+th*.3;k=1.5;}
+    const [kx,ky]=dollLimb(x,cx+ox,hipY,t1,48,20,col);const [fx,fy]=dollLimb(x,kx,ky,t1+k,46,17,col);x.fillStyle=dark;rrect(x,fx-9,fy-6,26,12,5);x.fill();};
+  const arm=(th,col,ox)=>{const t1=th*.9+(jump?-.9:0);const [ex,ey]=dollLimb(x,cx+ox,shY+6,t1,34,15,col);const [hx,hy]=dollLimb(x,ex,ey,t1-.35-(th<-1?.6:0),30,13,col);x.fillStyle=dr?skin:(lk.type==='human'?skin:skin);x.beginPath();x.arc(hx,hy,8,0,7);x.fill();};
+  const shade=c=>{const k=new THREE.Color(c).multiplyScalar(.72);return '#'+k.getHexString();};
+  if(dr){x.strokeStyle=shade(skin);x.lineWidth=16;x.lineCap='round';x.beginPath();x.moveTo(cx-6,hipY-6);x.quadraticCurveTo(cx-44,hipY+20+Math.sin(D.t*4)*6,cx-52,hipY+70-dy*.5);x.stroke();x.lineWidth=7;x.beginPath();x.moveTo(cx-50,hipY+62-dy*.5);x.lineTo(cx-58,hipY+86-dy*.5);x.stroke();}
+  if(D.suit){x.fillStyle='#c8ccd6';rrect(x,cx-(back?22:30),shY,back?44:22,56,6);x.fill();}
+  arm(ab,shade(suit),-21);leg(lb,shade(suit),-9);
+  x.fillStyle=suit;rrect(x,cx-27,shY-4,54,hipY-shY+10,14);x.fill();
+  if(!back){x.fillStyle=acc;rrect(x,cx-18,shY+6,36,24,7);x.fill();}
+  x.fillStyle=dark;x.fillRect(cx-24,hipY-6,48,8);x.fillStyle=acc;x.fillRect(cx-5,hipY-6,10,8);
+  if(D.suit&&back){x.fillStyle='#8a8e98';x.fillRect(cx+6,shY-18,7,22);}
+  leg(lf,suit,9);arm(af,suit,21);
+  x.fillStyle=skin;x.fillRect(cx-9,shY-16,18,16);
+  const hy=50+dy,hr=38;
+  if(back||!D.img){x.fillStyle=back?(lk.hair||shade(skin)):skin;x.beginPath();x.arc(cx,hy,hr,0,7);x.fill();
+    if(dr){x.fillStyle=shade(shade(skin));for(const s of [-1,1]){x.beginPath();x.moveTo(cx+s*14,hy-26);x.lineTo(cx+s*26,hy-52);x.lineTo(cx+s*24,hy-22);x.fill();}}}
+  else{x.save();x.beginPath();x.arc(cx,hy,hr,0,7);x.clip();const iw=D.img.width||256,ih=D.img.height||256;x.drawImage(D.img,iw*.16,ih*.06,iw*.68,ih*.68,cx-hr,hy-hr,hr*2,hr*2);x.restore();}
+  x.strokeStyle=acc;x.lineWidth=4;x.beginPath();x.arc(cx,hy,hr,0,7);x.stroke();
+  if(D.suit){x.fillStyle='rgba(190,232,255,.22)';x.strokeStyle='rgba(220,240,255,.75)';x.lineWidth=3;x.beginPath();x.arc(cx,hy+2,hr+9,0,7);x.fill();x.stroke();x.fillStyle='rgba(255,255,255,.55)';x.beginPath();x.ellipse(cx-14,hy-18,9,5,-.6,0,7);x.fill();}}
+function buildPilotDoll(lk,acc,img,draco){const g=new THREE.Group(),dm=()=>new THREE.Object3D();
+  const w={g,armL:dm(),armR:dm(),legL:dm(),legR:dm(),head:dm(),doll:true};let c=null,ctx=null;try{c=cv(128,256);ctx=c.getContext('2d');}catch(_){}
+  const tex=c?new THREE.CanvasTexture(c):null;const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false,alphaTest:.05}));
+  if(sp.center)sp.center.set(.5,0);sp.scale.set(1.4,2.8,1);g.add(sp);
+  const sh=new THREE.Mesh(geo('dollSh',()=>new THREE.CircleGeometry(.55,20).rotateX(-Math.PI/2)),basic(0x000000,{transparent:true,opacity:.32,depthWrite:false}));sh.position.y=.03;g.add(sh);
+  const D={ctx,lk,acc:'#'+new THREE.Color(acc).getHexString(),img:null,draco,suit:false,t:0,pose:{legL:0,legR:0,armL:0,armR:0,crouch:false,jump:false,back:false},key:'',y0:null,vy:0,last:0};w.D=D;
+  if(img&&typeof Image!=='undefined'){const im=new Image();im.onload=()=>{D.img=im;D.key='';};im.src=img;}
+  const v=new THREE.Vector3(),cr=new THREE.Vector3(),cf=new THREE.Vector3();
+  sp.onBeforeRender=(r,s,cam)=>{if(!ctx)return;const now=performance.now()/1000,dt=Math.min(.1,now-(D.last||now));D.last=now;D.t=now;
+    g.getWorldPosition(v);if(D.y0!=null&&dt>0)D.vy=D.vy*.6+((v.y-D.y0)/dt)*.4;D.y0=v.y;
+    const ry=g.rotation.y,fx=Math.sin(ry),fz=Math.cos(ry);const e=cam.matrixWorld.elements;cr.set(e[0],e[1],e[2]);cf.set(-e[8],-e[9],-e[10]);
+    const side=fx*cr.x+fz*cr.z,away=fx*cf.x+fz*cf.z;const P=D.pose;P.legL=w.legL.rotation.x;P.legR=w.legR.rotation.x;P.armL=w.armL.rotation.x;P.armR=w.armR.rotation.x;
+    P.back=away>.6;P.jump=Math.abs(D.vy)>3.2;P.crouch=!!(w.me&&(keys.shift||keys.c||touchCrouch));
+    const flip=side<-.05?-1:1;sp.scale.x=1.4*flip;
+    const q=a=>Math.round(a*8);const k=[q(P.legL),q(P.legR),q(P.armL),q(P.armR),P.back,P.jump,P.crouch,D.suit,!!D.img,D.draco?Math.round(D.t*6):0].join();
+    if(k!==D.key){D.key=k;try{drawDoll(D);tex.needsUpdate=true;}catch(_){}}};
+  return w;}
+function pilotWalker(){const w=buildPilotDoll(PILOT.look,PILOT.acc,PILOT.img,isDraco()||/\/u-/.test(PILOT.img||''));w.me=true;return w;}
 function animWalk(w,ph,amt){const a=Math.sin(ph)*.7*amt;w.legL.rotation.x=a;w.legR.rotation.x=-a;w.armL.rotation.x=-a*.8;w.armR.rotation.x=a*.8;w.armL.rotation.z=w.armR.rotation.z=0;}
 function addFlags(w){FLAGTEX=FLAGTEX||flagTex();const fm=geo('flagM',()=>new THREE.MeshBasicMaterial({map:FLAGTEX,side:THREE.DoubleSide})),sm=geo('flagSM',()=>basic(0xdddddd));
   for(const a of [w.armL,w.armR]){const st=new THREE.Mesh(geo('flagS',()=>new THREE.CylinderGeometry(.025,.025,.8,5)),sm);st.position.y=-1.15;a.add(st);const f=new THREE.Mesh(geo('flagG',()=>new THREE.PlaneGeometry(.55,.42)),fm);f.position.set(0,-1.42,.28);f.rotation.y=Math.PI/2;a.add(f);}}
@@ -2086,7 +2137,7 @@ function buildHangar(kind){const L=LEVELS[S.lvl],acc=kind==='home'?0x6fd4ff:new 
   for(let i=0;i<6;i++){const sd=i%2?1:-1,w=buildWarrior(look,acc,human);const z0=R(-60,60);w.g.position.set(sd*16.9,0,z0);sc.add(w.g);crew.push({w,x:sd*16.9,z0,z:z0,ph:R(0,6),dir:Math.random()<.5?-1:1});}
   for(const sd of [-1,1]){const w=buildWarrior(look,0xff8a30,human);addFlags(w);w.g.position.set(sd*7,0,-HZ+12);sc.add(w.g);flaggers.push(w);}
   /* tu piloto */
-  const pw=buildWarrior(PILOT.look,PILOT.acc,PILOT.look.type==='human');pw.g.position.set(0,0,HZ-14);pw.g.rotation.y=Math.PI;sc.add(pw.g);
+  const pw=pilotWalker();pw.g.position.set(0,0,HZ-14);pw.g.rotation.y=Math.PI;sc.add(pw.g);
   const sp=new Sparks(700,.5,sc);
   return {kind,sc,pads,ships,rack,crew,flaggers,guides,field,sparks:sp,door:hasArena,city:hasCity,pilot:{w:pw,x:0,z:HZ-14,face:Math.PI,ph:0},near:null,mode:'walk',msel:S.misType,t:0,meetT:12,
     camPos:new THREE.Vector3(0,9,HZ+1),look:new THREE.Vector3(0,2,HZ-24),launch:null};}
@@ -2297,7 +2348,7 @@ function buildMotherInterior(){const L=LEVELS[S.lvl],MC=msOverride||curMC(),acc=
   for(let i=0;i<10;i++){const sd=i%2?1:-1;const b=add(geo('msBarrel',()=>new THREE.CylinderGeometry(.7,.7,1.6,12)),geo('msBarM'+(i%3),()=>metal([0xb04020,0x3a6a9a,0xd0a020][i%3],{metalness:.4})),sd*R(18.5,19.8),.8,R(-56,-50)+((i/2)|0)*1.6);}
   sc.add(msLabel('ESTRELLA MADRE · CUBIERTA DE VUELO','#6fb8ff',0,18,40,24));
   const sp=new Sparks(900,.5,sc);
-  const pw=buildWarrior(PILOT.look,PILOT.acc,PILOT.look.type==='human');pw.g.visible=false;pw.g.position.set(-4,0,MSPAD.z+5);sc.add(pw.g);
+  const pw=pilotWalker();pw.g.visible=false;pw.g.position.set(-4,0,MSPAD.z+5);sc.add(pw.g);
   return {sc,myShip,fluid,tl,pring,hose,pulses,fuelLight,screens,buttons,doors,plat,deckY,cap,holo,crew,mech,flaggers,drones,guides,field,sparks:sp,fleet,fleetNames,
     shuttles,pilot:{w:pw,x:-4,y:0,z:MSPAD.z+5,face:Math.PI,ph:0},deck:'low',ride:null,near:null,t:0,scrT:0,landT:0,f0:0,said50:false,saidFull:false,launch:null,
     camPos:new THREE.Vector3(14,12,MSPAD.z+20),look:new THREE.Vector3(0,3,MSPAD.z)};}
@@ -2502,7 +2553,7 @@ function buildCity(MC,CV){const L=LEVELS[S.lvl],H=L.home,p=L.planets[CV&&CV.idx=
     const cp=new THREE.Mesh(geo('carC',()=>new THREE.SphereGeometry(.7,12,8)),geo('carCM',()=>new THREE.MeshStandardMaterial({color:0x9fd0ff,metalness:.9,roughness:.05})));cp.position.set(0,.45,-.3);g.add(cp);
     const tl=glowSprite(0xff3030,1.2,1);tl.position.z=2.4;g.add(tl);const hl=glowSprite(0xfff0c0,1.4,1);hl.position.z=-2.4;g.add(hl);sc.add(g);cars.push({g,r:R(28,70),h:R(10,30),a:R(0,7),sp:R(.12,.3)*(Math.random()<.5?-1:1)});}
   const sp=new Sparks(800,.5,sc);
-  const pw=buildWarrior(PILOT.look,PILOT.acc,PILOT.look.type==='human');pw.g.position.set(0,0,48);sc.add(pw.g);
+  const pw=pilotWalker();pw.g.position.set(0,0,48);sc.add(pw.g);
   /* autódromo de Turbo Circuito: solo en la Tierra */
   if(S.lvl===0&&!MC){const g=new THREE.Group();g.position.set(0,0,-44);sc.add(g);
     const chk=cv(256,64),cx2=chk.getContext('2d');for(let i=0;i<16;i++)for(let j=0;j<4;j++){cx2.fillStyle=(i+j)%2?'#111':'#fff';cx2.fillRect(i*16,j*16,16,16);}
@@ -2723,7 +2774,7 @@ function buildRover(acc,night){if(isDraco())return buildReptador(acc,night);cons
   g.userData={body,wheels,headG,tip};return g;}
 
 /* astronauta (traje con casco de vidrio y mochila) */
-function suitUp(w,col){const pack=new THREE.Mesh(new THREE.BoxGeometry(.7,.85,.34),new THREE.MeshStandardMaterial({color:col||0xd8dce4,roughness:.5,metalness:.4}));pack.position.set(0,1.6,-.38);w.g.add(pack);
+function suitUp(w,col){if(w.doll){w.D.suit=true;w.D.key='';return w;}const pack=new THREE.Mesh(new THREE.BoxGeometry(.7,.85,.34),new THREE.MeshStandardMaterial({color:col||0xd8dce4,roughness:.5,metalness:.4}));pack.position.set(0,1.6,-.38);w.g.add(pack);
   const t=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,.5,6),new THREE.MeshStandardMaterial({color:0x8a8e98}));t.position.set(.25,2.05,-.4);w.g.add(t);
   const h=new THREE.Mesh(new THREE.SphereGeometry(.46,16,12),new THREE.MeshStandardMaterial({color:0xbfe8ff,transparent:true,opacity:.28,metalness:.9,roughness:.05,depthWrite:false}));h.position.y=2.32;w.g.add(h);
   const ring=new THREE.Mesh(new THREE.TorusGeometry(.36,.06,6,16).rotateX(Math.PI/2),new THREE.MeshStandardMaterial({color:0xc8ccd6,metalness:.7}));ring.position.y=1.98;w.g.add(ring);return w;}
@@ -2772,7 +2823,7 @@ function buildExplore(l,mis){const E=EXPLORE[l],L=LEVELS[l],acc=new THREE.Color(
   /* cápsula y rover */
   const pod=buildPod(acc);pod.position.set(0,H(0,0),0);sc.add(pod);
   const rv=buildRover(acc,!!E.dark);const rvX=7,rvZ=-6;rv.position.set(rvX,H(rvX,rvZ),rvZ);rv.rotation.y=Math.PI*.85;sc.add(rv);
-  const pw=suitUp(buildWarrior(PILOT.look,PILOT.acc,PILOT.look.type==='human'));pw.g.visible=false;sc.add(pw.g);
+  const pw=suitUp(pilotWalker());pw.g.visible=false;sc.add(pw.g);
   const sp=new Sparks(900,.6,sc),dust=new Sparks(500,2.6,sc);dust.p.material.opacity=.7;
   const G={sc,E,l,mis,H,cr,rocks,pod,podY:H(0,0),sparks:sp,dust,
     pilot:{w:pw,x:4.6,z:-3.6,y:H(4.6,-3.6),vy:0,face:0,ph:0,air:false},
