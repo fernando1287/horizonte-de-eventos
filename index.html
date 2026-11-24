@@ -588,7 +588,7 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
     <h2>Elige a tu guerrero</h2>
     <p>Cada piloto tiene una habilidad especial que funciona en cualquier nave y también en la arena.</p>
     <div class="langPick" role="group" aria-label="Idioma de las voces"><span class="lbl">Voces</span><button type="button" data-l="es">Español</button><button type="button" data-l="en">English</button></div>
-    <div class="facPick" id="facPick"><span class="lbl">Tu facción</span><button type="button" data-f="alianza">Alianza Estelar</button><button type="button" data-f="umbra">Imperio Umbra</button></div>
+    <div class="facPick" id="facPick"><span class="lbl">Tu facción</span><button type="button" data-f="alianza">Alianza Estelar</button><button type="button" data-f="umbra">Dimensión Draco</button></div>
     <p class="facTxt" id="facTxt"></p>
     <div class="pilots" id="pilots"></div>
     <div class="btns"><button class="btn" id="pilotGo">Ir al hangar</button><button class="btn ghost" id="pilotBack">Volver</button></div>
@@ -707,6 +707,12 @@ const SHIPS=[
  {name:'Singularidad',cls:'Nave insignia',weapon:'Aniquilador: rayo + buscadores',w:'anni',rate:.28,agil:32,hull:220,shield:60,pow:1,col:0xfff4d0,trim:0x3a2a04,glow:0xffd040,shape:'saucer',mx:1.1},
 ];
 SHIPS.forEach((d,i)=>{d.unlock=i;});
+const DGL=[0x6aff40,0xff3ad0,0xff8a20,0xa040ff,0x40ffd0],DHULL=[0x2c3a26,0x3a2030,0x3a2a1a,0x22283a,0x302a34];
+const DRACO_SHIPS=[['Colmillo','Explorador'],['Garra Veloz','Caza'],['Mandíbula','Asalto'],['Raya Abisal','Interceptor'],['Coloso Escamado','Cañonera'],['Ala de Ceniza','Cazador'],['Sombra Reptante','Furtiva'],['Ojo de Tormenta','Tormenta'],['Aliento de Fuego','Destructor'],['Rey Wyrm','Nave insignia'],
+ ['Devorasoles','Cazadragones'],['Hidra Negra','Asalto'],['Wyvern Escarlata','Interceptor'],['Leviatán','Furtiva'],['Rayo Escamado','Tormenta'],['Caldera','Destructor'],['Medusa de Escamas','Caza pesado'],['Huracán Draconis','Tormenta'],['Behemot','Acorazado'],['Dragón Primordial','Nave legendaria']];
+function isDraco(){try{return FACTION==='umbra';}catch(_){return false;}}
+function applyFacShips(){const dr=isDraco();SHIPS.forEach((d,i)=>{if(!d.ali)d.ali={name:d.name,cls:d.cls,col:d.col,trim:d.trim,glow:d.glow};
+  const v=dr?{name:DRACO_SHIPS[i][0],cls:DRACO_SHIPS[i][1]+' Draco',col:DHULL[(i*2)%5],trim:new THREE.Color(DHULL[i%5]).multiplyScalar(.55).getHex(),glow:DGL[i%5]}:d.ali;Object.assign(d,v);d.isDraco=dr;});}
 SHIPS.push(
  {name:'Basilisco',cls:'Cazadragones',weapon:'Abanico de 7 rayos',w:'fan7',rate:.15,agil:31,hull:230,shield:65,pow:1.05,col:0xd8ffd0,trim:0x1a4a20,glow:0x6aff70,shape:'forward',mx:2.7,extra:['boosters'],unlock:10},
  {name:'Hidra',cls:'Asalto',weapon:'Plasma quíntuple',w:'plasma5',rate:.22,agil:28,hull:260,shield:60,pow:1.1,col:0xc8f0d8,trim:0x0a3a2a,glow:0x40ffb0,shape:'heavy',mx:1.9,extra:['rings'],unlock:10},
@@ -751,38 +757,38 @@ const PILOTS=[
  {name:'Rhaz Kor',img:'pilots/rhaz-kor.jpg',from:'Brasa Real',bonus:'+15% blindaje',b:{hull:.15},look:{type:'alien',skin:'#b0905a',eye:'#40e0ff',head:'wide',eyes:2,bg:'#2a2010',mark:'#ffe0a0'},acc:0x40e0ff},
  {name:'Soraya IX',img:'pilots/soraya-ix.jpg',from:'Verdania',bonus:'+12% agilidad',b:{agil:.12},look:{type:'alien',skin:'#5a9a4a',eye:'#ffb020',head:'round',eyes:2,bg:'#0a2a10',mark:'#e0ffd0'},acc:0xffb020},
  {name:'Nem Vor',img:'pilots/nem-vor.jpg',from:'Glaciar Blanco',bonus:'+2 bombas extra',b:{bombs:2},look:{type:'alien',skin:'#7a8aa8',eye:'#e0e8ff',head:'wide',eyes:2,bg:'#141c2a',mark:'#e0e8ff',tentacles:true},acc:0xa0c0ff}];
-/* guerreros dragón del Imperio Umbra */
+/* guerreros dragón de la Dimensión Draco */
 const UPILOTS=[
- {name:'Varkul',img:'pilots/u-varkul.jpg',from:'Trono Umbra · Imperio Umbra',bonus:'+30% fuerza en la arena',b:{fight:.3,dmg:.06},look:{type:'alien',skin:'#a02a24',eye:'#ffc040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffc040'},acc:0xffc040},
- {name:'Zhessa',img:'pilots/u-zhessa.jpg',from:'Forja Escarlata · Imperio Umbra',bonus:'+18% agilidad',b:{agil:.18},look:{type:'alien',skin:'#2a8a7a',eye:'#ffe060',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffe060'},acc:0xffe060},
- {name:'Drakth',img:'pilots/u-drakth.jpg',from:'Abismo de Ceniza · Imperio Umbra',bonus:'Escudo 40% más rápido',b:{regen:.4},look:{type:'alien',skin:'#d8d4c8',eye:'#40c0ff',head:'wide',eyes:2,bg:'#1a0a10',mark:'#40c0ff'},acc:0x40c0ff},
- {name:'Razhik',img:'pilots/u-razhik.jpg',from:'Nido de Hierro · Imperio Umbra',bonus:'+25% blindaje',b:{hull:.25},look:{type:'alien',skin:'#3a7a3a',eye:'#ffd040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffd040'},acc:0xffd040},
- {name:'Kthor',img:'pilots/u-kthor.jpg',from:'Volcán Negro · Imperio Umbra',bonus:'+15% daño del arma',b:{dmg:.15},look:{type:'alien',skin:'#2a2030',eye:'#c040ff',head:'wide',eyes:2,bg:'#1a0a10',mark:'#c040ff'},acc:0xc040ff},
- {name:'Morgax',img:'pilots/u-morgax.jpg',from:'Trono Umbra · Imperio Umbra',bonus:'+15% blindaje',b:{hull:.15},look:{type:'alien',skin:'#a06a40',eye:'#ffb040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb040'},acc:0xffb040},
- {name:'Sirak',img:'pilots/u-sirak.jpg',from:'Forja Escarlata · Imperio Umbra',bonus:'+12% agilidad',b:{agil:.12},look:{type:'alien',skin:'#2a4aa0',eye:'#ffc040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffc040'},acc:0xffc040},
- {name:'Thulvex',img:'pilots/u-thulvex.jpg',from:'Abismo de Ceniza · Imperio Umbra',bonus:'35% menos combustible',b:{fuel:.35},look:{type:'alien',skin:'#3a7a68',eye:'#ffb040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb040'},acc:0xffb040},
- {name:'Ulkara',img:'pilots/u-ulkara.jpg',from:'Nido de Hierro · Imperio Umbra',bonus:'+25% daño de misiles',b:{mis:.25},look:{type:'alien',skin:'#6a3a9a',eye:'#ffb020',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb020'},acc:0xffb020},
- {name:'Xeroth',img:'pilots/u-xeroth.jpg',from:'Volcán Negro · Imperio Umbra',bonus:'+2 bombas extra',b:{bombs:2},look:{type:'alien',skin:'#c8a060',eye:'#ff8040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ff8040'},acc:0xff8040},
- {name:'Kraz Vor',img:'pilots/u-kraz-vor.jpg',from:'Trono Umbra · Imperio Umbra',bonus:'+15% daño del arma',b:{dmg:.15},look:{type:'alien',skin:'#d8c8a8',eye:'#ff3030',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ff3030'},acc:0xff3030},
- {name:'Nyxar',img:'pilots/u-nyxar.jpg',from:'Forja Escarlata · Imperio Umbra',bonus:'+18% agilidad',b:{agil:.18},look:{type:'alien',skin:'#2a40b0',eye:'#ffb020',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb020'},acc:0xffb020},
- {name:'Gravok',img:'pilots/u-gravok.jpg',from:'Abismo de Ceniza · Imperio Umbra',bonus:'+25% blindaje',b:{hull:.25},look:{type:'alien',skin:'#8a6040',eye:'#ffb040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb040'},acc:0xffb040},
- {name:'Veskara',img:'pilots/u-veskara.jpg',from:'Nido de Hierro · Imperio Umbra',bonus:'Escudo 40% más rápido',b:{regen:.4},look:{type:'alien',skin:'#b8a0d8',eye:'#ffc040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffc040'},acc:0xffc040},
- {name:'Thrak',img:'pilots/u-thrak.jpg',from:'Volcán Negro · Imperio Umbra',bonus:'+30% fuerza en la arena',b:{fight:.3,dmg:.06},look:{type:'alien',skin:'#4a7a3a',eye:'#ffd040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffd040'},acc:0xffd040},
- {name:'Ommul',img:'pilots/u-ommul.jpg',from:'Trono Umbra · Imperio Umbra',bonus:'+25% daño de misiles',b:{mis:.25},look:{type:'alien',skin:'#3a2a48',eye:'#c060ff',head:'wide',eyes:2,bg:'#1a0a10',mark:'#c060ff'},acc:0xc060ff},
- {name:'Reth Ix',img:'pilots/u-reth-ix.jpg',from:'Forja Escarlata · Imperio Umbra',bonus:'+15% blindaje',b:{hull:.15},look:{type:'alien',skin:'#a05a30',eye:'#ffb040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb040'},acc:0xffb040},
- {name:'Zorvex',img:'pilots/u-zorvex.jpg',from:'Abismo de Ceniza · Imperio Umbra',bonus:'+12% agilidad',b:{agil:.12},look:{type:'alien',skin:'#a0a040',eye:'#ffff40',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffff40'},acc:0xffff40},
- {name:'Keldra',img:'pilots/u-keldra.jpg',from:'Nido de Hierro · Imperio Umbra',bonus:'35% menos combustible',b:{fuel:.35},look:{type:'alien',skin:'#4a5a8a',eye:'#ffb040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb040'},acc:0xffb040},
- {name:'Morth',img:'pilots/u-morth.jpg',from:'Volcán Negro · Imperio Umbra',bonus:'+30% fuerza en la arena',b:{fight:.3,dmg:.06},look:{type:'alien',skin:'#a02a2a',eye:'#ffd040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffd040'},acc:0xffd040},
- {name:'Sulketh',img:'pilots/u-sulketh.jpg',from:'Trono Umbra · Imperio Umbra',bonus:'Escudo 40% más rápido',b:{regen:.4},look:{type:'alien',skin:'#8a9098',eye:'#ffb040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb040'},acc:0xffb040},
- {name:'Aurkon',img:'pilots/u-aurkon.jpg',from:'Forja Escarlata · Imperio Umbra',bonus:'+2 bombas extra',b:{bombs:2},look:{type:'alien',skin:'#d8a840',eye:'#ffb040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb040'},acc:0xffb040},
- {name:'Vyrak',img:'pilots/u-vyrak.jpg',from:'Abismo de Ceniza · Imperio Umbra',bonus:'+18% agilidad',b:{agil:.18},look:{type:'alien',skin:'#2a9a9a',eye:'#ffb020',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb020'},acc:0xffb020},
- {name:'Drazha',img:'pilots/u-drazha.jpg',from:'Nido de Hierro · Imperio Umbra',bonus:'+25% blindaje',b:{hull:.25},look:{type:'alien',skin:'#5a6a2a',eye:'#ffd040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffd040'},acc:0xffd040},
- {name:'Korrum',img:'pilots/u-korrum.jpg',from:'Volcán Negro · Imperio Umbra',bonus:'+15% daño del arma',b:{dmg:.15},look:{type:'alien',skin:'#c06a2a',eye:'#ffd040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffd040'},acc:0xffd040},
- {name:'Ythril',img:'pilots/u-ythril.jpg',from:'Trono Umbra · Imperio Umbra',bonus:'+25% daño de misiles',b:{mis:.25},look:{type:'alien',skin:'#7a4ab0',eye:'#ffb020',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb020'},acc:0xffb020},
- {name:'Xal Vek',img:'pilots/u-xal-vek.jpg',from:'Forja Escarlata · Imperio Umbra',bonus:'35% menos combustible',b:{fuel:.35},look:{type:'alien',skin:'#c8b090',eye:'#40a0ff',head:'wide',eyes:2,bg:'#1a0a10',mark:'#40a0ff'},acc:0x40a0ff},
- {name:'Jhezza',img:'pilots/u-jhezza.jpg',from:'Abismo de Ceniza · Imperio Umbra',bonus:'+12% agilidad',b:{agil:.12},look:{type:'alien',skin:'#3ab0b8',eye:'#ffb040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb040'},acc:0xffb040},
- {name:'Vorlath',img:'pilots/u-vorlath.jpg',from:'Nido de Hierro · Imperio Umbra',bonus:'+30% fuerza en la arena',b:{fight:.3,dmg:.06},look:{type:'alien',skin:'#202024',eye:'#80ff40',head:'wide',eyes:2,bg:'#1a0a10',mark:'#80ff40'},acc:0x80ff40},
- {name:'Thulrak',img:'pilots/u-thulrak.jpg',from:'Volcán Negro · Imperio Umbra',bonus:'+15% blindaje',b:{hull:.15},look:{type:'alien',skin:'#c86a80',eye:'#ffb040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb040'},acc:0xffb040}];
+ {name:'Varkul',img:'pilots/u-varkul.jpg',from:'Trono Draco · Dimensión Draco',bonus:'+30% fuerza en la arena',b:{fight:.3,dmg:.06},look:{type:'alien',skin:'#a02a24',eye:'#ffc040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffc040'},acc:0xffc040},
+ {name:'Zhessa',img:'pilots/u-zhessa.jpg',from:'Forja Escarlata · Dimensión Draco',bonus:'+18% agilidad',b:{agil:.18},look:{type:'alien',skin:'#2a8a7a',eye:'#ffe060',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffe060'},acc:0xffe060},
+ {name:'Drakth',img:'pilots/u-drakth.jpg',from:'Abismo de Ceniza · Dimensión Draco',bonus:'Escudo 40% más rápido',b:{regen:.4},look:{type:'alien',skin:'#d8d4c8',eye:'#40c0ff',head:'wide',eyes:2,bg:'#1a0a10',mark:'#40c0ff'},acc:0x40c0ff},
+ {name:'Razhik',img:'pilots/u-razhik.jpg',from:'Nido de Hierro · Dimensión Draco',bonus:'+25% blindaje',b:{hull:.25},look:{type:'alien',skin:'#3a7a3a',eye:'#ffd040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffd040'},acc:0xffd040},
+ {name:'Kthor',img:'pilots/u-kthor.jpg',from:'Volcán Negro · Dimensión Draco',bonus:'+15% daño del arma',b:{dmg:.15},look:{type:'alien',skin:'#2a2030',eye:'#c040ff',head:'wide',eyes:2,bg:'#1a0a10',mark:'#c040ff'},acc:0xc040ff},
+ {name:'Morgax',img:'pilots/u-morgax.jpg',from:'Trono Draco · Dimensión Draco',bonus:'+15% blindaje',b:{hull:.15},look:{type:'alien',skin:'#a06a40',eye:'#ffb040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb040'},acc:0xffb040},
+ {name:'Sirak',img:'pilots/u-sirak.jpg',from:'Forja Escarlata · Dimensión Draco',bonus:'+12% agilidad',b:{agil:.12},look:{type:'alien',skin:'#2a4aa0',eye:'#ffc040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffc040'},acc:0xffc040},
+ {name:'Thulvex',img:'pilots/u-thulvex.jpg',from:'Abismo de Ceniza · Dimensión Draco',bonus:'35% menos combustible',b:{fuel:.35},look:{type:'alien',skin:'#3a7a68',eye:'#ffb040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb040'},acc:0xffb040},
+ {name:'Ulkara',img:'pilots/u-ulkara.jpg',from:'Nido de Hierro · Dimensión Draco',bonus:'+25% daño de misiles',b:{mis:.25},look:{type:'alien',skin:'#6a3a9a',eye:'#ffb020',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb020'},acc:0xffb020},
+ {name:'Xeroth',img:'pilots/u-xeroth.jpg',from:'Volcán Negro · Dimensión Draco',bonus:'+2 bombas extra',b:{bombs:2},look:{type:'alien',skin:'#c8a060',eye:'#ff8040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ff8040'},acc:0xff8040},
+ {name:'Kraz Vor',img:'pilots/u-kraz-vor.jpg',from:'Trono Draco · Dimensión Draco',bonus:'+15% daño del arma',b:{dmg:.15},look:{type:'alien',skin:'#d8c8a8',eye:'#ff3030',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ff3030'},acc:0xff3030},
+ {name:'Nyxar',img:'pilots/u-nyxar.jpg',from:'Forja Escarlata · Dimensión Draco',bonus:'+18% agilidad',b:{agil:.18},look:{type:'alien',skin:'#2a40b0',eye:'#ffb020',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb020'},acc:0xffb020},
+ {name:'Gravok',img:'pilots/u-gravok.jpg',from:'Abismo de Ceniza · Dimensión Draco',bonus:'+25% blindaje',b:{hull:.25},look:{type:'alien',skin:'#8a6040',eye:'#ffb040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb040'},acc:0xffb040},
+ {name:'Veskara',img:'pilots/u-veskara.jpg',from:'Nido de Hierro · Dimensión Draco',bonus:'Escudo 40% más rápido',b:{regen:.4},look:{type:'alien',skin:'#b8a0d8',eye:'#ffc040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffc040'},acc:0xffc040},
+ {name:'Thrak',img:'pilots/u-thrak.jpg',from:'Volcán Negro · Dimensión Draco',bonus:'+30% fuerza en la arena',b:{fight:.3,dmg:.06},look:{type:'alien',skin:'#4a7a3a',eye:'#ffd040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffd040'},acc:0xffd040},
+ {name:'Ommul',img:'pilots/u-ommul.jpg',from:'Trono Draco · Dimensión Draco',bonus:'+25% daño de misiles',b:{mis:.25},look:{type:'alien',skin:'#3a2a48',eye:'#c060ff',head:'wide',eyes:2,bg:'#1a0a10',mark:'#c060ff'},acc:0xc060ff},
+ {name:'Reth Ix',img:'pilots/u-reth-ix.jpg',from:'Forja Escarlata · Dimensión Draco',bonus:'+15% blindaje',b:{hull:.15},look:{type:'alien',skin:'#a05a30',eye:'#ffb040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb040'},acc:0xffb040},
+ {name:'Zorvex',img:'pilots/u-zorvex.jpg',from:'Abismo de Ceniza · Dimensión Draco',bonus:'+12% agilidad',b:{agil:.12},look:{type:'alien',skin:'#a0a040',eye:'#ffff40',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffff40'},acc:0xffff40},
+ {name:'Keldra',img:'pilots/u-keldra.jpg',from:'Nido de Hierro · Dimensión Draco',bonus:'35% menos combustible',b:{fuel:.35},look:{type:'alien',skin:'#4a5a8a',eye:'#ffb040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb040'},acc:0xffb040},
+ {name:'Morth',img:'pilots/u-morth.jpg',from:'Volcán Negro · Dimensión Draco',bonus:'+30% fuerza en la arena',b:{fight:.3,dmg:.06},look:{type:'alien',skin:'#a02a2a',eye:'#ffd040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffd040'},acc:0xffd040},
+ {name:'Sulketh',img:'pilots/u-sulketh.jpg',from:'Trono Draco · Dimensión Draco',bonus:'Escudo 40% más rápido',b:{regen:.4},look:{type:'alien',skin:'#8a9098',eye:'#ffb040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb040'},acc:0xffb040},
+ {name:'Aurkon',img:'pilots/u-aurkon.jpg',from:'Forja Escarlata · Dimensión Draco',bonus:'+2 bombas extra',b:{bombs:2},look:{type:'alien',skin:'#d8a840',eye:'#ffb040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb040'},acc:0xffb040},
+ {name:'Vyrak',img:'pilots/u-vyrak.jpg',from:'Abismo de Ceniza · Dimensión Draco',bonus:'+18% agilidad',b:{agil:.18},look:{type:'alien',skin:'#2a9a9a',eye:'#ffb020',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb020'},acc:0xffb020},
+ {name:'Drazha',img:'pilots/u-drazha.jpg',from:'Nido de Hierro · Dimensión Draco',bonus:'+25% blindaje',b:{hull:.25},look:{type:'alien',skin:'#5a6a2a',eye:'#ffd040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffd040'},acc:0xffd040},
+ {name:'Korrum',img:'pilots/u-korrum.jpg',from:'Volcán Negro · Dimensión Draco',bonus:'+15% daño del arma',b:{dmg:.15},look:{type:'alien',skin:'#c06a2a',eye:'#ffd040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffd040'},acc:0xffd040},
+ {name:'Ythril',img:'pilots/u-ythril.jpg',from:'Trono Draco · Dimensión Draco',bonus:'+25% daño de misiles',b:{mis:.25},look:{type:'alien',skin:'#7a4ab0',eye:'#ffb020',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb020'},acc:0xffb020},
+ {name:'Xal Vek',img:'pilots/u-xal-vek.jpg',from:'Forja Escarlata · Dimensión Draco',bonus:'35% menos combustible',b:{fuel:.35},look:{type:'alien',skin:'#c8b090',eye:'#40a0ff',head:'wide',eyes:2,bg:'#1a0a10',mark:'#40a0ff'},acc:0x40a0ff},
+ {name:'Jhezza',img:'pilots/u-jhezza.jpg',from:'Abismo de Ceniza · Dimensión Draco',bonus:'+12% agilidad',b:{agil:.12},look:{type:'alien',skin:'#3ab0b8',eye:'#ffb040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb040'},acc:0xffb040},
+ {name:'Vorlath',img:'pilots/u-vorlath.jpg',from:'Nido de Hierro · Dimensión Draco',bonus:'+30% fuerza en la arena',b:{fight:.3,dmg:.06},look:{type:'alien',skin:'#202024',eye:'#80ff40',head:'wide',eyes:2,bg:'#1a0a10',mark:'#80ff40'},acc:0x80ff40},
+ {name:'Thulrak',img:'pilots/u-thulrak.jpg',from:'Volcán Negro · Dimensión Draco',bonus:'+15% blindaje',b:{hull:.15},look:{type:'alien',skin:'#c86a80',eye:'#ffb040',head:'wide',eyes:2,bg:'#1a0a10',mark:'#ffb040'},acc:0xffb040}];
 let PILOT=PILOTS[0];
 function pilotList(f){return (f||FACTION)==='umbra'?UPILOTS:PILOTS;}
 function enemyList(){return FACTION==='umbra'?PILOTS:UPILOTS;}
@@ -931,7 +937,7 @@ const SPM={};
 function sGlow(color,scale,op=1){const k=color+'_'+op;const m=SPM[k]||(SPM[k]=new THREE.SpriteMaterial({map:GLOW,color,transparent:true,opacity:op,blending:THREE.AdditiveBlending,depthWrite:false,fog:false}));const s=new THREE.Sprite(m);s.scale.set(scale,scale,1);s.userData.shared=true;return s;}
 
 /* ---------- SHIP BUILDER ---------- */
-function buildShip(d){const g=new THREE.Group();
+function buildShip(d){if(d.isDraco)return buildDracoShip(d);const g=new THREE.Group();
   const body=stdMat(d.col,{metalness:.6,roughness:.3}),trim=stdMat(d.trim),glow=basic(d.glow),glass=stdMat(d.glow,{emissive:d.glow,emissiveIntensity:.35,metalness:.9,roughness:.1,flatShading:false});
   const eng=[];
   const add=(gm,mat,x=0,y=0,z=0,rx=0,ry=0,rz=0)=>{const m=new THREE.Mesh(gm,mat);m.position.set(x,y,z);m.rotation.set(rx,ry,rz);g.add(m);return m;};
@@ -996,6 +1002,36 @@ function buildShip(d){const g=new THREE.Group();
   for(const e of eng){const fl=glowSprite(d.glow,2.2);fl.position.set(e[0],e[1],e[2]);fl.userData.engine=true;g.add(fl);}
   g.userData.engines=eng;return g;}
 
+/* nave biológica de la Dimensión Draco: cuerpo de escamas, alas de membrana, cuernos y cola */
+function batWing(span,len,forward,pts){const s=new THREE.Shape();s.moveTo(0,len*.5);const tips=[];
+  for(let k=0;k<pts;k++){const u=(k+1)/pts,x=span*u,y=len*(.5-u*.25)+forward*u-(k%2?len*.18:0);tips.push([x,y]);}
+  s.lineTo(span*.35,len*.55+forward*.4);s.lineTo(span,forward+len*.2);for(let k=pts-1;k>=0;k--){const x=span*(k+.5)/pts,y=-len*.5+forward*(k/pts)+((pts-k)%2?len*.25:0);s.lineTo(x,y);}s.lineTo(0,-len*.5);s.lineTo(0,len*.5);
+  return {geo:new THREE.ShapeGeometry(s).rotateX(-Math.PI/2),tips:[[span*.35,len*.55+forward*.4],[span,forward+len*.2]]};}
+function buildDracoShip(d){const g=new THREE.Group(),sh=d.shape,eng=[];
+  const scale=stdMat(d.col,{metalness:.35,roughness:.45,flatShading:true}),dark=stdMat(d.trim,{roughness:.7,flatShading:true}),glow=basic(d.glow),
+    mem=new THREE.MeshStandardMaterial({color:new THREE.Color(d.glow).multiplyScalar(.35),emissive:d.glow,emissiveIntensity:.25,transparent:true,opacity:.82,side:THREE.DoubleSide,roughness:.6,depthWrite:false});
+  const add=(gm,mat,x=0,y=0,z=0,rx=0,ry=0,rz=0)=>{const m=new THREE.Mesh(gm,mat);m.position.set(x,y,z);m.rotation.set(rx,ry,rz);g.add(m);return m;};
+  const big=sh==='heavy'||sh==='saucer',L=big?3.1:2.7,W=big?.95:.72;
+  const body=add(new THREE.IcosahedronGeometry(1,1),scale);body.scale.set(W,W*.8,L);
+  const belly=add(new THREE.IcosahedronGeometry(1,1),stdMat(new THREE.Color(d.col).lerp(new THREE.Color(0xd8c8a0),.35).getHex(),{roughness:.6,flatShading:true}),0,-.22,0);belly.scale.set(W*.8,W*.55,L*.9);
+  for(let k=0;k<4;k++){const z=-1.5+k*.95;add(geo('drSp',()=>new THREE.ConeGeometry(.16,.55,4)),dark,0,W*.78,z,-.5);}
+  const heads=sh==='twin'?[-.55,.55]:[0];
+  for(const hx of heads){const hz=-L-.55;add(new THREE.ConeGeometry(.42,1.5,6).rotateX(-Math.PI/2),scale,hx,.12,hz);add(new THREE.ConeGeometry(.3,1.2,5).rotateX(-Math.PI/2),dark,hx,-.2,hz+.05,.18);
+    for(const s of [-1,1]){add(new THREE.SphereGeometry(.09,6,5),glow,hx+s*.2,.3,hz+.1);add(new THREE.ConeGeometry(.09,1.1,5),dark,hx+s*.24,.55,hz+.65,1.05,0,-s*.25);}
+    const br=glowSprite(d.glow,1.1,.7);br.position.set(hx,0,hz-.85);g.add(br);}
+  const tail=[];for(let k=0;k<4;k++){const r=.42-k*.08,z=L-.3+k*.7,y=Math.sin(k*.7)*.12;const t=add(new THREE.IcosahedronGeometry(r,0),k%2?dark:scale,0,y,z);tail.push(t);}
+  add(new THREE.ConeGeometry(.16,.9,4).rotateX(Math.PI/2),glow,0,.12,L+2.9);
+  const wings=sh==='x'?[[.35,1],[-.35,.8]]:sh==='ring'?[]:[[.12,1]];
+  const span=sh==='manta'?4.4:sh==='delta'?3.6:big?3.2:3.4,len=sh==='manta'?2.6:sh==='delta'?3.2:2.1,fw=sh==='forward'?.9:sh==='swept'?-1.2:sh==='delta'?-1.4:-.4,pts=sh==='delta'?1:sh==='manta'?4:3;
+  for(const [tilt,sz] of wings){const bw=batWing(span*sz,len*sz,fw*sz,pts);for(const s of [-1,1]){const wg=new THREE.Group();wg.position.set(s*W*.75,.15,-.2);wg.rotation.z=s*tilt;wg.scale.x=s;g.add(wg);
+      const m=new THREE.Mesh(bw.geo,mem);wg.add(m);for(const [tx,ty] of bw.tips){const bl=Math.hypot(tx,ty),bone=new THREE.Mesh(new THREE.CylinderGeometry(.05,.09,bl,5),dark);bone.position.set(tx/2,.02,-ty/2);bone.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),new THREE.Vector3(tx,0,-ty).normalize());wg.add(bone);}}}
+  if(sh==='ring'||sh==='saucer'){const rg=add(new THREE.TorusGeometry(2.3,.14,6,40),dark,0,0,.4,Math.PI/2);for(let k=0;k<14;k++){const a=k/14*Math.PI*2;add(new THREE.ConeGeometry(.12,.8,4),glow,Math.cos(a)*2.3,0,.4+Math.sin(a)*2.3,0,0,a-Math.PI/2).rotation.set(Math.PI/2,0,-a);}}
+  if(sh==='heavy'||sh==='saucer')for(let k=0;k<5;k++){const p=add(new THREE.BoxGeometry(1.4-k*.1,.18,.7),dark,0,W*.7,-1.4+k*.7);p.rotation.x=-.15;}
+  const ex=d.extra||[];if(ex.includes('spikes'))for(const s of [-1,1])for(let k=0;k<3;k++)add(new THREE.ConeGeometry(.08,.7,4),glow,s*(W+.05),.1,-1+k*.8,0,0,-s*1.3);
+  if(ex.includes('halo')||ex.includes('rings'))add(new THREE.TorusGeometry(1.1,.06,6,28),glow,0,0,.6);
+  for(const s of [-1,1]){add(new THREE.SphereGeometry(.26,8,6),glow,s*.38,-.05,L-.4);eng.push([s*.38,-.05,L+.2]);}
+  for(const e of eng){const fl=glowSprite(d.glow,2,.9);fl.position.set(e[0],e[1],e[2]);fl.userData.engine=true;g.add(fl);}
+  g.userData.engines=eng;g.userData.tail=tail;return g;}
 function buildMissileModel(i){const d=MISSILES[i],L=d.look,g=new THREE.Group(),K='mm'+i;
   const body=geo(K+'B',()=>stdMat(L.body,{metalness:.7,roughness:.3})),acc=geo(K+'A',()=>basic(d.col)),dk=geo('mmD',()=>stdMat(0x2a3040));
   const cyl=(rt,rb,len,seg=10)=>new THREE.CylinderGeometry(rt,rb,len,seg).rotateX(Math.PI/2);
@@ -1101,7 +1137,7 @@ let profKey=null;
 function pKey(f,i){return 'hde_prof_'+f+'_'+i;}
 function readProf(f,i){try{const j=JSON.parse(localStorage.getItem(pKey(f,i))||'null');if(j)return j;}catch(_){}return null;}
 function saveProf(){if(!profKey)return;try{localStorage.setItem(profKey,JSON.stringify({max:maxReached,ship:savedShip,mis:savedMis,cry:savedCry,sites:typeof siteCount!=='undefined'?siteCount:[]}));}catch(_){}}
-function loadProf(f,i){profKey=pKey(f,i);const j=readProf(f,i)||{max:0,ship:0,mis:0,cry:0,sites:[]};maxReached=Math.min(14,j.max|0);savedShip=j.ship|0;savedMis=j.mis|0;savedCry=j.cry|0;siteCount=Array.isArray(j.sites)?j.sites:[];
+function loadProf(f,i){profKey=pKey(f,i);applyFacShips();if(ship)setPlayerShip(S.shipIdx||0);const j=readProf(f,i)||{max:0,ship:0,mis:0,cry:0,sites:[]};maxReached=Math.min(14,j.max|0);savedShip=j.ship|0;savedMis=j.mis|0;savedCry=j.cry|0;siteCount=Array.isArray(j.sites)?j.sites:[];
   try{localStorage.setItem('hde_max',String(maxReached));localStorage.setItem('hde_ship',String(savedShip));localStorage.setItem('hde_mis',String(savedMis));localStorage.setItem('hde_cry',String(savedCry));localStorage.setItem('hde_sites',JSON.stringify(siteCount));}catch(_){}
   saveProf();}
 try{maxReached=Math.min(14,parseInt(localStorage.getItem('hde_max')||'0',10)||0);savedCry=parseInt(localStorage.getItem('hde_cry')||'0',10)||0;savedPilot=parseInt(localStorage.getItem('hde_pilot')||'0',10)||0;savedShip=parseInt(localStorage.getItem('hde_ship')||'0',10)||0;savedMis=parseInt(localStorage.getItem('hde_mis')||'0',10)||0;}catch(e){}
@@ -1508,7 +1544,7 @@ function damage(t,dmg){if(!t.alive)return;t.hp-=dmg;
   else if(t.kind==='boss'){t.flash=.06;if(t.hp<=0)killBoss();}
   else if(t.kind==='rival'){t.flash=.06;if(Math.random()<.3){const p=t.o.position;sparks.emit(p.x*(1-40/Math.max(t.dist,41)),p.y,p.z*(1-40/Math.max(t.dist,41)),R(-6,6),R(-6,6),R(-6,6),.5,C(0xffd080));}if(t.hp<=0)killRival();}}
 const EC_TXT=['Esta galaxia ya es nuestra. Ríndete, piloto.','Mi flota te hará polvo de estrellas.','Ninguna nave escapa de mí.','Has entrado en territorio enemigo. Prepárate.','Tu facción caerá esta noche.'];
-let ecT=0;function enemyComm(W,txt,sec){$('ecImg').src=W.img;$('ecName').textContent='Comandante '+W.name;$('ecFac').textContent='Transmisión · '+(FACTION==='umbra'?'Alianza Estelar':'Imperio Umbra');$('ecTxt').textContent=txt;$('enemyComm').hidden=false;ecT=sec||6;}
+let ecT=0;function enemyComm(W,txt,sec){$('ecImg').src=W.img;$('ecName').textContent='Comandante '+W.name;$('ecFac').textContent='Transmisión · '+(FACTION==='umbra'?'Alianza Estelar':'Dimensión Draco');$('ecTxt').textContent=txt;$('enemyComm').hidden=false;ecT=sec||6;}
 function spawnRival(){const mc=rivalMC();const b=buildMother(false,mc,true);const sd=Math.random()<.5?-1:1;b.g.position.copy(farDir(sd,1050,.2,1.2));scene.add(b.g);b.beamT.visible=false;
   const hp=900+S.lvl*140;const cmd=pickEnemy();S.rival={o:b.g,blink:b.blink,mc,cmd,hp,max:hp,r:42,alive:true,kind:'rival',launchT:4,fireT:3,launched:0,flash:0,told:false,dist:1050};
   msg('¡Alerta! Nave nodriza enemiga: '+mc.name,'var(--danger)',2.8);enemyComm(cmd,pick(EC_TXT),7);say('Alerta. Nave nodriza enemiga detectada. Destrúyela antes de que lance a su flota.');}
@@ -1538,7 +1574,7 @@ function caveify(sc,b){sc.background=new THREE.Color(0x0d0709);sc.fog=new THREE.
 function intruderStart(G,b){const I={guards:[],t:0,b,warnT:0};G.intr=I;I.alarm=new THREE.PointLight(0xff2020,0,140);I.alarm.position.set(0,b.h-3,(b.zMin+b.zMax)/2);G.sc.add(I.alarm);
   const list=enemyList();for(let i=0;i<5;i++){const W=list[(i*7+S.lvl*3)%list.length];const w=buildWarrior(W.look,0xff3030,W.look.type==='human');const z=b.zMin+12+i*((b.zMax-b.zMin-24)/4),x=(i%2?-1:1)*(b.w-6);
     w.g.position.set(x,0,z);G.sc.add(w.g);const gl=glowSprite(0xff3030,1.6,1);gl.position.y=3.2;w.g.add(gl);I.guards.push({w,x,z,ph:R(0,6),delay:.8+i*.5});}
-  msg('¡Intruso! Estás en territorio '+(FACTION==='umbra'?'de la Alianza':'del Imperio Umbra')+': corre a tu nave','var(--danger)',3.2);say('Alerta. Intruso detectado. Guardias, ataquen.');
+  msg('¡Intruso! Estás en territorio '+(FACTION==='umbra'?'de la Alianza':'de la Dimensión Draco')+': corre a tu nave','var(--danger)',3.2);say('Alerta. Intruso detectado. Guardias, ataquen.');
   $('hgHint').textContent='¡Te descubrieron! Los guardias de la facción enemiga te atacan. Corre a tu nave y despega antes de que te atrapen.';}
 function intruderUpdate(G,dt){const I=G&&G.intr;if(!I||I.done)return;I.t+=dt;const pv=G.pilot;I.alarm.intensity=1.6+Math.sin(I.t*9)*1.6;const up=(pv.y||0)>1;let touching=0;
   for(const g of I.guards){if(I.t<g.delay){animWalk(g.w,0,0);continue;}const tx=up&&typeof ELEV!=='undefined'?ELEV.x+2:pv.x,tz=up&&typeof ELEV!=='undefined'?ELEV.z-5:pv.z;const dx=tx-g.x,dz=tz-g.z,d=Math.hypot(dx,dz);const sp=6.6+S.lvl*.15;
@@ -1629,8 +1665,9 @@ const UCLASSES=[
  {id:'jade',name:'Mando del Enjambre Jade',cls:'Clase Enjambre',hull:0xe4ded2,glow:0x40ff70,style:2,d:'Placas de mármol y cuchillas de cristal verde que dirigen al enjambre.'},
  {id:'segador',name:'Segador Orbital',cls:'Clase Segador',hull:0x7a6a62,glow:0xff8a20,style:0,d:'Un anillo de púas con un sol atrapado en el centro.'}];
 const FACTIONS={alianza:{name:'Alianza Estelar',short:'Alianza',col:'#6fb8ff',d:'Defienden las galaxias con las naves nodrizas Estrella Madre, Omega, Oráculo, Vesper, Bastión, Nightfall y Helios.'},
-  umbra:{name:'Imperio Umbra',short:'Umbra',col:'#ff3ad0',d:'Conquistan las galaxias con el Portanaves Hostil, el Dreadnought Serpiente, el Crucero del Vacío, el Enjambre Jade y el Segador Orbital.'}};
+  umbra:{name:'Dimensión Draco',short:'Draco',col:'#ff3ad0',d:'Conquistan las galaxias con el Portanaves Hostil, el Dreadnought Serpiente, el Crucero del Vacío, el Enjambre Jade y el Segador Orbital.'}};
 let FACTION='alianza';try{if(localStorage.getItem('hde_fac')==='umbra')FACTION='umbra';}catch(_){}
+applyFacShips();if(ship&&FACTION==='umbra')setPlayerShip(S.shipIdx||0);
 function facList(f){return f==='umbra'?UCLASSES:MCLASSES;}
 function curMC(){if(msOverride&&(S.state==='mother'||S.state==='mlaunch'))return msOverride;const l=facList(FACTION);return l[S.lvl%l.length];}
 function rivalMC(){const f=FACTION==='umbra'?'alianza':'umbra',l=facList(f);return l[(S.lvl+2)%l.length];}
@@ -2384,11 +2421,18 @@ function buildCity(MC,CV){const L=LEVELS[S.lvl],H=L.home,p=L.planets[CV&&CV.idx=
     const skyW=new THREE.Mesh(new THREE.CircleGeometry(60,48).rotateX(Math.PI/2),new THREE.MeshBasicMaterial({map:skyTex(p),side:THREE.DoubleSide,fog:false}));skyW.position.y=148;sc.add(skyW);
     const rimc=new THREE.Mesh(new THREE.TorusGeometry(60,1.6,8,64).rotateX(Math.PI/2),basic(MC.glow,{fog:false}));rimc.position.y=147;sc.add(rimc);
     for(let k=0;k<5;k++){const pl=new THREE.PointLight(MC.glow,.9,180);const a=k/5*Math.PI*2;pl.position.set(Math.cos(a)*60,60,Math.sin(a)*60);sc.add(pl);}}
+  else if(CV&&CV.sub){const cave=new THREE.Color(p[1]).lerp(new THREE.Color(0x1a0c06),.75);sc.background=cave;sc.fog=new THREE.Fog(cave.getHex(),70,330);for(const o of sc.children){if(o.isHemisphereLight||o.type==='HemisphereLight')o.intensity=.45;if(o.isDirectionalLight||o.type==='DirectionalLight')o.intensity=.25;}
+    const dg=new THREE.SphereGeometry(250,40,20,0,Math.PI*2,0,Math.PI/2),dp=dg.attributes.position;for(let i=0;i<dp.count;i++){const k=1+Math.sin(dp.getX(i)*.05)*Math.cos(dp.getZ(i)*.04)*.08;dp.setXYZ(i,dp.getX(i)*k,dp.getY(i)*.55*k,dp.getZ(i)*k);}dg.computeVertexNormals();
+    sc.add(new THREE.Mesh(dg,new THREE.MeshStandardMaterial({color:0x6a4a38,emissive:0x2a1208,roughness:1,flatShading:true,side:THREE.BackSide,fog:false})));
+    const rk=M(new THREE.Color(p[1]).multiplyScalar(.5).getHex(),{roughness:1});for(let k=0;k<70;k++){const a=Math.random()*Math.PI*2,d=40+Math.random()*200,y=Math.sqrt(Math.max(0,1-(d/250)**2))*137;const hgt=10+Math.random()*30;const st=new THREE.Mesh(new THREE.ConeGeometry(2+Math.random()*4,hgt,5),rk);st.rotation.x=Math.PI;st.position.set(Math.sin(a)*d,y-hgt/2+4,Math.cos(a)*d);sc.add(st);}
+    const cg=[0xff9a40,0x6aff40,0xff3ad0,0x40d8ff];for(let k=0;k<26;k++){const a=Math.random()*Math.PI*2,d=110+Math.random()*120,c=cg[k%4];const cr=new THREE.Mesh(new THREE.OctahedronGeometry(2+Math.random()*3,0),basic(c));cr.scale.y=2.5;cr.position.set(Math.sin(a)*d,3,Math.cos(a)*d);cr.rotation.z=(Math.random()-.5)*.6;sc.add(cr);const gs=glowSprite(c,22,.5);gs.position.copy(cr.position);sc.add(gs);}
+    for(let k=0;k<6;k++){const a=k/6*Math.PI*2,pl=new THREE.PointLight(k%2?0xff8a30:0x6aff40,1.1,200);pl.position.set(Math.cos(a)*90,40,Math.sin(a)*90);sc.add(pl);}
+    const lava=new THREE.Mesh(new THREE.TorusGeometry(205,6,6,64).rotateX(Math.PI/2),basic(0xff5a10));lava.position.y=.3;sc.add(lava);const sunC=glowSprite(0xffb060,120,.35);sunC.position.set(0,140,0);sc.add(sunC);}
   else{
   const sky=new THREE.Mesh(new THREE.SphereGeometry(400,32,16),new THREE.MeshBasicMaterial({map:skyTex(p),side:THREE.BackSide,fog:false}));sc.add(sky);
   const sg=glowSprite(L.sun,90,.8);sg.position.set(-160,140,-260);sc.add(sg);}
-  if(!MC)for(const [x,y,z,r,c] of [[120,120,-280,26,p[2]],[-60,170,-300,12,p[0]]]){const m=new THREE.Mesh(new THREE.SphereGeometry(r,24,16),new THREE.MeshStandardMaterial({map:planetTex([c,p[1],'#ffffff']),fog:false,roughness:1}));m.position.set(x,y,z);sc.add(m);}
-  let gtx=MC?floorTex():cityGround(p);if(MC){gtx.wrapS=gtx.wrapT=THREE.RepeatWrapping;gtx.repeat.set(24,24);}const gr=new THREE.Mesh(new THREE.PlaneGeometry(600,600),new THREE.MeshStandardMaterial({map:gtx,roughness:MC?.45:1,metalness:MC?.6:0}));gr.rotation.x=-Math.PI/2;sc.add(gr);
+  if(!MC&&!(CV&&CV.sub))for(const [x,y,z,r,c] of [[120,120,-280,26,p[2]],[-60,170,-300,12,p[0]]]){const m=new THREE.Mesh(new THREE.SphereGeometry(r,24,16),new THREE.MeshStandardMaterial({map:planetTex([c,p[1],'#ffffff']),fog:false,roughness:1}));m.position.set(x,y,z);sc.add(m);}
+  let gtx=MC?floorTex():cityGround(p);if(MC){gtx.wrapS=gtx.wrapT=THREE.RepeatWrapping;gtx.repeat.set(24,24);}const gr=new THREE.Mesh(new THREE.PlaneGeometry(600,600),new THREE.MeshStandardMaterial({map:gtx,roughness:MC?.45:1,metalness:MC?.6:0}));gr.rotation.x=-Math.PI/2;sc.add(gr);if(CV&&CV.sub)gr.material.color.setHex(0x6a4636);
   add(new THREE.CylinderGeometry(15,15,.2,48),M(0x8a8a98,{metalness:.1}),0,.1,0);add(new THREE.TorusGeometry(15,.25,6,64).rotateX(Math.PI/2),basic(acc),0,.25,0);
   for(const a of [0,Math.PI/2,Math.PI,-Math.PI/2]){const av=add(new THREE.BoxGeometry(7,.15,48),M(0x6a6a78,{metalness:.1}),Math.sin(a)*38,.08,Math.cos(a)*38);av.rotation.y=a;
     for(let k=0;k<5;k++)for(const sd of [-1,1]){const d=18+k*9,lx=Math.sin(a)*d+Math.cos(a)*sd*4.5,lz=Math.cos(a)*d-Math.sin(a)*sd*4.5;add(geo('cyLp',()=>new THREE.CylinderGeometry(.12,.15,5,6)),geo('cyLpM',()=>M(0x30343c)),lx,2.5,lz);const g=glowSprite(acc,1.6,1);g.position.set(lx,5.2,lz);sc.add(g);}}
@@ -2599,7 +2643,7 @@ profKey=pKey(FACTION,selIdx());{const j=readProf(FACTION,selIdx());if(j){maxReac
 function siteMission(l){return MISIONES[(l+2*(siteCount[l]||0))%5];}
 
 /* cápsula de aterrizaje (la misma en la nave y en el suelo) */
-function buildPod(acc){const g=new THREE.Group();const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.45,metalness:.55},o));
+function buildPod(acc){if(isDraco())return buildDracoEgg(acc);const g=new THREE.Group();const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.45,metalness:.55},o));
   const shell=M(0xe8ecf2),dark=M(0x2a2e38),accM=M(acc,{metalness:.7,roughness:.3});
   const body=new THREE.Mesh(new THREE.CylinderGeometry(1.15,1.75,2.3,20),shell);body.position.y=1.85;g.add(body);
   const top=new THREE.Mesh(new THREE.CylinderGeometry(.55,1.15,.9,20),shell);top.position.y=3.45;g.add(top);
@@ -2615,8 +2659,43 @@ function buildPod(acc){const g=new THREE.Group();const M=(c,o={})=>new THREE.Mes
   const lights=[];for(const sd of [-1,1]){const l=glowSprite(sd>0?0x40ff80:0xff3030,1,1);l.position.set(sd*1.2,3.2,.6);g.add(l);lights.push(l);}
   g.userData={door,legs,flame,lights};return g;}
 
+/* Draco: huevo de descenso con grietas de energía */
+function buildDracoEgg(acc){const g=new THREE.Group();const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.55,metalness:.3,flatShading:true},o));const gl=0xff8a20;
+  const shell=new THREE.Mesh(new THREE.IcosahedronGeometry(1.6,2),M(0x3a2a24));shell.scale.set(1,1.4,1);shell.position.y=2.3;g.add(shell);
+  for(let k=0;k<8;k++){const a=k/8*Math.PI*2,c=new THREE.Mesh(new THREE.BoxGeometry(.08,1.8,.08),basic(gl));c.position.set(Math.sin(a)*1.52,2.4+Math.sin(k*2)*.4,Math.cos(a)*1.52);c.rotation.set(Math.sin(k)*.4,a,Math.cos(k*3)*.5);g.add(c);}
+  for(let k=0;k<12;k++){const a=k/12*Math.PI*2,sp=new THREE.Mesh(new THREE.ConeGeometry(.2,.8,4),M(0x1a1210));sp.position.set(Math.sin(a)*1.3,3.6+(k%2)*.3,Math.cos(a)*1.3);sp.rotation.set(Math.cos(a)*.6,0,-Math.sin(a)*.6);g.add(sp);}
+  const door=new THREE.Mesh(new THREE.SphereGeometry(.75,12,8,0,Math.PI*2,0,Math.PI/2),M(0x5a3a2a));door.position.set(0,2,1.45);door.rotation.x=Math.PI/2-.15;g.add(door);
+  const eye=new THREE.Mesh(new THREE.SphereGeometry(.28,10,8),basic(0xffd040));eye.position.set(0,2.95,1.55);eye.scale.set(1,.45,.5);g.add(eye);
+  const legs=[];for(let i=0;i<4;i++){const a=i*Math.PI/2+Math.PI/4,lg=new THREE.Group();lg.position.set(Math.sin(a)*1.3,1.2,Math.cos(a)*1.3);lg.rotation.y=a;
+    const st=new THREE.Mesh(new THREE.CylinderGeometry(.09,.14,1.7,5),M(0x2a1e18));st.position.set(0,-.45,.4);st.rotation.x=.6;lg.add(st);
+    for(const s of [-1,0,1]){const cl=new THREE.Mesh(new THREE.ConeGeometry(.08,.5,4),M(0xd8c8a0));cl.position.set(s*.15,-1.15,.95);cl.rotation.x=Math.PI/2;lg.add(cl);}g.add(lg);legs.push(lg);}
+  const flame=glowSprite(0xff3ad0,4.5,.95);flame.position.y=-.3;flame.visible=false;g.add(flame);
+  const lights=[];for(const sd of [-1,1]){const l=glowSprite(0x6aff40,1,1);l.position.set(sd*1.1,3.1,.9);g.add(l);lights.push(l);}
+  g.userData={door,legs,flame,lights};return g;}
+/* Draco: reptador de seis patas (lagarto mecánico) */
+function buildReptador(acc,night){const g=new THREE.Group(),body=new THREE.Group();g.add(body);const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.5,metalness:.4,flatShading:true},o));
+  const sk=M(0x2c3a26),dk=M(0x161c14),bel=M(0xb8a878),gl=0x6aff40;
+  const tor=new THREE.Mesh(new THREE.IcosahedronGeometry(1,1),sk);tor.scale.set(1.25,.6,2);tor.position.y=1.55;body.add(tor);
+  const bl=new THREE.Mesh(new THREE.IcosahedronGeometry(1,1),bel);bl.scale.set(1.05,.4,1.8);bl.position.y=1.3;body.add(bl);
+  for(let k=0;k<7;k++){const sp=new THREE.Mesh(new THREE.ConeGeometry(.16,.6,4),dk);sp.position.set(0,2.15-Math.abs(k-3)*.04,-1.4+k*.48);sp.rotation.x=-.4;body.add(sp);}
+  const saddle=new THREE.Mesh(new THREE.BoxGeometry(1,.3,1),M(0x5a2a1a));saddle.position.set(0,2.15,-.2);body.add(saddle);
+  const headG=new THREE.Group();headG.position.set(0,1.75,-2.2);body.add(headG);
+  const hd=new THREE.Mesh(new THREE.ConeGeometry(.55,1.6,6).rotateX(-Math.PI/2),sk);hd.position.z=-.5;headG.add(hd);
+  const jaw=new THREE.Mesh(new THREE.ConeGeometry(.4,1.3,5).rotateX(-Math.PI/2),dk);jaw.position.set(0,-.3,-.4);jaw.rotation.x=.15;headG.add(jaw);
+  for(const s of [-1,1]){const e=new THREE.Mesh(new THREE.SphereGeometry(.12,8,6),basic(gl));e.position.set(s*.28,.2,-.6);headG.add(e);const hn=new THREE.Mesh(new THREE.ConeGeometry(.1,.9,5),dk);hn.position.set(s*.3,.5,.1);hn.rotation.x=1;headG.add(hn);}
+  const tail=[];for(let k=0;k<6;k++){const t=new THREE.Mesh(new THREE.IcosahedronGeometry(.45-k*.06,0),k%2?dk:sk);t.position.set(0,1.5-k*.12,2+k*.55);body.add(t);tail.push(t);}
+  const tip=glowSprite(gl,.8,1);tip.position.set(0,.95,5.3);body.add(tip);
+  const hl=[];for(const sd of [-1,1]){const l=glowSprite(0xc8ff80,night?2.6:1.2,1);l.position.set(sd*.3,1.95,-3);body.add(l);hl.push(l);}
+  const legs=[];for(const sd of [-1,1])for(const z of [-1.3,0,1.3]){const lg=new THREE.Group();lg.position.set(sd*1.1,1.45,z);g.add(lg);
+    const up=new THREE.Mesh(new THREE.CylinderGeometry(.14,.18,1.1,5),sk);up.position.set(sd*.4,-.1,0);up.rotation.z=sd*1.1;lg.add(up);
+    const lo=new THREE.Mesh(new THREE.CylinderGeometry(.1,.14,1.2,5),dk);lo.position.set(sd*.85,-.75,0);lo.rotation.z=-sd*.25;lg.add(lo);
+    for(const c of [-1,0,1]){const cl=new THREE.Mesh(new THREE.ConeGeometry(.06,.35,4),bel);cl.position.set(sd*.95,-1.35,c*.14-.12);cl.rotation.x=-Math.PI/2.4;lg.add(cl);}legs.push(lg);}
+  let lamp=null;if(night){lamp=new THREE.SpotLight(0xd8ffb0,2.2,70,.6,.5,1);lamp.position.set(0,2,-2.6);const tg=new THREE.Object3D();tg.position.set(0,0,-14);g.add(tg);lamp.target=tg;g.add(lamp);}
+  g.userData={body,wheels:[],legs,tail,headG,tip};return g;}
+function rvName(){return FACTION==='umbra'?'reptador':'rover';}
+function dracoText(root){if(FACTION!=='umbra'||!root||typeof document.createTreeWalker!=='function')return;const w=document.createTreeWalker(root,4);let n;while((n=w.nextNode())){const t=n.nodeValue;if(/rover|cápsula/i.test(t))n.nodeValue=t.replace(/\brovers?\b/g,'reptador').replace(/\bRover\b/g,'Reptador').replace(/la cápsula/g,'el huevo de descenso').replace(/cápsula/g,'huevo de descenso');}}
 /* rover explorador de seis ruedas */
-function buildRover(acc,night){const g=new THREE.Group(),body=new THREE.Group();g.add(body);const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.5,metalness:.5},o));
+function buildRover(acc,night){if(isDraco())return buildReptador(acc,night);const g=new THREE.Group(),body=new THREE.Group();g.add(body);const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.5,metalness:.5},o));
   const white=M(0xe4e6ea),gray=M(0x6a6e78),dark=M(0x1e2028,{roughness:.8}),gold=M(0xd4a020,{metalness:.9,roughness:.25}),accM=M(acc,{metalness:.6});
   const ch=new THREE.Mesh(new THREE.BoxGeometry(2.6,.7,3.4),white);ch.position.y=1.35;body.add(ch);
   const und=new THREE.Mesh(new THREE.BoxGeometry(2.3,.3,3),gold);und.position.y=.95;body.add(und);
@@ -2729,7 +2808,7 @@ function exSetupMission(G){const sc=G.sc,E=G.E,l=G.l,H=G.H;
 function enterExplore(){const l=S.lvl,mis=siteMission(l);S.state='explore';firing=false;beam.visible=false;$('hud').hidden=true;setLandUI(null);setDockUI(false);setPodUI(false);
   EX=buildExplore(l,mis);const E=EX.E;
   $('exEye').textContent=E.k+' · '+LEVELS[l].name;$('exTitle').textContent=E.n;$('exHint').textContent=E.d;$('exObj').textContent=MIS_TXT[mis];
-  $('exUI').hidden=false;$('exAct').hidden=true;$('exJump').hidden=true;$('touch').hidden=!isTouch;$('touch').classList.add('walk');$('joyhint').textContent='Arrastra aquí para moverte';
+  $('exUI').hidden=false;setTimeout(()=>dracoText($('exUI')),60);$('exAct').hidden=true;$('exJump').hidden=true;$('touch').hidden=!isTouch;$('touch').classList.add('walk');$('joyhint').textContent='Arrastra aquí para moverte';
   exProgUI();hgCam.fov=60;hgCam.updateProjectionMatrix();fadeFlash();if(actx)musicMuffle(false);
   EX.pod.position.y=EX.podY+70;EX.pod.userData.flame.visible=true;}
 function exitExplore(){if(!EX)return;const G=EX,done=G.done,l=G.l;disposeScene(G.sc);EX=null;$('exUI').hidden=true;$('touch').classList.remove('walk');$('joyhint').textContent='Arrastra aquí para volar';
@@ -2780,9 +2859,9 @@ function exProgUI(){const G=EX;if(!G)return;let got=0;if(G.mis==='muestras')got=
   $('exProg').textContent=txt;$('exBar').style.transform=`scaleX(${G.done?1:got/G.total})`;$('exO2n').textContent=Math.ceil(G.o2)+'%';$('exO2').style.transform=`scaleX(${G.o2/100})`;$('exO2').classList.toggle('low',G.o2<25);
   $('exObj').textContent=G.done?'Misión cumplida · regresa a la cápsula':MIS_TXT[G.mis];}
 function exSetAct(n){const G=EX;if(n===G.near)return;G.near=n;const b=$('exAct');if(!n){b.hidden=true;return;}b.hidden=false;
-  b.innerHTML={rover:'Subir al rover',bajar:'Bajar del rover',pod:G.done?'Volver a la nave':'Volver a la nave (sin terminar)',baliza:'Activar baliza'}[n]+(isTouch?'':'<kbd>E</kbd>');}
+  b.innerHTML={rover:'Subir al '+rvName(),bajar:'Bajar del '+rvName(),pod:G.done?'Volver a la nave':'Volver a la nave (sin terminar)',baliza:'Activar baliza'}[n]+(isTouch?'':'<kbd>E</kbd>');}
 function exAction(){const G=EX;if(!G||G.mode==='land'||G.mode==='leave')return;const n=G.near;
-  if(n==='rover'){G.mode='drive';const pv=G.pilot;pv.w.g.visible=true;G.rover.spd=0;G.camYaw=G.rover.yaw;if(actx&&!S.muted)tone('sawtooth',80,160,.35,.05);if(!G.saidRover){G.saidRover=true;say('Rover en marcha.');}
+  if(n==='rover'){G.mode='drive';const pv=G.pilot;pv.w.g.visible=true;G.rover.spd=0;G.camYaw=G.rover.yaw;if(actx&&!S.muted)tone('sawtooth',80,160,.35,.05);if(!G.saidRover){G.saidRover=true;say(FACTION==='umbra'?'Reptador en marcha.':'Rover en marcha.');}
     for(const c of G.crew)if(c.st==='follow')c.st='ride';if(G.mis==='carrera'&&!G.done&&!G.raceOn){G.raceOn=true;G.raceT=G.raceMax;G.ringI=0;msg('¡Arranca la carrera!','#ffd23f',1.4);}}
   else if(n==='bajar')exLeaveRover();
   else if(n==='pod'){if(G.mode==='drive')exLeaveRover();G.mode='leave';G.leaveT=0;G.pilot.w.g.visible=false;exSetAct(null);$('exJump').hidden=true;G.pod.userData.flame.visible=true;say('Despegue de la cápsula. Volviendo a la nave.');}
@@ -2829,7 +2908,7 @@ function exUpdate(dt){const G=EX;G.t+=dt;const t=G.t,E=G.E,H=G.H,pv=G.pilot,rv=G
   /* el rover sigue el terreno */
   {const y0=H(rv.x,rv.z),sy=Math.sin(rv.yaw),cy=Math.cos(rv.yaw);const hf=H(rv.x+sy*1.6,rv.z+cy*1.6),hb=H(rv.x-sy*1.6,rv.z-cy*1.6),hr=H(rv.x+cy*1.4,rv.z-sy*1.4),hl=H(rv.x-cy*1.4,rv.z+sy*1.4);
     rv.g.position.set(rv.x,Math.max(y0,(hf+hb+hr+hl)/4),rv.z);rv.g.rotation.set(0,0,0);rv.g.rotation.y=rv.yaw;rv.g.rotateX(-Math.atan2(hf-hb,3.2));rv.g.rotateZ(Math.atan2(hr-hl,2.8));
-    for(const w of rv.g.userData.wheels)w.rotation.x+=rv.spd*dt/.55;rv.g.userData.headG.rotation.y=Math.sin(t*.7)*.6;rv.g.userData.tip.material.opacity=(t*2%1)<.5?1:.2;
+    for(const w of rv.g.userData.wheels)w.rotation.x+=rv.spd*dt/.55;if(rv.g.userData.legs){rv.ph=(rv.ph||0)+rv.spd*dt*1.6;const a=Math.min(1,Math.abs(rv.spd)/3);rv.g.userData.legs.forEach((lg,i)=>{lg.rotation.x=Math.sin(rv.ph+(i%2?Math.PI:0)+(i>2?Math.PI:0))*.55*a;});rv.g.userData.tail.forEach((tl,i)=>{tl.position.x=Math.sin(t*3+i*.7)*.12*(i+1)*(.3+a);});}rv.g.userData.headG.rotation.y=Math.sin(t*.7)*.6;rv.g.userData.tip.material.opacity=(t*2%1)<.5?1:.2;
     if(G.mode==='drive'){const w=pv.w;rv.g.updateMatrixWorld();exTmp.set(0,1.95,-.45);rv.g.localToWorld(exTmp);w.g.position.copy(exTmp);w.g.rotation.set(0,0,0);w.g.quaternion.copy(rv.g.quaternion);w.legL.rotation.x=w.legR.rotation.x=-1.45;w.armL.rotation.x=w.armR.rotation.x=-.9;w.armL.rotation.z=w.armR.rotation.z=0;w.g.position.y-=1.05;
       pv.x=rv.x;pv.z=rv.z;pv.y=rv.g.position.y;}}
   /* misiones */
@@ -2897,9 +2976,9 @@ function exNav(){const G=EX,W=exNavC.clientWidth||innerWidth,Hh=exNavC.clientHei
   if(!G.done){if(G.mis==='muestras')G.items.forEach(i=>{if(!i.got)list.push([i.x,yAt(i.x,i.z),i.z,'#'+new THREE.Color(G.E.gem).getHexString(),'Muestra']);});
     else if(G.mis==='balizas')G.beacons.forEach(b=>{if(!b.on)list.push([b.x,yAt(b.x,b.z)+5,b.z,'#ff5a4a','Baliza']);});
     else if(G.mis==='rescate'){G.crew.forEach(c=>{if(c.st==='wait')list.push([c.x,yAt(c.x,c.z)+1,c.z,'#ffb547','Astronauta']);});if(G.crew.some(c=>c.st==='follow'||c.st==='ride'))list.push([0,yAt(0,0)+3,0,'#6fb8ff','Cápsula']);}
-    else if(G.mis==='carrera'){if(G.mode!=='drive'&&!G.raceOn)list.push([G.rover.x,yAt(G.rover.x,G.rover.z)+1,G.rover.z,'#5dffa8','Rover']);else{const r=G.rings[G.ringI];if(r)list.push([r.x,r.y,r.z,'#ffd23f','Anillo '+(G.ringI+1)]);}}
+    else if(G.mis==='carrera'){if(G.mode!=='drive'&&!G.raceOn)list.push([G.rover.x,yAt(G.rover.x,G.rover.z)+1,G.rover.z,'#5dffa8',FACTION==='umbra'?'Reptador':'Rover']);else{const r=G.rings[G.ringI];if(r)list.push([r.x,r.y,r.z,'#ffd23f','Anillo '+(G.ringI+1)]);}}
     else if(G.mis==='meteoros')G.cells.forEach(c=>{if(!c.got)list.push([c.x,yAt(c.x,c.z),c.z,'#ffd23f','Energía']);});}
-  if(G.mode==='walk'&&!G.done&&Math.hypot(G.rover.x-px,G.rover.z-pz)>12&&G.mis!=='carrera')list.push([G.rover.x,yAt(G.rover.x,G.rover.z)+1,G.rover.z,'#5dffa8','Rover']);
+  if(G.mode==='walk'&&!G.done&&Math.hypot(G.rover.x-px,G.rover.z-pz)>12&&G.mis!=='carrera')list.push([G.rover.x,yAt(G.rover.x,G.rover.z)+1,G.rover.z,'#5dffa8',FACTION==='umbra'?'Reptador':'Rover']);
   /* solo las más cercanas */
   list.sort((a,b)=>Math.hypot(a[0]-px,a[2]-pz)-Math.hypot(b[0]-px,b[2]-pz));const m=34,top=isTouch?170:140,bot=isTouch?200:110;x.textAlign='center';x.textBaseline='middle';
   list.slice(0,4).forEach(([ox,oy,oz,c,name],i)=>{exTmp.set(ox,oy,oz).project(hgCam);const behind=exTmp.z>1;let dx=exTmp.x*W/2,dy=-exTmp.y*Hh/2;if(behind){dx=-dx;dy=Math.abs(dy)+Hh*.3;}
@@ -2958,8 +3037,10 @@ function buildAtmo(ck){const l=S.lvl,L=LEVELS[l],H=L.home,EA=l===0,CO=EA?CONTS[M
   /* lugares del planeta */
   const locs=[];const place=(kind,dmin,dmax,flat)=>{let x,z,t=0;do{const a=rnd()*Math.PI*2,d=dmin+rnd()*(dmax-dmin);x=Math.sin(a)*d;z=Math.cos(a)*d;t++;}while(t<60&&locs.some(o=>Math.hypot(o.x-x,o.z-z)<o.flat+flat+70));
     const o={kind,x,z,flat,done:false};locs.push(o);return o;};
-  const port=place('port',140,260,40);const enemyPort=planetOwner(l)!==FACTION;port.name=enemyPort?'Puerto enemigo ('+(planetOwner(l)==='umbra'?'Umbra':'Alianza')+')':'Puerto espacial';port.col=enemyPort?'#ff4d6d':'#5dffa8';
+  const port=place('port',140,260,40);const enemyPort=planetOwner(l)!==FACTION;port.name=enemyPort?'Puerto enemigo ('+(planetOwner(l)==='umbra'?'Draco':'Alianza')+')':'Puerto espacial';port.col=enemyPort?'#ff4d6d':'#5dffa8';
   const cities=[];for(let k=0;k<3;k++){const c=place('city',380,950,95);c.name=EA?CO.cities[k]:CITY_POOL[(l*3+k)%CITY_POOL.length];c.ck=EA?CITY_KIND[CO.ck[k]]:CITY_KIND[(l+k)%4];c.col='#7fd4ff';c.idx=k;cities.push(c);}
+  const SUBN=['Nido Profundo','Cripta de Ámbar','Colmena de Lava','Abismo Esmeralda','Galerías del Wyrm','Cueva Solar','Raíz de Fuego','Madriguera Real'];
+  const subs=[];{const sb=place('city',420,1000,80);sb.sub=true;sb.name='Ciudad intraterrena '+SUBN[(l*3+(EA?(ck||0):0))%SUBN.length];sb.ck={t:'Ciudad intraterrena Draco',style:[1,2,3][l%3]};sb.col='#ff9a40';sb.idx=1;subs.push(sb);}
   const retos=EA?CO.retos.slice():[RETO_ORDER[l%4],RETO_ORDER[(l+1)%4]];const rlocs=retos.map(r=>{const o=r==='defensa'?cities[2]:place('reto',450,1050,r==='torretas'?90:60);if(r==='defensa'){o.defensa=true;}
     const R0={kind:'reto',type:r,x:o.x,z:o.z,flat:0,done:false,name:RETOS[r].n,col:RETOS[r].col,city:r==='defensa'?o:null};if(r!=='defensa')Object.assign(o,R0);else locs.push(R0);return r==='defensa'?R0:o;});
   const dl=[];for(let k=0;k<4;k++){const t=EA?CO.disco[k]:DISCO_ORDER[(l*3+k*2)%8];const big=['giza','muralla','opera','machu','chichen'].includes(t);const o=place('disco',big?380:300,1150,t==='arco'?40:big?70:24);o.type=t;o.name=DISCO[t].n;o.col='#c58bff';dl.push(o);}
@@ -3003,6 +3084,14 @@ function buildAtmo(ck){const l=S.lvl,L=LEVELS[l],H=L.home,EA=l===0,CO=EA?CONTS[M
       g.add(m);if(rnd()<.25){const gl=glowSprite(acc,4,1);gl.position.set(x,hh*(st===2?1.4:1)+2,z);g.add(gl);}}
     const pa=rnd()*Math.PI*2;c.padX=c.x+Math.sin(pa)*78;c.padZ=c.z+Math.cos(pa)*78;mkPad(c,8,'#7fd4ff');
     const lb=msLabel(c.name.toUpperCase(),L.accent,c.x,c.g+75,c.z,60);sc.add(lb);c.obj=g;}
+  for(const c of subs){const g=new THREE.Group();g.position.set(c.x,c.g,c.z);sc.add(g);const rock=M(new THREE.Color(p[1]).multiplyScalar(.6).getHex(),{roughness:1});
+    const hill=new THREE.Mesh(new THREE.SphereGeometry(48,16,10,0,Math.PI*2,0,Math.PI/2),rock);hill.scale.set(1,.55,1);g.add(hill);
+    const mouth=new THREE.Mesh(new THREE.CircleGeometry(13,20,0,Math.PI),basic(0x050302,{side:THREE.DoubleSide}));mouth.position.set(0,0,46.5);g.add(mouth);
+    const arch=new THREE.Mesh(new THREE.TorusGeometry(13.5,1.6,6,20,Math.PI),M(0x2a1a12));arch.position.set(0,0,46.6);g.add(arch);
+    for(let k=0;k<9;k++){const a=k/8*Math.PI,cr=new THREE.Mesh(new THREE.OctahedronGeometry(1.6,0),basic(k%2?0xff9a40:0x6aff40));cr.position.set(Math.cos(a)*14.5,Math.sin(a)*14.5,47.5);cr.scale.y=1.8;g.add(cr);}
+    const gw=glowSprite(0xff8a30,40,.6);gw.position.set(0,6,48);g.add(gw);
+    for(let k=0;k<6;k++){const sp=new THREE.Mesh(new THREE.ConeGeometry(4,18+rnd()*14,5),rock);const a=rnd()*Math.PI*2;sp.position.set(Math.sin(a)*34,8,Math.cos(a)*30);g.add(sp);}
+    c.padX=c.x;c.padZ=c.z+70;mkPad(c,8,'#ff9a40');sc.add(msLabel(c.name.toUpperCase(),'#ff9a40',c.x,c.g+55,c.z,60));c.obj=g;}
   /* descubrimientos */
   for(const o of dl){const g=new THREE.Group();g.position.set(o.x,Hf(o.x,o.z),o.z);sc.add(g);const t=o.type;
     if(t==='ruinas'){for(let k=0;k<10;k++){const a=k/10*Math.PI*2,c=new THREE.Mesh(new THREE.CylinderGeometry(1.6,1.8,8+rnd()*14,8),M(0xd8ccb0));c.position.set(Math.cos(a)*18,5,Math.sin(a)*18);c.rotation.z=(rnd()-.5)*.3;g.add(c);}
@@ -3030,7 +3119,7 @@ function buildAtmo(ck){const l=S.lvl,L=LEVELS[l],H=L.home,EA=l===0,CO=EA?CONTS[M
   /* tu nave */
   const so=buildShip(SHIP);so.scale.setScalar(1.9);sc.add(so);
   const sp=new Sparks(1200,1.2,sc);
-  return {sc,l,EA,hz:hz.clone(),sky,plasma,space:new THREE.Color('#06102a'),reentry:0,Hf,wet,W,locs,port,cities,retos:rlocs,discos:dl,ship:{o:so,pos:new THREE.Vector3(port.x*.2,240,port.z*.2+500),yaw:Math.atan2(-(port.x-port.x*.2),-(port.z-port.z*.2-500))*-1,pitch:-.25,spd:60,thr:1,roll:0},
+  return {sc,subs,l,EA,hz:hz.clone(),sky,plasma,space:new THREE.Color('#06102a'),reentry:0,Hf,wet,W,locs,port,cities,retos:rlocs,discos:dl,ship:{o:so,pos:new THREE.Vector3(port.x*.2,240,port.z*.2+500),yaw:Math.atan2(-(port.x-port.x*.2),-(port.z-port.z*.2-500))*-1,pitch:-.25,spd:60,thr:1,roll:0},
     shots:[],eb:[],sparks:sp,t:0,fireT:0,cam:new THREE.Vector3(0,300,800),look:new THREE.Vector3(),near:null,landing:null,hitT:0,uiT:0};}
 function enterAtmo(ck){const lp=S.land;S.orbit=null;S.landedHere=true;routeDone('land');removeLand();S.state='atmo';const cont=S.lvl===0?(ck||0):-1;$('gbUI').hidden=true;if(hgCam.up)hgCam.up.set(0,1,0);firing=false;beam.visible=false;
   $('hud').hidden=true;$('orbitHud').hidden=true;setLandUI(null);setDockUI(false);setPodUI&&setPodUI(false);
@@ -3087,7 +3176,7 @@ function atUpdate(dt){const A=AT;A.t+=dt;const t=A.t,s=A.ship,Hf=A.Hf;if(A.hitT>
     A.fireT-=dt;if((firing||keys[' '])&&A.fireT<=0){A.fireT=.13;for(const sd of [-1,1]){const m=new THREE.Mesh(geo('atSh',()=>new THREE.BoxGeometry(.5,.5,6)),basic(new THREE.Color(SHIP.glow).getHex()));
         atV2.set(sd*2.2,-.3,-2).applyEuler(s.o.rotation).add(s.pos);m.position.copy(atV2);m.quaternion.copy(s.o.quaternion);A.sc.add(m);A.shots.push({m,v:f.clone().multiplyScalar(s.spd+300),life:1.3});}if(actx&&!S.muted&&Math.random()<.4)tone('square',900,500,.05,.02);}
     /* cerca de qué estás */
-    let near=null;for(const o of [A.port,...A.cities]){const d=Math.hypot(s.pos.x-o.padX,s.pos.z-o.padZ);if(d<110&&s.pos.y-o.g<150){near=o;break;}}
+    let near=null;for(const o of [A.port,...A.cities,...A.subs]){const d=Math.hypot(s.pos.x-o.padX,s.pos.z-o.padZ);if(d<110&&s.pos.y-o.g<150){near=o;break;}}
     if(near!==A.near){A.near=near;const b=$('atAct');if(near){b.hidden=false;b.innerHTML=(near.kind==='port'?(planetOwner(S.lvl)!==FACTION?'Aterrizar en el puerto enemigo ⚠':'Aterrizar en el puerto espacial'):'Aterrizar en '+near.name)+(isTouch?'':'<kbd>L</kbd>');}else b.hidden=true;}}
   s.o.position.copy(s.pos);s.o.rotation.set(s.pitch,s.yaw,s.roll,'YXZ');
   for(const c of s.o.children)if(c.userData&&c.userData.engine){const k=1.6+s.thr*.8+Math.sin(t*40)*.15;c.scale.set(k,k,1);}
@@ -3133,7 +3222,7 @@ function atUI(){const A=AT;if(!A)return;const cv2=A.cities.filter(c=>c.done).len
 const atNavC=$('atNav'),atNavX=atNavC.getContext('2d');
 function atNav(){const A=AT,Wd=atNavC.clientWidth||innerWidth,Hd=atNavC.clientHeight||innerHeight,dpr=Math.min(2,devicePixelRatio||1);if(atNavC.width!==Math.round(Wd*dpr)||atNavC.height!==Math.round(Hd*dpr)){atNavC.width=Math.round(Wd*dpr);atNavC.height=Math.round(Hd*dpr);}
   const x=atNavX;x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,Wd,Hd);if(A.landing)return;const s=A.ship;const list=[];
-  list.push([A.port.padX,A.port.g+10,A.port.padZ,A.port.col,A.port.name,false]);for(const c of A.cities)list.push([c.padX,c.g+10,c.padZ,'#7fd4ff',c.name,c.done]);
+  list.push([A.port.padX,A.port.g+10,A.port.padZ,A.port.col,A.port.name,false]);for(const c of A.cities)list.push([c.padX,c.g+10,c.padZ,'#7fd4ff',c.name,c.done]);for(const c of A.subs)list.push([c.padX,c.g+10,c.padZ,'#ff9a40',c.name,c.done]);
   for(const r of A.retos)if(!r.done){const rr=r.type==='anillos'&&r.rings[r.ri];list.push(rr?[rr.x,rr.y,rr.z,'#ffd23f','Anillo '+(r.ri+1),false]:[r.x,(r.city?r.city.g:r.y)+30,r.z,RETOS[r.type].col,RETOS[r.type].n,false]);}
   for(const d of A.discos)if(!d.done){const p=d.cr?d.cr.g.getWorldPosition(new THREE.Vector3()):new THREE.Vector3(d.x,d.y+20,d.z);list.push([p.x,p.y,p.z,'#c58bff','Descubrimiento ?',false]);}
   const m=34,top=isTouch?140:120,bot=isTouch?230:110;x.textAlign='center';x.textBaseline='middle';x.font='600 11px system-ui,sans-serif';
@@ -3146,9 +3235,9 @@ function atNav(){const A=AT,Wd=atNavC.clientWidth||innerWidth,Hd=atNavC.clientHe
       x.save();x.translate(ex,ey);x.rotate(a);x.beginPath();x.moveTo(13,0);x.lineTo(-7,-8);x.lineTo(-2,0);x.lineTo(-7,8);x.closePath();x.fill();x.restore();if(i<2)lab(ex-Math.cos(a)*30,ey-Math.sin(a)*20);}});x.globalAlpha=1;}
 function atKey(k,e){if(!AT)return;if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();if((k==='l'||k==='e')&&AT.near)atLand(AT.near);}
 /* ciudades del planeta */
-function enterAtmoCity(o){leaveAtmo(false);S.state='city';const CV={name:o.name,style:o.ck.style,kind:o.ck.t,idx:o.idx};CT=buildCity(null,CV);CT.fromAtmo=o;
+function enterAtmoCity(o){leaveAtmo(false);S.state='city';const CV={name:o.name,style:o.ck.style,kind:o.ck.t,idx:o.idx,sub:!!o.sub};CT=buildCity(null,CV);CT.fromAtmo=o;
   if(!o.done){o.done=true;addCry(1);}
-  $('cyEye').textContent=o.ck.t+' · '+LEVELS[S.lvl].home.planet;$('cyTitle').textContent=o.name;
+  $('cyEye').textContent=o.ck.t+' · '+LEVELS[S.lvl].home.planet;$('cyTitle').textContent=o.name;if(o.sub){if(FACTION==='umbra')say('Bienvenido a la ciudad intraterrena, guerrero Draco. Aquí abajo estás a salvo.');else{msg('Territorio Draco: los reptiles te vigilan','var(--danger)',3);say('Cuidado. Entraste a una ciudad intraterrena de la Dimensión Draco.');}}
   $('cyHint').textContent=(isTouch?'Camina con el joystick. Habla con los habitantes y prueba los juegos.':'Camina con WASD y pulsa E para hablar, jugar o comprar.')+' Vuelve al puerto de la ciudad para despegar.';
   $('cyCard').hidden=true;$('cyAct').hidden=true;$('cyGame').hidden=true;$('cyShop').hidden=true;cryUI();$('cityUI').hidden=false;$('touch').hidden=!isTouch;$('touch').classList.add('walk');
   hgCam.position.copy(CT.camPos);hgCam.lookAt(CT.look);fadeFlash();say('Bienvenido a '+o.name+'.');}
@@ -3179,7 +3268,7 @@ let smBtns=[];function openStarMap(){const box=$('smList');box.innerHTML='';smBt
     const mk=(kind,name,sub,col)=>{const b=document.createElement('button');b.className='smBtn'+(S.route&&S.route.l===l&&S.route.kind===kind?' sel':'');b.disabled=locked;b.dataset.l=l;b.dataset.k=kind;
       smBtns.push(b);b.innerHTML=`<span class="ico" style="background:radial-gradient(circle at 35% 35%,#fff8,transparent 45%),${col}"></span><b>${name}</b><small>${sub}</small>`;row.appendChild(b);};
     const pc=L.planets&&L.planets[0]?L.planets[0][0]||L.accent:L.accent;
-    mk('land',L.home.planet.charAt(0).toUpperCase()+L.home.planet.slice(1),(planetOwner(l)===FACTION?'Aliado':'⚠ Territorio enemigo')+' · '+(planetOwner(l)==='umbra'?'Imperio Umbra':'Alianza Estelar')+' · aeropuerto y ciudades',typeof pc==='string'?pc:'#5dffa8');
+    mk('land',L.home.planet.charAt(0).toUpperCase()+L.home.planet.slice(1),(planetOwner(l)===FACTION?'Aliado':'⚠ Territorio enemigo')+' · '+(planetOwner(l)==='umbra'?'Dimensión Draco':'Alianza Estelar')+' · aeropuerto y ciudades',typeof pc==='string'?pc:'#5dffa8');
     mk('site',E.n,E.k+' · bajar en cápsula · '+MIS_CORTO[siteMission(l)],E.gr);
     d.appendChild(row);box.appendChild(d);});
   smRouteUI();$('starMap').hidden=false;}
@@ -3208,8 +3297,8 @@ function pilotCards(){const box=$('pilots');box.innerHTML='';
     b.insertAdjacentHTML('beforeend',`<span class="pn">${pl.name}</span><span class="pp${pr&&pr.max>0?' on':''}">${prog}</span>`);b.insertAdjacentHTML('beforeend',`<span class="lbl">${pl.from}</span><span class="pb">${pl.bonus}</span>`);box.appendChild(b);});
 }
 function facUI(){for(const b of $('facPick').children){if(b.dataset&&b.dataset.f)b.classList.toggle('on',b.dataset.f===FACTION);}$('facTxt').textContent=FACTIONS[FACTION].d;}
-$('facPick').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;FACTION=b.dataset.f;try{localStorage.setItem('hde_fac',FACTION);}catch(_){}facUI();pilotCards();if(actx&&!S.muted)tone('sine',400,700,.1,.05);
-  say(FACTION==='umbra'?'Te uniste al Imperio Umbra. La Alianza Estelar es tu enemiga.':'Te uniste a la Alianza Estelar. El Imperio Umbra es tu enemigo.');});
+$('facPick').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;FACTION=b.dataset.f;try{localStorage.setItem('hde_fac',FACTION);}catch(_){}applyFacShips();if(ship)setPlayerShip(S.shipIdx||0);facUI();pilotCards();if(actx&&!S.muted)tone('sine',400,700,.1,.05);
+  say(FACTION==='umbra'?'Te uniste a la Dimensión Draco. La Alianza Estelar es tu enemiga.':'Te uniste a la Alianza Estelar. La Dimensión Draco es tu enemiga.');});
 $('pilots').addEventListener('click',e=>{const b=e.target.closest('.pcard');if(!b)return;const i=+b.dataset.i;if(FACTION==='umbra'){savedPilotU=i;try{localStorage.setItem('hde_pilot_u',String(i));}catch(_){}}else{savedPilot=i;try{localStorage.setItem('hde_pilot',String(i));}catch(_){}}
   for(const c of $('pilots').children)c.classList.toggle('sel',+c.dataset.i===i);if(actx&&!S.muted)tone('sine',500,800,.08,.05);});
 $('pilotGo').onclick=()=>{$('pilotSel').hidden=true;loadProf(FACTION,selIdx());cryUI&&cryUI();renderMenu();startGame(pendingLvl==='cont'?maxReached:0);};$('pilotBack').onclick=()=>{$('pilotSel').hidden=true;$('menu').hidden=false;};
@@ -3469,7 +3558,7 @@ function finRound(ganador,como){const A=AR;if(A.estado==='entre'||A.estado==='fi
     fadeFlash();iniciaRound();},2800);}
 function endFight(win){const A=AR;if(!A||A.over)return;A.over=true;
   $('fEndT').textContent=win?'¡Victoria!':'Derrota';
-  if(win){S.score+=2500;S.laserLvl=Math.min(3,S.laserLvl+1);S.mis=Math.min(20,S.mis+6);addCry&&addCry(3);$('fEndP').textContent=`Venciste a ${A.opName} (${FACTION==='umbra'?'Alianza Estelar':'Imperio Umbra'}) ${A.me.wins} rounds a ${A.op.wins}. Premio: +2500 puntos, +1 nivel de potencia, +6 misiles y 3 cristales.`;say('¡Victoria! El público te aclama.');}
+  if(win){S.score+=2500;S.laserLvl=Math.min(3,S.laserLvl+1);S.mis=Math.min(20,S.mis+6);addCry&&addCry(3);$('fEndP').textContent=`Venciste a ${A.opName} (${FACTION==='umbra'?'Alianza Estelar':'Dimensión Draco'}) ${A.me.wins} rounds a ${A.op.wins}. Premio: +2500 puntos, +1 nivel de potencia, +6 misiles y 3 cristales.`;say('¡Victoria! El público te aclama.');}
   else{$('fEndP').textContent=`${A.opName} ganó ${A.op.wins} rounds a ${A.me.wins}. Puedes pedir la revancha o volver al hangar.`;say('Has caído. Puedes pedir la revancha.');}
   $('fEnd').hidden=false;}
 function exitArena(again){if(!AR)return;arCrowdStop();disposeScene(AR.sc);AR=null;renderer.shadowMap.enabled=false;$('fightUI').hidden=true;$('fMsg').classList.remove('on');$('fFloat').innerHTML='';if(again){startArena();return;}
