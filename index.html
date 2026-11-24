@@ -81,6 +81,17 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
 .touch #podBtn kbd{display:none}
 #atUI{position:fixed;inset:0;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between;gap:12px;padding-top:calc(env(safe-area-inset-top,0px) + 14px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 14px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));box-sizing:border-box}
 #atUI .hgBottom{align-items:center;width:100%;align-self:stretch}
+#gbUI{position:fixed;inset:0;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between;gap:12px;padding-top:calc(env(safe-area-inset-top,0px) + 14px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 14px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));box-sizing:border-box}
+#gbUI .hgTop{padding-left:66px;display:flex;flex-direction:column;gap:6px;max-width:640px}
+#gbUI h2{margin:0;font:700 30px var(--f-disp);text-shadow:0 2px 12px #000}
+.gbDesc{margin:0;font-size:13px;color:var(--ink);text-shadow:0 1px 6px #000;max-width:46ch}
+.gbList{display:flex;flex-wrap:wrap;gap:6px;pointer-events:auto;margin-top:4px}
+.gbList button{font:600 11px var(--f-disp);letter-spacing:.06em;text-transform:uppercase;padding:7px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(4,8,20,.6);color:var(--ink);cursor:pointer}
+.gbList button b{font-family:var(--f-mono);color:var(--dim);margin-left:4px}.gbList button.done{border-color:var(--good)}.gbList button.done b{color:var(--good)}
+#gbUI .hgBottom{display:flex;justify-content:center;width:100%;align-self:stretch}.touch #gbUI .hgBottom{padding-bottom:240px}
+#gbLand{pointer-events:auto}#gbLand kbd{font:500 11px var(--f-mono);background:#04060f;color:var(--accent);border-radius:4px;padding:1px 5px;margin-left:8px}
+#gbExit{position:absolute;right:max(16px,env(safe-area-inset-right,0px));top:calc(env(safe-area-inset-top,0px) + 14px);pointer-events:auto;padding:10px 14px;font-size:12px}
+@media (max-width:600px){#gbUI h2{font-size:22px}#gbUI .hgTop{padding-right:110px}.gbDesc{display:none}}
 .touch #atUI .hgBottom{padding-bottom:240px}
 #atNav{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .atStats{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);text-shadow:0 1px 6px #000}
@@ -522,6 +533,18 @@ body{background:var(--bg);color:var(--ink);overflow:hidden;font-family:var(--f-d
   </div>
   <div class="hgBottom"><button class="btn actbtn" id="atAct" hidden>Aterrizar</button></div>
   <button class="btn ghost" id="atExit">Volver al espacio</button>
+</div>
+
+<div id="gbUI" hidden>
+  <div class="hgTop">
+    <div class="eyebrow">Vuelo planetario · la Tierra</div>
+    <h2 id="gbCont">la Tierra</h2>
+    <p class="gbDesc" id="gbDesc"></p>
+    <div class="atStats"><span>Posición <b id="gbLat"></b></span><span>Altura <b id="gbAlt"></b></span><span>Vel. <b id="gbSpd"></b></span><span>Continentes completos <b id="gbDone">0/7</b></span></div>
+    <div class="gbList" id="gbList" aria-label="Volar a un continente"></div>
+  </div>
+  <div class="hgBottom"><button class="btn actbtn" id="gbLand" hidden>Aterrizar</button></div>
+  <button class="btn ghost" id="gbExit">Volver al espacio</button>
 </div>
 
 <div id="exUI" hidden>
@@ -1231,7 +1254,7 @@ function sayAttendant(text){if(attTimer)clearTimeout(attTimer);try{if(hasSpeech)
 /* ---------- INPUT ---------- */
 const keys={};const joy={x:0,y:0,id:null,ox:0,oy:0};let firing=false,thrIn=0;
 addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=true;
-  if(S.state==='atmo'){atKey(k,e);return;}if(S.state==='explore'){exKey(k,e);return;}if(S.state==='city'){cityKey(k,e);return;}if(S.state==='mother'){msKey(k,e);return;}if(S.state==='hangar'){hgKey(k,e);return;}if(S.state==='arena'){arKey(k,e);return;}
+  if(S.state==='globe'){gbKey(k,e);return;}if(S.state==='atmo'){atKey(k,e);return;}if(S.state==='explore'){exKey(k,e);return;}if(S.state==='city'){cityKey(k,e);return;}if(S.state==='mother'){msKey(k,e);return;}if(S.state==='hangar'){hgKey(k,e);return;}if(S.state==='arena'){arKey(k,e);return;}
   if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();
   if(k==='e'||k==='m')fireMissile();if(k==='q'||k==='b')dropBomb();if(k==='p'||k==='escape')togglePause();if(k==='l')landAction();if(k==='n')startDock();if(k==='v')toggleView();if(k==='c')startPod();});
 addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
@@ -1341,7 +1364,7 @@ function buildEarth(r){const T=earthTex();if(!T||typeof THREE.ShaderMaterial==='
     vertexShader:'varying vec3 vNv;varying vec3 vN;void main(){vNv=normalize(normalMatrix*normal);vN=normalize(mat3(modelMatrix)*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
     fragmentShader:'uniform vec3 sunDir;varying vec3 vNv;varying vec3 vN;void main(){float i=pow(max(0.,.78+dot(vNv,vec3(0.,0.,1.))),4.)*3.;float l=smoothstep(-.4,.5,dot(normalize(vN),sunDir));gl_FragColor=vec4(vec3(.3,.6,1.)*i*l,1.);}'}));halo.scale.setScalar(r*1.08);
   const dots=new THREE.Group();for(const [n,la,lo] of EARTH_CITIES){const p=latLon(la,lo,r*1.004);const d=glowSprite(n==='Ciudad de México'?0x5dffa8:0xffd27a,r*(n==='Ciudad de México'?.09:.05),1);d.position.copy(p);dots.add(d);
-    const lb=new THREE.Sprite(new THREE.SpriteMaterial({map:labelTex(n.toUpperCase(),n==='Ciudad de México'?'#5dffa8':'#ffe6b0'),transparent:true,depthWrite:false,fog:false}));lb.scale.set(r*.62,r*.078,1);lb.position.copy(latLon(la,lo,r*1.03));lb.center.set(.5,-.2);dots.add(lb);}
+    const lb=new THREE.Sprite(new THREE.SpriteMaterial({map:labelTex(n.toUpperCase(),n==='Ciudad de México'?'#5dffa8':'#ffe6b0'),transparent:true,depthWrite:false,fog:false}));lb.scale.set(r*.62,r*.078,1);lb.position.copy(latLon(la,lo,r*1.03));lb.center.set(.5,-.2);lb.userData.lbl=1;dots.add(lb);}
   return {m,cl,halo,dots,sun};}
 function spawnLandPlanet(){const L=LEVELS[S.lvl],H=L.home,p=L.planets[0],r=30;const g=new THREE.Group(),body=new THREE.Group();g.add(body);
   const E=S.lvl===0?buildEarth(r):null;let m;
@@ -1825,14 +1848,15 @@ function updateDock(dt){const D=S.dock;if(!D||!S.mother)return;D.t+=dt;const t=D
   else{S.dock=null;bm.opacity=0;enterMother(D.f0);return;}
   if(dir.lengthSq()<1e-6)dir.set(0,0,-1);dir.normalize();ship.position.copy(pos);ship.up.set(0,1,0);ship.lookAt(tmpV.copy(pos).sub(dir));if(t>3.3)$('flash').style.opacity=Math.min(1,(t-3.3)/.5);
   if(t>=3.2){camDes.copy(D.camR);lookDes.copy(D.mouth);}else{camDes.copy(pos).addScaledVector(dir,-11).add(tmpV.set(0,4.5,0));lookDes.copy(pos).addScaledVector(dir,6);}}
-$('dockBtn').addEventListener('click',startDock);$('atAct').addEventListener('click',()=>{if(AT&&AT.near)atLand(AT.near);});$('atExit').addEventListener('click',()=>{if(AT&&S.state==='atmo'&&!AT.landing)leaveAtmo(true);});$('podBtn').addEventListener('click',startPod);$('exAct').addEventListener('click',()=>exAction());$('exJump').addEventListener('pointerdown',e=>{e.preventDefault();exJump();});$('viewBtn').addEventListener('click',toggleView);$('viewBig').addEventListener('click',toggleView);$('tView').addEventListener('pointerdown',e=>{e.preventDefault();toggleView();});$('msHelm').addEventListener('click',takeHelm);
+$('dockBtn').addEventListener('click',startDock);$('atAct').addEventListener('click',()=>{if(AT&&AT.near)atLand(AT.near);});$('atExit').addEventListener('click',()=>{if(AT&&S.state==='atmo'&&!AT.landing)atToSpace();});$('podBtn').addEventListener('click',startPod);$('gbLand').addEventListener('click',gbDescend);$('gbExit').addEventListener('click',()=>{if(S.state==='globe')leaveGlobe(true);});
+$('gbList').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!GB)return;GB.autoTo=+b.dataset.c;msg('Rumbo a '+CONTS[GB.autoTo].n,'#7fd4ff',1.6);});$('exAct').addEventListener('click',()=>exAction());$('exJump').addEventListener('pointerdown',e=>{e.preventDefault();exJump();});$('viewBtn').addEventListener('click',toggleView);$('viewBig').addEventListener('click',toggleView);$('tView').addEventListener('pointerdown',e=>{e.preventDefault();toggleView();});$('msHelm').addEventListener('click',takeHelm);
 
 /* ---------- ÓRBITA Y ATERRIZAJE ---------- */
 let landMode=null;
 function setLandUI(mode){if(mode===landMode)return;landMode=mode;const b=$('landBtn');if(!mode){b.hidden=true;return;}const pl=LEVELS[S.lvl].home.planet;
   b.classList.toggle('warn',mode==='slow');
-  b.innerHTML=mode==='slow'?`Frenar y orbitar ${pl}<kbd>L</kbd>`:mode==='braking'?`Frenando… entrando en órbita`:mode==='orbit'?`Entrar en órbita de ${pl}<kbd>L</kbd>`:`Descender a ${pl}<kbd>L</kbd>`;b.hidden=false;}
-function landAction(){if(S.paused)return;if(landMode==='orbit')startOrbit();else if(landMode==='slow'){S.autoBrake=true;msg('Frenando para entrar en órbita','var(--warn)',1.6);}else if(landMode==='land')enterAtmo();}
+  b.innerHTML=mode==='slow'?`Frenar y orbitar ${pl}<kbd>L</kbd>`:mode==='braking'?`Frenando… entrando en órbita`:mode==='orbit'?`Entrar en órbita de ${pl}<kbd>L</kbd>`:S.lvl===0?`Volar alrededor de la Tierra<kbd>L</kbd>`:`Descender a ${pl}<kbd>L</kbd>`;b.hidden=false;}
+function landAction(){if(S.paused)return;if(landMode==='orbit')startOrbit();else if(landMode==='slow'){S.autoBrake=true;msg('Frenando para entrar en órbita','var(--warn)',1.6);}else if(landMode==='land'){if(S.lvl===0)enterGlobe(false);else enterAtmo();}}
 function orbitPos(O,a){return new THREE.Vector3(O.C.x+Math.cos(a)*O.R,O.C.y+O.R*.42,O.C.z+Math.sin(a)*O.R);}
 function startOrbit(){const lp=S.land;if(!lp||S.state!=='play')return;if(S.thr>.72){msg('Demasiado rápido para orbitar','var(--warn)',1.4);return;}
   S.state='orbit';firing=false;beam.visible=false;
@@ -2899,11 +2923,34 @@ const DISCO={ruinas:{n:'Ruinas antiguas',d:'Columnas de una civilización perdid
   templo:{n:'Templo flotante',d:'Un templo que flota sobre las nubes sin motores.'},geiser:{n:'Géiser de energía',d:'Un chorro de energía brota del centro del planeta.'},
   monolito:{n:'Monolito negro',d:'Una piedra perfecta que nadie sabe quién puso aquí.'},arco:{n:'Arco de piedra',d:'Un arco natural gigantesco. ¡Pasa volando por debajo!'}};
 const DISCO_ORDER=['ruinas','nave','cristal','criatura','templo','geiser','monolito','arco'];
+const CONTS=[
+ {id:'na',n:'Norteamérica',lat:38,lon:-100,pal:['#567536','#33602a'],rock:'#76674f',sky:'#5d9be0',hz:'#b9d3ec',wet:true,hill:16,snow:110,tree:'#2b5424',trees:'cone',nt:700,water:'#1c5a96',
+  cities:['Ciudad de México','Nueva York','Los Ángeles'],ck:[0,0,0],retos:['cazas','torretas'],disco:['chichen','ruinas','nave','arco'],d:'Bosques, lagos y montañas. Defiende el cielo de México y Estados Unidos.'},
+ {id:'sa',n:'Sudamérica',lat:-14,lon:-60,pal:['#3c7a2a','#1f5a22'],rock:'#6a5a40',sky:'#6aa6e0',hz:'#c6dcc8',wet:true,hill:13,snow:120,tree:'#1b4a1a',trees:'jungle',nt:1100,water:'#2a6a6a',
+  cities:['Bogotá','São Paulo','Buenos Aires'],ck:[0,0,0],retos:['defensa','anillos'],disco:['machu','criatura','geiser','templo'],d:'La selva del Amazonas y los Andes. Salva las ciudades y cruza los cañones.'},
+ {id:'eu',n:'Europa',lat:50,lon:12,pal:['#6a8a48','#46703a'],rock:'#807868',sky:'#7aa8d8',hz:'#c8d4e0',wet:true,hill:14,snow:95,tree:'#2e5a30',trees:'cone',nt:650,water:'#24527e',
+  cities:['Madrid','París','Londres'],ck:[0,1,0],retos:['cazas','defensa'],disco:['eiffel','ruinas','monolito','arco'],d:'Colinas verdes y castillos. Batallas aéreas sobre París y Londres.'},
+ {id:'af',n:'África',lat:10,lon:20,pal:['#d8b274','#c89a58'],rock:'#a8784a',sky:'#8ab8e0',hz:'#f0dcb4',wet:false,hill:12,snow:999,tree:'#7a7a34',trees:'rock',nt:160,water:'#1c5a96',
+  cities:['El Cairo','Lagos','Ciudad del Cabo'],ck:[1,0,0],retos:['torretas','anillos'],disco:['giza','nave','cristal','arco'],d:'El desierto del Sahara y sus pirámides. Destruye las bases ocultas en la arena.'},
+ {id:'as',n:'Asia',lat:42,lon:95,pal:['#6a7f48','#4a6a38'],rock:'#7a6e60',sky:'#5a90d8',hz:'#c4d0dc',wet:true,hill:26,snow:70,tree:'#2a5028',trees:'cone',nt:700,water:'#1e4e7a',
+  cities:['Tokio','Pekín','Nueva Delhi'],ck:[2,0,1],retos:['anillos','cazas'],disco:['muralla','templo','criatura','monolito'],d:'El Himalaya, la montaña más alta del mundo. Carreras entre picos nevados.'},
+ {id:'oc',n:'Oceanía',lat:-25,lon:134,pal:['#b86a3a','#9a5a30'],rock:'#8a4a2a',sky:'#4a96e8',hz:'#ead2ba',wet:true,hill:10,snow:999,tree:'#5a6a2a',trees:'cone',nt:260,water:'#1a8ab0',
+  cities:['Sídney','Melbourne','Auckland'],ck:[0,0,1],retos:['defensa','torretas'],disco:['opera','cristal','geiser','arco'],d:'El desierto rojo de Australia y playas turquesa. Protege Sídney.'},
+ {id:'an',n:'Antártida',lat:-80,lon:20,pal:['#e8eef4','#d4dfe8'],rock:'#9aa4b0',sky:'#6a9ad8',hz:'#e4eef8',wet:true,hill:20,snow:-99,tree:'#bfe0f4',trees:'ice',nt:140,water:'#0e3a5a',
+  cities:['Base McMurdo','Base Esperanza','Estación Vostok'],ck:[1,1,1],retos:['cazas','anillos'],disco:['polar','nave','monolito','cristal'],d:'Hielo por todas partes. Bases científicas, pingüinos y cazas en la tormenta.'}];
+const CONT_BOX={an:[[-90,-62,-180,180]],eu:[[36,71,-11,40]],as:[[5,78,40,180],[-11,5,95,141]],af:[[-35,37,-18,52]],na:[[7,84,-170,-52]],sa:[[-56,12,-82,-34]],oc:[[-48,-10,112,179]]};
+Object.assign(DISCO,{chichen:{n:'Chichén Itzá',d:'La gran pirámide maya de Kukulcán, en México.'},machu:{n:'Machu Picchu',d:'La ciudad inca escondida en las montañas de Perú.'},
+  eiffel:{n:'Torre Eiffel',d:'La torre de hierro de París: mide 330 metros.'},giza:{n:'Pirámides de Giza',d:'Las pirámides de Egipto tienen más de 4500 años.'},
+  muralla:{n:'Gran Muralla China',d:'Una muralla de miles de kilómetros que cruza las montañas.'},opera:{n:'Ópera de Sídney',d:'El edificio de velas blancas junto al mar en Australia.'},
+  polar:{n:'Colonia de pingüinos',d:'Pingüinos emperador junto a una base científica.'}});
+function earthKey(){return pKey(FACTION,selIdx())+'_earth';}
+function earthProg(){try{return JSON.parse(localStorage.getItem(earthKey())||'{}');}catch(_){return {};}}
+function earthSave(id,v){const P=earthProg();if((P[id]||0)>=v)return false;P[id]=v;try{localStorage.setItem(earthKey(),JSON.stringify(P));}catch(_){}return true;}
 let AT=null;const atV=new THREE.Vector3(),atV2=new THREE.Vector3();
 function smooth01(a,b,x){const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t);}
 function earthSky(){const c=cv(64,256),x=c.getContext('2d'),g=x.createLinearGradient(0,0,0,256);g.addColorStop(0,'#071a3e');g.addColorStop(.3,'#1d55a8');g.addColorStop(.47,'#7fb3e6');g.addColorStop(.5,'#cfe2f2');g.addColorStop(.53,'#9fb8c8');g.addColorStop(1,'#3a4a3a');x.fillStyle=g;x.fillRect(0,0,64,256);return new THREE.CanvasTexture(c);}
-function buildAtmo(){const l=S.lvl,L=LEVELS[l],H=L.home,EA=l===0,p=EA?['#567536','#33602a','#f2f4f6']:L.planets[0],acc=new THREE.Color(L.accent).getHex(),rnd=rng32(l*977+13),seed=l*2.3+.7;const sc=new THREE.Scene();
-  const skyC=EA?new THREE.Color('#5d9be0'):new THREE.Color(p[2]).lerp(new THREE.Color(L.accent),.25),hz=EA?new THREE.Color('#b9d3ec'):skyC.clone().lerp(new THREE.Color(p[0]),.35);sc.background=hz;sc.fog=new THREE.Fog(hz.getHex(),260,1350);
+function buildAtmo(ck){const l=S.lvl,L=LEVELS[l],H=L.home,EA=l===0,CO=EA?CONTS[Math.max(0,ck||0)]:null,p=EA?[CO.pal[0],CO.pal[1],'#f2f4f6']:L.planets[0],acc=new THREE.Color(L.accent).getHex(),rnd=rng32(l*977+13+(EA?(ck||0)*311:0)),seed=l*2.3+.7+(EA?(ck||0)*1.7:0);const sc=new THREE.Scene();
+  const skyC=EA?new THREE.Color(CO.sky):new THREE.Color(p[2]).lerp(new THREE.Color(L.accent),.25),hz=EA?new THREE.Color(CO.hz):skyC.clone().lerp(new THREE.Color(p[0]),.35);sc.background=hz;sc.fog=new THREE.Fog(hz.getHex(),260,1350);
   sc.add(new THREE.HemisphereLight(skyC.getHex(),new THREE.Color(p[1]).getHex(),.55));const sun=new THREE.DirectionalLight(L.sun,1.15);sun.position.set(-300,500,-200);sc.add(sun);sc.add(new THREE.AmbientLight(0x404050,.35));
   const sky=new THREE.Mesh(new THREE.SphereGeometry(2600,32,16),new THREE.MeshBasicMaterial({map:EA?earthSky():skyTex(p),side:THREE.BackSide,fog:false}));sc.add(sky);
   const sg=glowSprite(L.sun,420,.85);sg.position.set(-900,1100,-1500);sg.material.fog=false;sc.add(sg);
@@ -2912,23 +2959,23 @@ function buildAtmo(){const l=S.lvl,L=LEVELS[l],H=L.home,EA=l===0,p=EA?['#567536'
   const locs=[];const place=(kind,dmin,dmax,flat)=>{let x,z,t=0;do{const a=rnd()*Math.PI*2,d=dmin+rnd()*(dmax-dmin);x=Math.sin(a)*d;z=Math.cos(a)*d;t++;}while(t<60&&locs.some(o=>Math.hypot(o.x-x,o.z-z)<o.flat+flat+70));
     const o={kind,x,z,flat,done:false};locs.push(o);return o;};
   const port=place('port',140,260,40);const enemyPort=planetOwner(l)!==FACTION;port.name=enemyPort?'Puerto enemigo ('+(planetOwner(l)==='umbra'?'Umbra':'Alianza')+')':'Puerto espacial';port.col=enemyPort?'#ff4d6d':'#5dffa8';
-  const cities=[];for(let k=0;k<3;k++){const c=place('city',380,950,95);c.name=EA?['Ciudad de México','Puebla','Toluca'][k]:CITY_POOL[(l*3+k)%CITY_POOL.length];c.ck=EA?CITY_KIND[0]:CITY_KIND[(l+k)%4];c.col='#7fd4ff';c.idx=k;cities.push(c);}
-  const retos=[RETO_ORDER[l%4],RETO_ORDER[(l+1)%4]];const rlocs=retos.map(r=>{const o=r==='defensa'?cities[2]:place('reto',450,1050,r==='torretas'?90:60);if(r==='defensa'){o.defensa=true;}
+  const cities=[];for(let k=0;k<3;k++){const c=place('city',380,950,95);c.name=EA?CO.cities[k]:CITY_POOL[(l*3+k)%CITY_POOL.length];c.ck=EA?CITY_KIND[CO.ck[k]]:CITY_KIND[(l+k)%4];c.col='#7fd4ff';c.idx=k;cities.push(c);}
+  const retos=EA?CO.retos.slice():[RETO_ORDER[l%4],RETO_ORDER[(l+1)%4]];const rlocs=retos.map(r=>{const o=r==='defensa'?cities[2]:place('reto',450,1050,r==='torretas'?90:60);if(r==='defensa'){o.defensa=true;}
     const R0={kind:'reto',type:r,x:o.x,z:o.z,flat:0,done:false,name:RETOS[r].n,col:RETOS[r].col,city:r==='defensa'?o:null};if(r!=='defensa')Object.assign(o,R0);else locs.push(R0);return r==='defensa'?R0:o;});
-  const dl=[];for(let k=0;k<4;k++){const t=DISCO_ORDER[(l*3+k*2)%8];const o=place('disco',300,1150,t==='arco'?40:24);o.type=t;o.name=DISCO[t].n;o.col='#c58bff';dl.push(o);}
+  const dl=[];for(let k=0;k<4;k++){const t=EA?CO.disco[k]:DISCO_ORDER[(l*3+k*2)%8];const big=['giza','muralla','opera','machu','chichen'].includes(t);const o=place('disco',big?380:300,1150,t==='arco'?40:big?70:24);o.type=t;o.name=DISCO[t].n;o.col='#c58bff';dl.push(o);}
   /* terreno */
-  const wet=l%3!==1,hill=16+(l%4)*5,W=-4;
+  const wet=EA?CO.wet:l%3!==1,hill=EA?CO.hill:16+(l%4)*5,W=-4;
   const base=(x,z)=>exNoise(x*.21,z*.21,seed)*hill+Math.max(0,exNoise(x*.07,z*.07,seed+3)-.2)*hill*3.2+10;
   for(const o of locs){if(o.flat)o.g=Math.max(wet?W+3:0,base(o.x,o.z)*.5+2);}
   const Hf=(x,z)=>{let h=base(x,z);for(const o of locs){if(!o.flat)continue;const d=Math.hypot(x-o.x,z-o.z);if(d<o.flat*1.7){const k=smooth01(o.flat,o.flat*1.7,d);h=o.g+(h-o.g)*k;}}const d0=Math.hypot(x,z);if(d0>1300)h+=(d0-1300)*.6;return h;};
   const SZ=3200,SEG=170,gg=new THREE.PlaneGeometry(SZ,SZ,SEG,SEG).rotateX(-Math.PI/2),pos=gg.attributes.position,cols=new Float32Array(pos.count*3);
-  const cLo=new THREE.Color(p[1]),cMid=new THREE.Color(p[0]),cHi=new THREE.Color(EA?'#76674f':p[2]),snow=new THREE.Color('#f4f6f8'),sand=EA?new THREE.Color('#d9c99a'):new THREE.Color(p[0]).lerp(new THREE.Color('#e8d8a8'),.5),cc=new THREE.Color();
+  const cLo=new THREE.Color(p[1]),cMid=new THREE.Color(p[0]),cHi=new THREE.Color(EA?CO.rock:p[2]),snow=new THREE.Color('#f4f6f8'),sand=EA?new THREE.Color('#d9c99a'):new THREE.Color(p[0]).lerp(new THREE.Color('#e8d8a8'),.5),cc=new THREE.Color();
   for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i),h=Hf(x,z);pos.setY(i,h);const t=clamp((h+5)/(hill*3.4),0,1);
-    if(wet&&h<W+2.5)cc.copy(sand);else if(t<.72)cc.copy(cMid).lerp(cLo,.35*(1-t/.72));else cc.copy(cMid).lerp(cHi,(EA?1:.55)*Math.min(1,(t-.72)/(EA?.14:.28)));if(EA&&h>110)cc.lerp(snow,Math.min(1,(h-110)/40));cc.offsetHSL(0,0,exNoise(x*1.3,z*1.3,seed+7)*.03);cols[i*3]=cc.r;cols[i*3+1]=cc.g;cols[i*3+2]=cc.b;}
+    if(wet&&h<W+2.5)cc.copy(sand);else if(t<.72)cc.copy(cMid).lerp(cLo,.35*(1-t/.72));else cc.copy(cMid).lerp(cHi,(EA?1:.55)*Math.min(1,(t-.72)/(EA?.14:.28)));if(EA&&h>CO.snow)cc.lerp(snow,Math.min(1,(h-CO.snow)/40));cc.offsetHSL(0,0,exNoise(x*1.3,z*1.3,seed+7)*.03);cols[i*3]=cc.r;cols[i*3+1]=cc.g;cols[i*3+2]=cc.b;}
   gg.setAttribute('color',new THREE.BufferAttribute(cols,3));gg.computeVertexNormals();sc.add(new THREE.Mesh(gg,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.95,flatShading:true})));
-  if(wet){const wc=EA?new THREE.Color('#1c5a96'):new THREE.Color(p[1]).lerp(new THREE.Color('#1a6ab0'),.55);const wm=new THREE.Mesh(new THREE.PlaneGeometry(SZ,SZ).rotateX(-Math.PI/2),new THREE.MeshStandardMaterial({color:wc,metalness:.6,roughness:.15,transparent:true,opacity:.82}));wm.position.y=W;sc.add(wm);}
+  if(wet){const wc=EA?new THREE.Color(CO.water):new THREE.Color(p[1]).lerp(new THREE.Color('#1a6ab0'),.55);const wm=new THREE.Mesh(new THREE.PlaneGeometry(SZ,SZ).rotateX(-Math.PI/2),new THREE.MeshStandardMaterial({color:wc,metalness:.6,roughness:.15,transparent:true,opacity:.82}));wm.position.y=W;sc.add(wm);}
   /* árboles, cristales o rocas */
-  {const N=700,tg=l%4===2?new THREE.OctahedronGeometry(1,0):new THREE.ConeGeometry(1,3,6),tm=new THREE.MeshStandardMaterial({color:EA?new THREE.Color('#2b5424'):new THREE.Color(p[0]).lerp(new THREE.Color(l%4===2?L.accent:'#1a4a20'),.5),flatShading:true,roughness:.8,emissive:l%4===2?acc:0,emissiveIntensity:l%4===2?.25:0});
+  {const TT=EA?CO.trees:'',N=EA?CO.nt:700,tg=(l%4===2&&!EA)||TT==='rock'||TT==='ice'?new THREE.OctahedronGeometry(1,0):TT==='jungle'?new THREE.SphereGeometry(1.3,7,5):new THREE.ConeGeometry(1,3,6),tm=new THREE.MeshStandardMaterial({color:EA?new THREE.Color(CO.tree):new THREE.Color(p[0]).lerp(new THREE.Color(l%4===2?L.accent:'#1a4a20'),.5),flatShading:true,roughness:.8,emissive:l%4===2?acc:0,emissiveIntensity:l%4===2?.25:0});
     const inst=new THREE.InstancedMesh(tg,tm,N),mm=new THREE.Matrix4(),q=new THREE.Quaternion(),sv=new THREE.Vector3(),pv=new THREE.Vector3();let n=0;
     for(let k=0;k<N*3&&n<N;k++){const x=(rnd()-.5)*2400,z=(rnd()-.5)*2400,h=Hf(x,z);if(wet&&h<W+3)continue;if(locs.some(o=>o.flat&&Math.hypot(o.x-x,o.z-z)<o.flat*1.3))continue;const s=2+rnd()*4;
       pv.set(x,h+s*1.2,z);sv.set(s,s*(1+rnd()),s);mm.compose(pv,q,sv);inst.setMatrixAt(n++,mm);}inst.count=n;sc.add(inst);}
@@ -2967,6 +3014,7 @@ function buildAtmo(){const l=S.lvl,L=LEVELS[l],H=L.home,EA=l===0,p=EA?['#567536'
       const tp=new THREE.Mesh(new THREE.CylinderGeometry(16,16,2,6),M(0xd8ccb0));tg.add(tp);for(let k=0;k<6;k++){const a=k/6*Math.PI*2,c=new THREE.Mesh(new THREE.CylinderGeometry(.8,.8,10,8),M(0xf0e8d8));c.position.set(Math.cos(a)*12,6,Math.sin(a)*12);tg.add(c);}
       const rf=new THREE.Mesh(new THREE.ConeGeometry(15,8,6),M(0xd8a840,{metalness:.8}));rf.position.y=15;tg.add(rf);const gl=glowSprite(0xffd060,30,.6);gl.position.y=5;tg.add(gl);o.tg=tg;}
     else if(t==='geiser'){const bs=new THREE.Mesh(new THREE.CylinderGeometry(8,12,4,16),M(0x5a4a40));bs.position.y=2;g.add(bs);const col=new THREE.Mesh(new THREE.CylinderGeometry(2,5,120,12,1,true),basic(acc,{transparent:true,opacity:.35,blending:THREE.AdditiveBlending,depthWrite:false}));col.position.y=60;g.add(col);o.col2=col;}
+    else if(EA&&buildWonder(t,g,o,M,Hf,rnd)){}
     else if(t==='monolito'){const m=new THREE.Mesh(new THREE.BoxGeometry(6,40,2),M(0x050505,{metalness:.9,roughness:.1}));m.position.y=20;g.add(m);const gl=glowSprite(0xffffff,10,.4);gl.position.y=42;g.add(gl);}
     else{const arc=new THREE.Mesh(new THREE.TorusGeometry(32,7,10,30,Math.PI),M(new THREE.Color(p[0]).multiplyScalar(.8).getHex()));arc.rotation.y=rnd()*3;g.add(arc);o.arcY=g.position.y+28;}
     const lb=msLabel('?',' #c58bff'.trim(),0,t==='templo'?100:t==='criatura'?60:50,0,10);g.add(lb);o.lb=lb;o.obj=g;o.y=g.position.y;}
@@ -2984,14 +3032,30 @@ function buildAtmo(){const l=S.lvl,L=LEVELS[l],H=L.home,EA=l===0,p=EA?['#567536'
   const sp=new Sparks(1200,1.2,sc);
   return {sc,l,EA,hz:hz.clone(),sky,plasma,space:new THREE.Color('#06102a'),reentry:0,Hf,wet,W,locs,port,cities,retos:rlocs,discos:dl,ship:{o:so,pos:new THREE.Vector3(port.x*.2,240,port.z*.2+500),yaw:Math.atan2(-(port.x-port.x*.2),-(port.z-port.z*.2-500))*-1,pitch:-.25,spd:60,thr:1,roll:0},
     shots:[],eb:[],sparks:sp,t:0,fireT:0,cam:new THREE.Vector3(0,300,800),look:new THREE.Vector3(),near:null,landing:null,hitT:0,uiT:0};}
-function enterAtmo(){const lp=S.land;S.orbit=null;S.landedHere=true;routeDone('land');removeLand();S.state='atmo';firing=false;beam.visible=false;
+function enterAtmo(ck){const lp=S.land;S.orbit=null;S.landedHere=true;routeDone('land');removeLand();S.state='atmo';const cont=S.lvl===0?(ck||0):-1;$('gbUI').hidden=true;if(hgCam.up)hgCam.up.set(0,1,0);firing=false;beam.visible=false;
   $('hud').hidden=true;$('orbitHud').hidden=true;setLandUI(null);setDockUI(false);setPodUI&&setPodUI(false);
-  if(!AT||AT.l!==S.lvl){if(AT)disposeScene(AT.sc);AT=buildAtmo();}
+  if(!AT||AT.l!==S.lvl||AT.cont!==cont){if(AT)disposeScene(AT.sc);AT=buildAtmo(cont);AT.cont=cont;}
   const s=AT.ship;s.pos.set(AT.port.x*.3,415,AT.port.z*.3+640);atAim(s,AT.port.x,AT.port.z);s.pitch=-.42;s.spd=70;AT.landing=null;AT.reentry=4.5;AT.t=0;AT.cam.set(s.pos.x,s.pos.y+30,s.pos.z+60);
   hgCam.far=6000;hgCam.near=.5;hgCam.updateProjectionMatrix();
-  $('atUI').hidden=false;$('touch').hidden=!isTouch;$('touch').classList.add('atmo');$('touch').classList.remove('walk');$('atPlanet').textContent=LEVELS[S.lvl].home.planet;$('atEye').textContent='Vuelo atmosférico · '+LEVELS[S.lvl].name;
-  fadeFlash();musicMuffle(false);msg('Reentrada atmosférica: '+LEVELS[S.lvl].home.planet,'var(--warn)',2.4);say('Entrando a la atmósfera. Explora el planeta: hay ciudades, batallas y descubrimientos.');atUI();}
+  $('atUI').hidden=false;$('touch').hidden=!isTouch;$('touch').classList.add('atmo');$('touch').classList.remove('walk');$('atPlanet').textContent=cont>=0?CONTS[cont].n:LEVELS[S.lvl].home.planet;$('atEye').textContent='Vuelo atmosférico · '+(cont>=0?'la Tierra':LEVELS[S.lvl].name);$('atExit').textContent=cont>=0?'Subir y volar el planeta':'Volver al espacio';
+  fadeFlash();musicMuffle(false);msg('Reentrada atmosférica: '+(cont>=0?CONTS[cont].n:LEVELS[S.lvl].home.planet),'var(--warn)',2.4);if(cont>=0)setTimeout(()=>{if(S.state==='atmo')msg(CONTS[cont].d,'#7fd4ff',3.4);},2600);say('Entrando a la atmósfera. Explora el planeta: hay ciudades, batallas y descubrimientos.');atUI();}
+function buildWonder(t,g,o,M,Hf,rnd){const B=(w,hh,d,c,x,y,z,ry)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,hh,d),M(c));m.position.set(x,y,z);if(ry)m.rotation.y=ry;g.add(m);return m;};
+  if(t==='chichen'){for(let k=0;k<9;k++){const s=64-k*6.4;B(s,4.2,s,k%2?0xbcae8e:0xb0a282,0,2.1+k*4.2,0);}B(5,38,4,0xa09070,0,19,33).rotation.x=-.72;B(14,9,14,0xc8b898,0,42,0);B(4,6,.5,0x2a2018,0,41,7.2);}
+  else if(t==='giza'){for(const [x,z,r,hh] of [[0,0,40,56],[78,34,35,48],[136,66,20,28]]){const m=new THREE.Mesh(new THREE.ConeGeometry(r,hh,4),M(0xdcbc80));m.rotation.y=Math.PI/4;m.position.set(x,hh/2,z);g.add(m);}
+    B(6,7,20,0xc8a870,-42,3.5,48);B(6,6,6,0xc8a870,-42,8,40);}
+  else if(t==='eiffel'){const lat=new THREE.MeshStandardMaterial({color:0x6a5a48,wireframe:true});const tw=new THREE.Mesh(new THREE.CylinderGeometry(1.5,26,110,4,10,true),lat);tw.position.y=55;tw.rotation.y=Math.PI/4;g.add(tw);
+    const tw2=new THREE.Mesh(new THREE.CylinderGeometry(1.2,22,100,4,1,true),M(0x7a6a56,{transparent:true,opacity:.35,side:THREE.DoubleSide}));tw2.position.y=50;tw2.rotation.y=Math.PI/4;g.add(tw2);
+    B(30,2,30,0x5a4a3a,0,22,0,Math.PI/4);B(16,2,16,0x5a4a3a,0,52,0,Math.PI/4);const sp=new THREE.Mesh(new THREE.CylinderGeometry(.3,1,20,6),M(0x5a4a3a));sp.position.y=118;g.add(sp);const gl=glowSprite(0xffe0a0,14,.9);gl.position.y=128;g.add(gl);}
+  else if(t==='muralla'){const y0=g.position.y;for(let k=0;k<22;k++){const x=k*13-140,z=Math.sin(k*.45)*34,y=Hf(o.x+x,o.z+z)-y0;const nx=Math.cos(k*.45)*.45*34/13;B(7,9,15,0x9a8a74,x,y+4,z,Math.atan2(1,nx)+Math.PI/2);if(k%5===0)B(12,18,12,0x8a7a64,x,y+8,z);}}
+  else if(t==='opera'){B(90,6,46,0xd8ccb0,0,3,0);for(let k=0;k<6;k++){const r=12+(k%3)*4,sh=new THREE.Mesh(new THREE.SphereGeometry(r,16,10,0,Math.PI,0,Math.PI/2),M(0xf6f4ee,{roughness:.3}));sh.position.set(-30+k*12,6,(k%2?8:-8));sh.rotation.set(0,Math.PI/2,-.35);sh.scale.set(1,1.5,.7);g.add(sh);}}
+  else if(t==='machu'){for(let k=0;k<6;k++)B(80-k*9,4,50-k*5,0x6a7a44,0,2+k*4,-k*4);for(let k=0;k<12;k++){const x=(rnd()-.5)*50,z=(rnd()-.5)*24;B(6,5,6,0x9a9080,x,26.5,z-14);const rf=new THREE.Mesh(new THREE.ConeGeometry(4.6,4,4),M(0x6a5a40));rf.rotation.y=Math.PI/4;rf.position.set(x,31,z-14);g.add(rf);}
+    const pk=new THREE.Mesh(new THREE.ConeGeometry(26,90,7),M(0x3a5a2a));pk.position.set(10,45,-60);g.add(pk);}
+  else if(t==='polar'){const dm=new THREE.Mesh(new THREE.SphereGeometry(12,16,10,0,Math.PI*2,0,Math.PI/2),M(0xd06030));g.add(dm);B(1,22,1,0x888888,16,11,0);const gl=glowSprite(0xff3030,4,1);gl.position.set(16,23,0);g.add(gl);
+    for(let k=0;k<24;k++){const x=20+rnd()*40,z=(rnd()-.5)*50;const b=new THREE.Mesh(new THREE.CylinderGeometry(1,1.4,4,8),M(0x111418));b.position.set(x,2,z);g.add(b);const be=new THREE.Mesh(new THREE.SphereGeometry(1.1,8,6),M(0xf4f4f4));be.position.set(x,1.8,z+.7);be.scale.set(.8,1.4,.5);g.add(be);
+      const hd=new THREE.Mesh(new THREE.SphereGeometry(.9,8,6),M(0x111418));hd.position.set(x,4.6,z);g.add(hd);const bk=new THREE.Mesh(new THREE.SphereGeometry(.3,6,4),M(0xffa020));bk.position.set(x,4.5,z+.9);g.add(bk);}}
+  else return false;return true;}
 function atAim(s,x,z){s.yaw=Math.atan2(-(x-s.pos.x),-(z-s.pos.z));}
+function atToSpace(){if(AT&&AT.cont>=0){leaveAtmo(false);enterGlobe(true);}else leaveAtmo(true);}
 function leaveAtmo(toSpace){$('atUI').hidden=true;$('touch').classList.remove('atmo');$('atAct').hidden=true;hgCam.far=1500;hgCam.near=.1;hgCam.updateProjectionMatrix();
   for(const b of AT.eb)AT.sc.remove(b.m);AT.eb=[];for(const s of AT.shots)AT.sc.remove(s.m);AT.shots=[];
   if(toSpace){S.state='play';takeoff();msg('De vuelta en el espacio','var(--accent)',1.6);}}
@@ -3018,7 +3082,7 @@ function atUpdate(dt){const A=AT;A.t+=dt;const t=A.t,s=A.ship,Hf=A.Hf;if(A.hitT>
       for(let i=0;i<3;i++)A.sparks.emit(s.pos.x+(Math.random()-.5)*5,s.pos.y+(Math.random()-.5)*4,s.pos.z+(Math.random()-.5)*5,-f.x*30+(Math.random()-.5)*10,-f.y*30+(Math.random()-.5)*10,-f.z*30+(Math.random()-.5)*10,.6,C(Math.random()<.5?0xff8a30:0xffe0a0));
       if(A.reentry<=0){A.plasma.material.opacity=0;msg('Atmósfera estable: vuela sobre '+LEVELS[S.lvl].home.planet,'var(--good)',2.2);}}
     {const hk=smooth01(300,440,s.pos.y);A.sc.background.copy(A.hz).lerp(A.space,hk*.9);A.sc.fog.color.copy(A.sc.background);A.sky.material.color.setScalar(1-hk*.7);}
-    if(s.pos.y>430&&A.reentry<=0&&A.t>7){leaveAtmo(true);return;}else if(s.pos.y>470)s.pos.y=470;
+    if(s.pos.y>430&&A.reentry<=0&&A.t>7){atToSpace();return;}else if(s.pos.y>470)s.pos.y=470;
     /* disparos */
     A.fireT-=dt;if((firing||keys[' '])&&A.fireT<=0){A.fireT=.13;for(const sd of [-1,1]){const m=new THREE.Mesh(geo('atSh',()=>new THREE.BoxGeometry(.5,.5,6)),basic(new THREE.Color(SHIP.glow).getHex()));
         atV2.set(sd*2.2,-.3,-2).applyEuler(s.o.rotation).add(s.pos);m.position.copy(atV2);m.quaternion.copy(s.o.quaternion);A.sc.add(m);A.shots.push({m,v:f.clone().multiplyScalar(s.spd+300),life:1.3});}if(actx&&!S.muted&&Math.random()<.4)tone('square',900,500,.05,.02);}
@@ -3063,7 +3127,7 @@ function atUpdate(dt){const A=AT;A.t+=dt;const t=A.t,s=A.ship,Hf=A.Hf;if(A.hitT>
   hgCam.position.copy(A.cam);if(S.shake>0){hgCam.position.x+=(Math.random()-.5)*S.shake;hgCam.position.y+=(Math.random()-.5)*S.shake;S.shake=Math.max(0,S.shake-dt*2);}hgCam.lookAt(A.look);hgCam.rotateZ(-s.roll*.15);
   A.sparks.update(dt);A.uiT-=dt;if(A.uiT<=0){A.uiT=.2;atUI();}atNav();}
 function atUI(){const A=AT;if(!A)return;const cv2=A.cities.filter(c=>c.done).length,dv=A.discos.filter(d=>d.done).length,rv=A.retos.filter(r=>r.done).length;
-  $('atCities').textContent=`${cv2}/3`;$('atDisc').textContent=`${dv}/4`;$('atRetos').textContent=`${rv}/2`;const s=A.ship;$('atAlt').textContent=Math.max(0,Math.round(s.pos.y-Math.max(A.Hf(s.pos.x,s.pos.z),A.wet?A.W:-999)))+' m';
+  $('atCities').textContent=`${cv2}/3`;if(A.cont>=0){const tot=cv2+dv+rv;if(earthSave(CONTS[A.cont].id,tot)&&tot===9){addCry(15);msg('¡'+CONTS[A.cont].n+' completado! +15 cristales','var(--good)',3.4);say('¡Continente completado! Ganaste una medalla de explorador.');}}$('atDisc').textContent=`${dv}/4`;$('atRetos').textContent=`${rv}/2`;const s=A.ship;$('atAlt').textContent=Math.max(0,Math.round(s.pos.y-Math.max(A.Hf(s.pos.x,s.pos.z),A.wet?A.W:-999)))+' m';
   $('atSpd').textContent=(s.thr).toFixed(1)+'x';$('atHull').style.transform=`scaleX(${clamp(S.hull/S.hullMax,0,1)})`;
   const r=A.retos.find(x=>x.type==='anillos'&&x.ri>0&&!x.done);$('atTimer').hidden=!r;if(r)$('atTimer').textContent=`Anillo ${r.ri}/${r.rings.length} · ${Math.ceil(r.time)} s`;}
 const atNavC=$('atNav'),atNavX=atNavC.getContext('2d');
@@ -3725,6 +3789,57 @@ function update(dt){const L=LEVELS[S.lvl];S.time+=dt;const T=S.time;const playin
   drawNav();}
 let hudT=0,inkShown=0;
 
+/* ---------- VUELO PLANETARIO (la Tierra completa) ---------- */
+let GB=null;const gbA=new THREE.Vector3(),gbB=new THREE.Vector3(),gbC=new THREE.Vector3();
+function v3cross(o,a,b){return o.set(a.y*b.z-a.z*b.y,a.z*b.x-a.x*b.z,a.x*b.y-a.y*b.x);}
+function v3rot(v,k,a){const c=Math.cos(a),s=Math.sin(a),d=v.x*k.x+v.y*k.y+v.z*k.z,cx=k.y*v.z-k.z*v.y,cy=k.z*v.x-k.x*v.z,cz=k.x*v.y-k.y*v.x;return v.set(v.x*c+cx*s+k.x*d*(1-c),v.y*c+cy*s+k.y*d*(1-c),v.z*c+cz*s+k.z*d*(1-c));}
+function v3ll(u){const lat=90-Math.acos(clamp(u.y,-1,1))*180/Math.PI;let lon=Math.atan2(u.z,-u.x)*180/Math.PI-180;if(lon<-180)lon+=360;return [lat,lon];}
+function buildGlobe(){const sc=new THREE.Scene();sc.background=new THREE.Color('#02040c');const R=200;const E=buildEarth(R);
+  if(E){sc.add(E.m,E.cl,E.dots,E.halo);}else{sc.add(new THREE.Mesh(new THREE.SphereGeometry(R,48,32),new THREE.MeshStandardMaterial({map:habitableTex(LEVELS[0].planets[0]),roughness:1})));}
+  sc.add(new THREE.AmbientLight(0x404050,.5));const sun=new THREE.DirectionalLight(0xffffff,1.1);sc.add(sun);
+  {const n=1400,pa=new Float32Array(n*3);for(let i=0;i<n;i++){const v=new THREE.Vector3(Math.random()-.5,Math.random()-.5,Math.random()-.5).normalize().multiplyScalar(2600+Math.random()*900);pa[i*3]=v.x;pa[i*3+1]=v.y;pa[i*3+2]=v.z;}
+    const sg=new THREE.BufferGeometry();sg.setAttribute('position',new THREE.BufferAttribute(pa,3));sc.add(new THREE.Points(sg,new THREE.PointsMaterial({color:0xdfe8ff,size:1.6,sizeAttenuation:false})));}
+  const moon=new THREE.Mesh(new THREE.SphereGeometry(45,32,20),new THREE.MeshStandardMaterial({color:0xcfcfca,roughness:1}));moon.position.set(-1500,500,-1900);sc.add(moon);
+  const labels=CONTS.map(c=>{const lb=new THREE.Sprite(new THREE.SpriteMaterial({map:labelTex(c.n.toUpperCase(),'#ffffff'),transparent:true,depthWrite:false,fog:false,opacity:.9}));lb.scale.set(R*.42,R*.052,1);lb.position.copy(latLon(c.lat,c.lon,R*1.07));sc.add(lb);return lb;});
+  const so=buildShip(SHIP);so.scale.setScalar(.9);sc.add(so);if(E)for(const lb of E.dots.children)if(lb.userData.lbl)lb.scale.set(R*.3,R*.0375,1);
+  let land=null;try{const img=E&&EARTH_TEX.day.image;if(img&&img.width){const c=cv(256,128),x=c.getContext('2d');x.drawImage(img,0,0,256,128);land=x.getImageData(0,0,256,128).data;}}catch(_){land=null;}
+  return {sc,R,E,sun,labels,so,land,u:new THREE.Vector3(),hd:new THREE.Vector3(),alt:0,altT:0,spd:.1,thr:1,roll:0,t:0,cont:-1,cam:new THREE.Vector3(),look:new THREE.Vector3(),uiT:0};}
+function gbIsLand(G,lat,lon){if(!G.land){const E=EARTH_TEX&&EARTH_TEX.day.image;if(E&&E.width&&!G.landTry){G.landTry=1;try{const c=cv(256,128),x=c.getContext('2d');x.drawImage(E,0,0,256,128);G.land=x.getImageData(0,0,256,128).data;}catch(_){}}if(!G.land)return true;}
+  const px=Math.min(255,Math.floor((lon+180)/360*256)),py=Math.min(127,Math.floor((90-lat)/180*128)),i=(py*256+px)*4,r=G.land[i],g=G.land[i+1],b=G.land[i+2];return !(b>r+14&&b>=g-4);}
+function gbContAt(G,lat,lon){if(!gbIsLand(G,lat,lon))return -1;for(const id of ['an','eu','as','af','na','sa','oc']){for(const [a0,a1,o0,o1] of CONT_BOX[id])if(lat>=a0&&lat<=a1&&lon>=o0&&lon<=o1)return CONTS.findIndex(c=>c.id===id);}return -1;}
+function gbOcean(lat,lon){if(lat<-55)return 'Océano Antártico';if(lat>70)return 'Océano Ártico';if(lon>-70&&lon<20)return 'Océano Atlántico';if(lon>=20&&lon<120&&lat<25)return 'Océano Índico';return 'Océano Pacífico';}
+function enterGlobe(fromAtmo){if(S.land)removeLand();S.orbit=null;S.landedHere=true;routeDone('land');S.state='globe';firing=false;beam.visible=false;
+  $('hud').hidden=true;$('orbitHud').hidden=true;setLandUI(null);setDockUI(false);setPodUI&&setPodUI(false);
+  if(!GB)GB=buildGlobe();const G=GB,R=G.R,c0=fromAtmo&&AT&&AT.cont>=0?CONTS[AT.cont]:{lat:19.4,lon:-99.1};
+  G.u.copy(latLon(c0.lat-(fromAtmo?0:14),c0.lon,1)).normalize();G.hd.set(0,1,0).addScaledVector(G.u,-G.u.y).normalize();G.alt=fromAtmo?R*.1:R*.75;G.altT=R*.11;G.t=0;G.thr=1;G.spd=.1;G.roll=0;G.cont=-2;
+  G.cam.copy(G.u).multiplyScalar(R+G.alt+40).addScaledVector(G.hd,-60);G.look.copy(G.u).multiplyScalar(R);
+  hgCam.far=9000;hgCam.near=.5;hgCam.updateProjectionMatrix();
+  $('gbUI').hidden=false;$('touch').hidden=!isTouch;$('touch').classList.add('atmo');$('touch').classList.remove('walk');gbList();
+  fadeFlash();musicMuffle(false);msg(fromAtmo?'Subiendo sobre la Tierra':'Vuelo planetario: la Tierra','var(--good)',2.2);
+  if(!fromAtmo)say('Vuelo planetario. Recorre la Tierra y elige el continente donde quieres aterrizar.');}
+function leaveGlobe(toSpace){$('gbUI').hidden=true;if(hgCam.up)hgCam.up.set(0,1,0);$('touch').classList.remove('atmo');hgCam.far=1500;hgCam.near=.1;hgCam.updateProjectionMatrix();
+  if(toSpace){S.state='play';takeoff();msg('De vuelta en el espacio','var(--accent)',1.6);}}
+function gbDescend(){const G=GB;if(!G||S.state!=='globe'||G.cont<0)return;const c=G.cont;leaveGlobe(false);enterAtmo(c);}
+function gbKey(k,e){if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();if(k==='l'||k==='e')gbDescend();}
+function gbList(){const P=earthProg();$('gbList').innerHTML=CONTS.map((c,i)=>{const v=P[c.id]||0;return '<button type="button" data-c="'+i+'" class="'+(v>=9?'done':'')+'">'+c.n+' <b>'+v+'/9</b></button>';}).join('');
+  $('gbDone').textContent=CONTS.filter(c=>(P[c.id]||0)>=9).length+'/7';}
+function gbUpdate(dt){const G=GB,R=G.R;G.t+=dt;
+  let ix=(keys.a||keys.arrowleft?-1:0)+(keys.d||keys.arrowright?1:0)+joy.x,iy=(keys.w||keys.arrowup?1:0)+(keys.s||keys.arrowdown?-1:0)-joy.y;ix=clamp(ix,-1,1);iy=clamp(iy,-1,1);
+  const ti=thrIn+(keys.x?1:0)-(keys.z?1:0);if(ti)G.thr=clamp(G.thr+ti*dt*.8,.4,2.4);
+  if(G.t>2.5)G.altT=clamp(G.altT+iy*dt*R*.12,R*.09,R*.45);G.alt+=(G.altT-G.alt)*Math.min(1,dt*(G.t<3?.8:2));
+  if(G.autoTo!=null){const c=CONTS[G.autoTo],tg=gbC.copy(latLon(c.lat,c.lon,1)).normalize();const ang=Math.acos(clamp(tg.dot(G.u),-1,1));
+    if(ang<.06||ix){G.autoTo=null;}else{gbB.copy(tg).addScaledVector(G.u,-tg.dot(G.u)).normalize();v3cross(gbA,G.hd,gbB);const sgn=gbA.dot(G.u)>0?1:-1;const da=Math.acos(clamp(G.hd.dot(gbB),-1,1));v3rot(G.hd,G.u,sgn*Math.min(da,dt*1.6));G.thr=Math.max(G.thr,1.8);}}
+  v3rot(G.hd,G.u,-ix*1.1*dt);G.roll+=(-ix*.7-G.roll)*Math.min(1,dt*4);G.spd+=(G.thr*.085-G.spd)*Math.min(1,dt*1.5);
+  v3cross(gbA,G.u,G.hd).normalize();v3rot(G.u,gbA,G.spd*dt).normalize();v3rot(G.hd,gbA,G.spd*dt);G.hd.addScaledVector(G.u,-G.hd.dot(G.u)).normalize();
+  const P=gbB.copy(G.u).multiplyScalar(R+G.alt),so=G.so;so.position.copy(P);if(so.up)so.up.copy(G.u);so.lookAt(gbC.copy(P).addScaledVector(G.hd,-10));so.rotateZ(G.roll);
+  const k=clamp((G.alt-R*.05)/(R*.4),0,1);G.cam.lerp(gbC.copy(G.u).multiplyScalar(R+G.alt+6+26*k).addScaledVector(G.hd,-(14+40*k)),Math.min(1,dt*3));
+  G.look.lerp(gbC.copy(P).addScaledVector(G.hd,12+20*k).addScaledVector(G.u,-9-14*k),Math.min(1,dt*4));hgCam.position.copy(G.cam);if(hgCam.up)hgCam.up.copy(G.u);hgCam.lookAt(G.look);
+  v3cross(gbA,G.hd,G.u);gbC.copy(G.u).addScaledVector(G.hd,.35).addScaledVector(gbA,.55).normalize();if(G.E){G.E.sun.value.copy(gbC);G.E.cl.rotation.y+=dt*.004;}G.sun.position.copy(gbC).multiplyScalar(1000);
+  for(const lb of G.labels)lb.material.opacity=clamp(lb.position.distanceTo(hgCam.position)/(R*.9)-.15,0,.9);if(G.E&&(G.fr=(G.fr||0)+1)%6===1)for(const lb of G.E.dots.children)if(lb.userData.lbl){lb.getWorldPosition(gbA);lb.material.opacity=clamp(gbA.distanceTo(hgCam.position)/(R*.35)-.25,0,1);}
+  G.uiT-=dt;if(G.uiT<=0){G.uiT=.25;const [lat,lon]=v3ll(G.u),c=G.t>2?gbContAt(G,lat,lon):-1;
+    $('gbLat').textContent=Math.abs(lat).toFixed(0)+'°'+(lat>=0?'N':'S')+' '+Math.abs(lon).toFixed(0)+'°'+(lon>=0?'E':'O');$('gbAlt').textContent=Math.round(G.alt*18)+' km';$('gbSpd').textContent=G.thr.toFixed(1)+'x';
+    if(c!==G.cont){G.cont=c;$('gbCont').textContent=c>=0?CONTS[c].n:gbOcean(lat,lon);$('gbDesc').textContent=c>=0?CONTS[c].d:'Vuela sobre el océano hasta encontrar un continente.';
+      const b=$('gbLand');b.hidden=c<0;if(c>=0){b.innerHTML='Aterrizar en '+CONTS[c].n+'<kbd>L</kbd>';if(G.t>3){msg('Sobrevolando '+CONTS[c].n,'#7fd4ff',1.6);if(actx&&!S.muted)tone('sine',500,800,.12,.05);}}}}}
 /* ---------- LOOP ---------- */
 let last=performance.now();
 function frame(now){requestAnimationFrame(frame);let dt=(now-last)/1000;last=now;dt=Math.min(.05,Math.max(0,dt));
@@ -3732,6 +3847,7 @@ function frame(now){requestAnimationFrame(frame);let dt=(now-last)/1000;last=now
   if(st==='carrera')return;
   badgeT-=dt;if(badgeT<=0){badgeT=.3;pilotBadgeUI();}
   if(AT&&st==='atmo'){atUpdate(dt);if(S.state==='atmo')renderer.render(AT.sc,hgCam);else if(S.state==='city'&&CT)renderer.render(CT.sc,hgCam);else if(S.state==='hangar'&&HG)renderer.render(HG.sc,hgCam);else renderer.render(scene,camera);return;}
+  if(GB&&st==='globe'){gbUpdate(dt);if(S.state==='globe')renderer.render(GB.sc,hgCam);else if(S.state==='atmo'&&AT)renderer.render(AT.sc,hgCam);else renderer.render(scene,camera);return;}
   if(EX&&st==='explore'){exUpdate(dt);if(EX)renderer.render(EX.sc,hgCam);else renderer.render(scene,camera);return;}
   if(CT&&st==='city'){cityUpdate(dt);if(CT)renderer.render(CT.sc,hgCam);else if(HG)renderer.render(HG.sc,hgCam);return;}
   if(MS&&(st==='mother'||st==='mlaunch')){msUpdate(dt);if(MS)renderer.render(MS.sc,hgCam);else renderer.render(scene,camera);return;}
