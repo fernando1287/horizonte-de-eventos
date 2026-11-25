@@ -350,8 +350,19 @@ rivals.forEach(r=>{const cs=new Float32Array(N);for(let i=0;i<N;i++)cs[i]=Math.m
  for(let p=0;p<3;p++)for(let i=N-1;i>=0;i--){const j=(i+1)%N;cs[i]=Math.min(cs[i],Math.sqrt(cs[j]*cs[j]+2*17*ds))}r.vt=cs});
 const PERS=makePerson(0x2563eb,0x1e293b,0xef4444);scene.add(PERS.g);
 let HDE=null;try{HDE=window.parent&&window.parent!==window&&window.parent.HDE_PILOT||null}catch(e){HDE=null}
-if(HDE&&HDE.front){const tl=new THREE.TextureLoader();tl.load(HDE.front,tx=>{const im=tx.image,ar=(im.width||1)/(im.height||1);const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,alphaTest:.05}));sp.center.set(.5,0);const hh=2.05;sp.scale.set(hh*ar,hh,1);
-    PERS.g.children.forEach(c=>c.visible=false);PERS.g.add(sp);PERS.spr=sp});
+if(HDE&&HDE.front){const tl=new THREE.TextureLoader(),TX={},hh=2.05;let cur='front';const ld=(k,u)=>{if(u)tl.load(u,tx=>{TX[k]=tx;if(k===cur&&PERS.spr)setV(k)})};
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({transparent:true,alphaTest:.05}));sp.center.set(.5,0);sp.visible=false;
+  const setV=k=>{const tx=TX[k]||TX.front;if(!tx)return;cur=k;sp.material.map=tx;sp.material.needsUpdate=true;const im=tx.image;sp.userData.ar=(im.width||1)/(im.height||1);sp.visible=true};
+  tl.load(HDE.front,tx=>{TX.front=tx;PERS.g.children.forEach(c=>c.visible=false);PERS.g.add(sp);PERS.spr=sp;setV('front')});
+  if(HDE.views){ld('left',HDE.views.left);ld('right',HDE.views.right);ld('back',HDE.views.back);}
+  const wp=new THREE.Vector3(),cf=new THREE.Vector3(),cr=new THREE.Vector3();let lx=null,lz=null,walk=0,ph=0,flip=1,lt=0;
+  sp.onBeforeRender=(r,sc,cam)=>{const now=performance.now()/1000,dt=Math.min(.1,now-(lt||now));lt=now;PERS.g.getWorldPosition(wp);
+    const mv=lx==null?0:Math.hypot(wp.x-lx,wp.z-lz)/Math.max(dt,1e-3);lx=wp.x;lz=wp.z;walk+=((mv>.5?1:0)-walk)*Math.min(1,dt*8);ph+=dt*mv*1.6;
+    const ry=PERS.g.rotation.y,fx=Math.sin(ry),fz=Math.cos(ry),e=cam.matrixWorld.elements;cr.set(e[0],e[1],e[2]);cf.set(-e[8],-e[9],-e[10]);
+    const side=fx*cr.x+fz*cr.z,away=fx*cf.x+fz*cf.z;let k,fl=1;
+    if(HDE.views){k=away>.5?'back':away<-.5?'front':(side>0?'left':'right');}else{k='front';fl=side<-.05?-1:1;}
+    if(k!==cur||!sp.material.map)setV(k);flip=fl;const ar=sp.userData.ar||.5,bob=Math.abs(Math.sin(ph))*.08*walk;
+    sp.scale.set(hh*ar*flip,hh*(1+bob*.4),1);sp.position.y=bob;sp.material.rotation=Math.sin(ph)*.05*walk};
   const bd=document.createElement('div');bd.id='hdeBadge';bd.style.cssText='position:fixed;right:10px;top:calc(env(safe-area-inset-top,0px) + 40px);z-index:30;display:flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;border-radius:999px;background:rgba(10,14,24,.78);color:#fff;font:700 13px system-ui,sans-serif;border:2px solid '+(HDE.color||'#ffd23f')+';pointer-events:none';
   const bi=document.createElement('img');bi.src=HDE.portrait||'';bi.alt='';bi.style.cssText='width:36px;height:36px;border-radius:50%;object-fit:cover';const bt=document.createElement('span');bt.textContent=HDE.name;bd.appendChild(bi);bd.appendChild(bt);document.body.appendChild(bd)}
 
